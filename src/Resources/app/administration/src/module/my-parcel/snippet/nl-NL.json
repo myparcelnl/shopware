@@ -1,0 +1,127 @@
+{
+  "sw-myparcel": {
+    "general": {
+      "mainMenuItemGeneral": "MyParcel",
+      "ordersMenuItemGeneral": "Orders",
+      "consignmentsMenuItemGeneral": "Consignments",
+      "shippingMethodsMenuItemGeneral": "Shipping methods",
+      "descriptionTextModule": "Tagline for MyParcel",
+      "packageTypes": {
+        "package": "Pakket",
+        "mailbox": "Brievenbuspakket",
+        "letter": "Briefpost",
+        "digitalStamp": "Digitale postzegel"
+      },
+      "deliveryTypes": {
+        "morning": "Ochtendlevering",
+        "standard": "Standaardlevering",
+        "evening": "Avondlevering",
+        "pickup": "Afhaalpunt"
+      },
+      "carriers": {
+        "postNL": "PostNL",
+        "bPost": "bpost",
+        "dpd": "DPD"
+      }
+    },
+    "messages": {
+      "error": "Er heeft een fout plaatsgevonden",
+      "consignmentSuccess": "De verzending is succesvol aangemaakt",
+      "createLabelSuccess": "Het label is succesvol aangemaakt"
+    },
+    "columns": {
+      "idColumn": "ID",
+      "orderColumn": "Bestelling",
+      "orderDateColumn": "Besteld",
+      "consignmentDateColumn": "Aangemaakt",
+      "totalAmountColumn": "Totaal",
+      "trackingCodesColumn": "Track & trace",
+      "statusColumn": "Status",
+      "actionsColumn": "Acties",
+      "packageTypeColumn": "Type pakket",
+      "deliveryDateColumn": "Bezorgdatum",
+      "carrierColumn": "Carrier",
+      "deliveryTypeColumn": "Verzendtype",
+      "requiresAgeCheckColumn": "Controle leeftijd 18+",
+      "requiresSignatureColumn": "Handtekening nodig",
+      "onlyRecipientColumn": "Alleen thuisadres",
+      "returnIfNotHomeColumn": "Retour bij niet aanwezig",
+      "largeFormatColumn": "Groot pakket",
+      "numberOfConsignmentsColumn": "Zending(en)"
+    },
+    "orders": {
+      "title": "Bestellingen",
+      "modals": {
+        "createConsignment": {
+          "titleSingle": "Maak verzending aan",
+          "titleMultiple": "Maak verzendingen aan ({numberOfItems} item(s))",
+          "actionTypeDownloadLabel": "Download",
+          "actionTypeCreateLabel": "Maak label",
+          "actionTypeCreateConsignment": "Maak zending",
+          "packageTypePackageLabel": "Pakket",
+          "packageTypeMailboxLabel": "Brievenbuspakket",
+          "packageTypeLetterLabel": "Briefpost",
+          "packageTypeDigitalStampLabel": "Digitale postzegel",
+          "optionOnlyRecipientLabel": "Alleen thuisadres",
+          "optionRequiresAgeCheckLabel": "Controle leeftijd 18+",
+          "optionRequiresSignatureLabel": "Handtekening nodig",
+          "optionReturnIfNotHomeLabel": "Retour bij niet aanwezig",
+          "optionLargeFormatLabel": "Groot formaat",
+          "positionTopLeftLabel": "Linksboven",
+          "positionTopRightLabel": "Rechtsboven",
+          "positionBottomLeftLabel": "Linksonder",
+          "positionBottomRightLabel": "Rechtsonder",
+          "printSmallLabelLabel": "A6 label",
+          "actionTypeHeading": "Type actie",
+          "deliveryTypeHeading": "Type levering",
+          "packageTypeHeading": "Type pakket",
+          "numberOfLabelsHeading": "Aantal labels",
+          "printOptionsHeading": "Printopties",
+          "printPositionHeading": "Printpositie",
+          "shippingOptionsHeading": "Verzendopties"
+        }
+      },
+      "buttons": {
+        "viewOrderButton": "Order bekijken",
+        "cancelButton": "Annuleren",
+        "createConsignmentButton": "Verzending aanmaken",
+        "createConsignmentsButton": "Verzendingen aanmaken",
+        "createLabelButton": "Label aanmaken",
+        "downloadLabelButton": "Label downloaden"
+      }
+    },
+    "consignments": {
+      "title": "Verzendingen",
+      "modals": {
+        "createLabels": {
+          "titleSingle": "Label aanmaken",
+          "titleMultiple": "Labels aanmaken ({numberOfItems} item(s))",
+          "positionTopLeftLabel": "Linksboven",
+          "positionTopRightLabel": "Rechtsboven",
+          "positionBottomLeftLabel": "Linksonder",
+          "positionBottomRightLabel": "Rechtsonder",
+          "printSmallLabelLabel": "A6 label",
+          "numberOfLabelsHeading": "Aantal labels",
+          "printOptionsHeading": "Printopties",
+          "printPositionHeading": "Printpositie"
+        }
+      },
+      "buttons": {
+        "cancelButton": "Annuleren",
+        "clearFiltersButton": "Toon alles",
+        "createLabelButton": "Label aanmaken",
+        "createLabelsButton": "Labels aanmaken",
+        "downloadLabelButton": "Label downloaden",
+        "downloadLabelsButton": "Labels downloaden",
+        "downloadDefaultLabelButton": "Label downloaden (standaard instellingen)",
+        "downloadDefaultLabelsButton": "Labels downloaden (standaard instellingen)"
+      }
+    },
+    "shippingMethods": {
+      "title": "Verzendmethoden",
+      "buttons": {
+        "viewShippingMethodButton": "Bekijk verzendmethode"
+      }
+    }
+  }
+}

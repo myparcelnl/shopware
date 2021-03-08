@@ -1,0 +1,14 @@
+{
+    "myparcel": {
+        "delivery_type_1": "Ochtendlevering",
+        "delivery_type_2": "Standaardlevering",
+        "delivery_type_3": "Avondlevering",
+        "delivery_signature": "Handtekening voor ontvangst",
+        "delivery_recipient": "Niet bij de buren bezorgen"
+    },
+  "cookie": {
+    "myparcel": {
+      "name": "MyParcel"
+    }
+  }
+}

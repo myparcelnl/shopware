@@ -1,0 +1,56 @@
+{% block sw_myparcel_shipments %}
+<sw-page class="sw-myparcel-shipments">
+    {% block sw_myparcel_smart_bar_header %}
+    <template #smart-bar-header>
+        {% block sw_myparcel_smart_bar_header_title %}
+        <h2>
+            {% block sw_myparcel_smart_bar_header_title_text %}
+            {{ $tc('sw-myparcel.general.mainMenuItemGeneral') }}: {{ $tc('sw-myparcel.shippingMethods.title') }}
+            {% endblock %}
+        </h2>
+        {% endblock %}
+    </template>
+    {% endblock %}
+
+    {% block sw_myparcel_smart_bar_actions %}
+<template #smart-bar-actions>
+
+</template>
+    {% endblock %}
+
+    {% block sw_myparcel_content %}
+    <template #content>
+        <sw-data-grid
+                :dataSource="shippingMethods"
+                :columns="shippingMethodColumns"
+                :fullPage="true"
+                :showSettings="true"
+                :showSelection="false"
+                :sortBy="sortBy"
+                :sortDirection="sortDirection"
+                :isLoading="isLoading"
+                :allowColumnEdit="false"
+                identifier="sw-myparcel-shipping-methods-list"
+                @column-sort="onSortColumn">
+
+            <template slot="pagination">#}
+                <sw-pagination
+                        :page="page"
+                        :limit="limit"
+                        :total="total"
+                        :total-visible="25"
+                        @page-change="onPageChange"
+                        :steps="[25]">
+                </sw-pagination>
+            </template>
+
+            <template #actions="{ item }">
+                <sw-context-menu-item class="sw-myparcel-shipping-methods-list__shipping-method-view-action" :routerLink="{ name: 'sw.settings.shipping.detail', params: { id: item.shippingMethodId } }">
+                    {{ $tc('sw-myparcel.shippingMethods.buttons.viewShippingMethodButton') }}
+                </sw-context-menu-item>
+            </template>
+        </sw-data-grid>
+    </template>
+    {% endblock %}
+</sw-page>
+{% endblock %}

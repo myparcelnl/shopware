@@ -1,0 +1,191 @@
+{% block sw_myparcel_consignments %}
+<sw-page class="sw-myparcel-consignments">
+    {% block sw_myparcel_smart_bar_header %}
+    <template #smart-bar-header>
+        {% block sw_myparcel_smart_bar_header_title %}
+        <h2>
+            {% block sw_myparcel_smart_bar_header_title_text %}
+            {{ $tc('sw-myparcel.general.mainMenuItemGeneral') }}: {{ $tc('sw-myparcel.consignments.title') }}
+            {% endblock %}
+        </h2>
+        {% endblock %}
+    </template>
+    {% endblock %}
+
+    {% block sw_myparcel_smart_bar_actions %}
+    <template #smart-bar-actions>
+        <sw-button v-if="orderIdFilter.length > 0" variant="secondary" :square="false" :block="false" :isLoading="false" @click="onClearFilters">
+            {{ $tc('sw-myparcel.consignments.buttons.clearFiltersButton') }}
+        </sw-button>
+
+        <sw-button :disabled="!createMultipleLabelsAvailable" variant="primary" :square="false" :block="false" :isLoading="false" @click="onOpenCreateMultipleLabelsModal">
+            {{ $tc('sw-myparcel.consignments.buttons.createLabelsButton') }}
+        </sw-button>
+    </template>
+    {% endblock %}
+
+    {% block sw_myparcel_content %}
+    <template #content>
+        <sw-data-grid
+                :dataSource="consignments"
+                :columns="consignmentColumns"
+                :fullPage="true"
+                :showSettings="true"
+                :showSelection="true"
+                :sortBy="sortBy"
+                :sortDirection="sortDirection"
+                :isLoading="isLoading"
+                :allowColumnEdit="false"
+                identifier="sw-myparcel-consignments-list"
+                @column-sort="onSortColumn"
+                @selection-change="onSelectionChanged">
+
+            <template #column-createdAt="{ item }">
+                {{ item.createdAt | date({hour: '2-digit', minute: '2-digit', second: '2-digit'}) }}
+            </template>
+
+            <template #column-order.orderNumber="{ item }">
+                <router-link :to="{ name: 'sw.order.detail', params: { id: item.order.id } }">{{ item.order.orderNumber }}</router-link>
+            </template>
+
+            <template #column-order.orderDateTime="{ item }">
+                {{ item.order.orderDateTime | date({hour: '2-digit', minute: '2-digit', second: '2-digit'}) }}
+            </template>
+
+            <template #column-barCode="{ item }">
+                <a :href="item.trackAndTraceUrl" target="_blank">{{ item.barCode }}</a>
+            </template>
+
+            <template #column-shippingOption.packageType="{ item }">
+                {{ packageTypes[item.shippingOption.packageType] }}
+            </template>
+
+            <template #column-shippingOption.deliveryDate="{ item }">
+                {{ item.shippingOption.deliveryDate | date() }}
+            </template>
+
+            <template #column-shippingOption.carrierId="{ item }">
+                {{ carriers[item.shippingOption.carrierId] }}
+            </template>
+
+            <template #column-shippingOption.deliveryType="{ item }">
+                {{ deliveryTypes[item.shippingOption.deliveryType] }}
+            </template>
+
+            <template #column-shippingOption.requiresAgeCheck="{ item }">
+                <sw-icon name="default-basic-checkmark-line" v-if="item.shippingOption.requiresAgeCheck === true" small="true" />
+                <span v-else />
+            </template>
+
+            <template #column-shippingOption.requiresSignature="{ item }">
+                <sw-icon name="default-basic-checkmark-line" v-if="item.shippingOption.requiresSignature === true" small="true" />
+                <span v-else />
+            </template>
+
+            <template #column-shippingOption.onlyRecipient="{ item }">
+                <sw-icon name="default-basic-checkmark-line" v-if="item.shippingOption.onlyRecipient === true" small="true" />
+                <span v-else />
+            </template>
+
+            <template #column-shippingOption.returnIfNotHome="{ item }">
+                <sw-icon name="default-basic-checkmark-line" v-if="item.shippingOption.returnIfNotHome === true" small="true" />
+                <span v-else />
+            </template>
+
+            <template #column-shippingOption.largeFormat="{ item }">
+                <sw-icon name="default-basic-checkmark-line" v-if="item.shippingOption.largeFormat === true" small="true" />
+                <span v-else />
+            </template>
+
+            <template #actions="{ item }">
+                <sw-context-menu-item class="sw-myparcel-consignments-list__create-label-action" @click="onOpenCreateSingleLabelModal(item)">
+                    {{ $tc('sw-myparcel.consignments.buttons.createLabelButton') }}
+                </sw-context-menu-item>
+            </template>
+
+            <template #pagination>
+                {% block sw_order_list_grid_pagination %}
+                    <sw-pagination :page="page"
+                                   :limit="limit"
+                                   :total="total"
+                                   :total-visible="7"
+                                   @page-change="onPageChange">
+                    </sw-pagination>
+                {% endblock %}
+            </template>
+
+        </sw-data-grid>
+
+        <sw-modal v-if="createSingleLabel.showModal === true"
+                  :title="$tc('sw-myparcel.consignments.modals.createLabels.titleSingle')"
+                  @modal-close="onCloseCreateSingleLabelModal"
+                  variant="small">
+
+            <form>
+
+                <sw-base-field :label="$tc('sw-myparcel.consignments.modals.createLabels.printOptionsHeading')" />
+                <sw-checkbox-field :label="$tc('sw-myparcel.consignments.modals.createLabels.printSmallLabelLabel')" name="myparcel[print_small_label]" value="1" v-model="createSingleLabel.printSmallLabel" />
+
+                <sw-multi-select
+                        :disabled="createSingleLabel.printSmallLabel === true"
+                        :label="$tc('sw-myparcel.consignments.modals.createLabels.printPositionHeading')"
+                        name="myparcel[print_position]"
+                        v-model="createSingleLabel.printPosition"
+                        :options="[
+                                { value: 1, label: $tc('sw-myparcel.consignments.modals.createLabels.positionTopLeftLabel') },
+                                { value: 2, label: $tc('sw-myparcel.consignments.modals.createLabels.positionTopRightLabel') },
+                                { value: 3, label: $tc('sw-myparcel.consignments.modals.createLabels.positionBottomLeftLabel') },
+                                { value: 4, label: $tc('sw-myparcel.consignments.modals.createLabels.positionBottomRightLabel') },
+                            ]">
+                </sw-multi-select>
+
+            </form>
+
+            <template slot="modal-footer">
+                <sw-button @click="onCloseCreateSingleLabelModal" size="small">
+                    {{ $tc('sw-myparcel.consignments.buttons.cancelButton') }}
+                </sw-button>
+                <sw-button @click.prevent="onCreateSingleLabel" :isLoading="createSingleLabelLoading" variant="primary" size="small">
+                    {{ $tc('sw-myparcel.consignments.buttons.downloadLabelButton') }}
+                </sw-button>
+            </template>
+        </sw-modal>
+
+        <sw-modal v-if="createMultipleLabels.showModal === true"
+                  :title="$tc('sw-myparcel.consignments.modals.createLabels.titleMultiple', 0, { numberOfItems: selectionCount })"
+                  @modal-close="onCloseCreateMultipleLabelsModal"
+                  variant="small">
+
+            <form>
+
+                <sw-base-field :label="$tc('sw-myparcel.consignments.modals.createLabels.printOptionsHeading')" />
+                <sw-checkbox-field :label="$tc('sw-myparcel.consignments.modals.createLabels.printSmallLabelLabel')" name="myparcel[print_small_label]" value="1" v-model="createMultipleLabels.printSmallLabel" />
+
+                <sw-multi-select
+                        :disabled="createMultipleLabels.printSmallLabel === true"
+                        :label="$tc('sw-myparcel.consignments.modals.createLabels.printPositionHeading')"
+                        name="myparcel[print_position]"
+                        v-model="createMultipleLabels.printPosition"
+                        :options="[
+                                { value: 1, label: $tc('sw-myparcel.consignments.modals.createLabels.positionTopLeftLabel') },
+                                { value: 2, label: $tc('sw-myparcel.consignments.modals.createLabels.positionTopRightLabel') },
+                                { value: 3, label: $tc('sw-myparcel.consignments.modals.createLabels.positionBottomLeftLabel') },
+                                { value: 4, label: $tc('sw-myparcel.consignments.modals.createLabels.positionBottomRightLabel') },
+                            ]">
+                </sw-multi-select>
+
+            </form>
+
+            <template slot="modal-footer">
+                <sw-button @click="onCloseCreateMultipleLabelsModal" size="small">
+                    {{ $tc('sw-myparcel.consignments.buttons.cancelButton') }}
+                </sw-button>
+                <sw-button @click.prevent="onCreateMultipleLabels" :isLoading="createMultipleLabelsLoading" variant="primary" size="small">
+                    {{ $tc('sw-myparcel.consignments.buttons.downloadLabelsButton') }}
+                </sw-button>
+            </template>
+        </sw-modal>
+    </template>
+    {% endblock %}
+</sw-page>
+{% endblock %}

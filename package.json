@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "nodemon": "*"
+  },
+  "scripts": {
+    "watch-scss": "./node_modules/nodemon/bin/nodemon.js -e scss -w src/scss/**/* -x '../../../bin/console theme:compile'",
+    "watch-js": "./node_modules/nodemon/bin/nodemon.js -e js -w src/main.js -x '../../../bin/build-storefront.sh'",
+    "watch-all": "npm run watch-scss & npm run watch-js"
+  }
+}

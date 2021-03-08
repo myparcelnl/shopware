@@ -1,0 +1,16 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/confirm-shipping.html.twig' %}
+
+{% block page_checkout_confirm_shipping_form_input %}
+    {{ parent() }}
+{#     Todo: add is-myparcel-shipping-option class #}
+{% endblock %}
+
+{% block page_checkout_confirm_shipping_form_label %}
+    {{ parent() }}
+
+    {% if shipping.id in page.myparcel_shipping_method_ids %}
+        <div class="myparcel_shipping_form mt-3" data-myparcel-option="true" data-shipping-method-id="{{ shipping.id }}" data-target="myparcel[shipping_method_id]" data-options-loaded="false">
+
+        </div>
+    {% endif %}
+{% endblock %}
