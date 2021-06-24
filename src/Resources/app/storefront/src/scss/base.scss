@@ -1,9 +1,0 @@
-.myparcel_shipping_form {
-  max-height: 0;
-  overflow-y: hidden;
-  transition: all .5s ease-in-out;
-
-  .shipping-method-input:checked ~ & {
-    max-height: 12rem;
-  }
-}
