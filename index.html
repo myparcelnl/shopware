@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="UTF-8" />
+    <title>MyParcel Shopware 6 handleiding</title>
+    <meta name="description" content="The documentation to make a connection with MyParcel">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <link rel="shortcut icon" href="https://assets.myparcel.nl/skin/images/favicon/ms-icon-144x144.png">
+    <link href="css/normalize.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap.min.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css" />
+    <link href="css/stylesheet.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="css/github-light.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/auto_menu.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="menu col-xs-4 col-lg-3">
+                <nav class="navbar nav nav-pills nav-stacked">
+                    <div class="menu-items">
+                    </div>
+                </nav>
+            </div>
+            <section class="page-header col-xs-8 col-xs-offset-4 col-lg-9 col-lg-offset-3">
+                <img height="185" alt="" src="media/logo_myparcel.png">
+                    <h1 class="project-name">
+                        Handleiding Shopware 6 speckoppeling
+                    </h1>
+                    <br />
+                <a target="_blank" class="btn" href="https://github.com/myparcelnl/shopware/releases/latest">De MyParcel plugin</a>
+            </section>
+            <section class="main-content col-xs-8 col-xs-offset-4 col-lg-7 col-lg-offset-4">
+                <h1>Inleiding</h1>
+                <p>
+                Creëer en download snel verzendetiketten vanuit jouw Shopware.
+                </p>
+                <div>
+                </div>
+                <div style="margin-top:10px">
+                    <h1 id="1">1. Installatie</h1>
+                    <h2 id="1_A">1.1 Nieuwe installatie</h2>
+                        <p>
+                            De plugin kan je gemakkelijk installeren. Download eerst de plugin bestanden van <a target="_blank" href="https://github.com/myparcelnl/shopware/releases">github</a>. Na het downloaden open je jouw Shopware omgeving en ga je naar plug-ins. Dit vind je onder <span class='nice'>instellingen -> Systeem -> Plug-ins.</span>
+                        </p>
+                        <img alt="Shopware instellingen" src='media/shopware-instellingen-plugins.png'><br><br>
+                        <p>
+                            Zodra je op plug-ins hebt geklikt zie je een knop "Plug-in uploaden". Klik hier op en upload hier het mapje dat je eerder gedownload hebt van github.
+                        </p>
+                        <img alt="shopware plug-in uploaden" src='media/shopware-upload-plugin.png'>
+                        <p>
+                            Activeer "PostNL" als een verzendmethode via <span class="nice">MyParcel -> Verzendmethodes</span>, klik op de drie puntjes bij "PostNL" en kies de instellingen die jij wilt. Vervolgens kan je de verzendmethode actieveren en opslaan.<br>
+                        </p>
+                        <p>    
+                            In de verkoop kanalen kan je PostNL activeren door op de dropdown onder verzending te klikken. Selecteer "PostNL" in het betalingen en verzendmethodes scherm. Hier kan je ook PostNL als standaard verzendmethode instellen.<br>
+                        </p>
+                        <p>
+                            Als je klaar bent met het instellen, kan je de cache herladen: <span class="nice">Instellingen -> Systeem -> Caches &amp; Indexes -> Verwijder en actieveer</span>
+                        </p>
+                    <h2 id="1_B">1.2 Updaten bestaande installatie</h2>
+                        <p>
+                            Om de plug-in te updaten, zal je op dit moment nog alles moeten de-installeren. Hierna kan je de nieuwe versie van github uploaden, zoals hierboven uitgelegd.
+                        </p>
+                        <img alt="shopware de-installeren plugin" src='media/shopware-de-installeren-plugin.png'>
+
+                        <h1 id="2">2. Configuratie</h1>
+                        <h3>API Instellingen</h3>
+                            <p>
+                                Om zendingen in het juiste account terecht te laten komen, zal je de API key uit je MyParcel-account moeten invullen.
+                                Als je ingelogd bent in jouw MyParcel account, kun je deze vinden bij het
+                                <img height="25" alt="" src="media/shopware-myparcel-account-icoon.png">-teken &gt; <span class="nice">Shopinstellingen</span> &gt; <span class="nice">Algemeen</span>.
+                                Het kan zijn dat je de API key nog niet ziet, maar deze eerst nog moet 'genereren'.
+                                Klik dan op <span class="nice">Genereer API-key</span> en kopieer de API-key.
+                            </p>
+                            <img alt="API-key-instellen" src="media/shopware-apikey-instellen.png">
+                            <h3>Standaard afleveringsperiode</h3>
+                            <p>
+                                Bij deze instelling kan je aangeven wanneer je standaard de pakket wilt leveren. Je hebt hier de keuze tussen een normale, ochtend of avondlevering.
+                            </p>
+                            <img alt="Standaard-afleveringsperiode" src="media/shopware-standaard-afleveringsperiode.png">
+                            <h3>Standaard handtekening bij bezorging</h3>
+                            <p>
+                                Als je deze optie aanzet, zal er standaard een handtekening bij levering gevraagd worden door de bezorger. 
+                            </p>
+                            <img alt="Standaard-afleveringsperiode" src="media/shopware-standaard-afleveringsperiode.png">
+                            <h3>Standaard aflevering bij buren</h3>
+                            <p>
+                                Deze optie zet je aan als je de pakketten niet bij de buren van de consument geleverd mogen worden.
+                            </p>
+                            <img alt="Standaard-bij-niet-buren" src="media/shopware-standaard-bij-buren.png">
+                            <h3>Stuur standaard het pakket terug naar de afzender als de ontvanger niet thuis is (Retour bij geen gehoor)</h3>
+                            <p>
+                                Wanneer een pakket na de eerste leverpoging direct retour moet komen, dan kan je deze optie aanzetten.
+                            </p>
+                            <img alt="Retour-bij-geen-gehoor" src="media/shopware-retour-bij-geen-gehoor.png">
+                            <h3>De klant welke voor het pakket tekent dient minstens 18 jaar te zijn</h3>
+                            <p>
+                                Als je producten verkoopt waarbij een leeftijdscheck nodig is, kan je deze optie aanzetten. Deze optie zal op alle orders een 18+ check zetten.
+                            </p>
+                            <img alt="Standaard-18-plus-check" src="media/shopware-standaard-18-plus.png">
+                            <h3>Standaard verpakkingssoort</h3>
+                            <p>
+                                Met standaard verpakkingssoort, kan je aangeven wat voor pakkettype je voor alle orders wilt gebruiken. Je hebt de keuze uit pakket, brievenbus pakket, brief(ongefrankeerd) en digitale postzegel.
+                            </p>
+                            <img alt="Standaard-pakkettype" src="media/shopware-standaard-pakkettype.png">
+                            <h3>Toon ochtend levering</h3>
+                            <p>
+                                Met deze optie, kan je de consument in de checkout de keuze geven voor een ochtend levering. Onder de optie kan je de extra kosten in bij jouw klant in rekening brengen.
+                            </p>
+                            <img alt="Ochtend-levering-ja/nee" src="media/shopware-checkout-ochtend-levering.png">
+                            <h3>Toon avond levering</h3>
+                            <p>
+                                Als je jouw klanten de optie wilt geven om een avond levering te kiezen in de checkout, kan je deze optie aanzetten. Onder deze instelling kan je de extra kosten doorberekenen aan jouw klanten.
+                            </p>
+                            <img alt="Avond-levering-ja/nee" src="media/shopware-checkout-avond-levering.png">
+                            <h3>Standaard verzendwijze</h3>
+                            <p>
+                                De standaard verzendwijze van Shopware waar je gebruik van wilt maken. In bijna alle gevallen zal dit op PostNL moeten staan. 
+                            </p>
+                            <img alt="" src="media/shopware-standaard-verzendwijze.png">
+                            <h3>Label instellingen</h3>
+                            <p>
+                                In de label instellingen kan je aangeven welk formaat je wilt printen. Je hebt hier de keuze uit A4 en A6.
+                            </p>
+                            <img alt="Label-instellingen" src="media/shopware-label-instellingen.png">
+                        <h1 id="3">3. Gebruik plugin</h1>
+                            <h2 id="3_A">3.1 Aanmaken van één verzendlabel</h2>
+                                <img alt="Enkele-zending-aanmaken" src="media/shopware-zending-aanmaken.png">
+                                <p>
+                                    Wanneer je één label aan wilt maken klik je op de puntjes achter de order. Er klapt een menu uit, in dat menu klik je op "Verzending aanmaken". Zodra je dat doet zal er een scherm omhoog komen. In dat scherm kan je aangeven wat voor label je wilt maken. Je kan de instellingen zo laten staan of veranderen. Als je klaar bent klik je nog een keer op "Verzending aanmaken" om het label te creëren. 
+                                </p>
+                                <img alt="Label-printen" src="media/shopware-label-printen.png">
+                            <h2 id="3_B">3.2 Aanmaken meerdere verzendlabels</h2>
+                                <p>
+                                    Als je van meerdere orders tegelijk een label wilt maken gaat dat ongeveer hetzelfde. Eerst selecteer je de checkboxes aan de voorkant en daarna klik je bovenaan de pagina op "Verzendingen aanmaken". Hierna zal hetzelfde scherm als hierboven naar voren komen en kan je eventueel nog een aanpassing maken aan de labels. Zodra alles goed staat kan je de labels maken met "Verzending aanmaken".
+                                </p>
+                                <img alt="Meerdere-zendingen-aanmaken" src="media/shopware-meerdere-zendingen-aanmaken.png">
+                            <h2 id="3_C">3.3 Checkout</h2>
+                                <p>
+                                    In de configuratie heb je twee instellingen voor de checkout aan kunnen zetten (ochtend en avondlevering). Hieronder kan je een voorbeeld zien hoe het in een standaard omgeving eruit zal zien.
+                                </p>
+                            <img alt="checkout-screenshot" src="media/shopware-checkout-opties.png">
+                        <footer class="site-footer">
+                            <p>
+                                <span class="site-footer-owner">MyParcel</span>
+                            </p>
+                            <p>
+                                <span class="site-footer-credits">
+                                    <strong>Adres </strong>Antareslaan 31, 2132 JE Hoofddorp<br />
+                                    <strong>Telefoon </strong>023 30 30 315&nbsp;
+                                    <strong>E-mail</strong> &nbsp;info@myparcel.nl<br />
+                                    <strong>Website </strong><a href="https://www.myparcel.nl">www.myparcel.nl</a>&nbsp;
+                                    <strong>IBAN </strong>NL48ABNA0447850539&nbsp;
+                                    <strong>KvK </strong>Amsterdam 34 09 97 58 <br />
+                                    <strong>BTW-nr. </strong>NL8045.33.258.B01
+                                </span>
+                                <br />
+                                &nbsp;
+                            </p>
+                        </footer>
+                    </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        // Set postman button attributes in one place
+        postman_buttons = document.getElementsByClassName('postman-run-button');
+        
+        for (i = 0; i < postman_buttons.length; i++) {
+            postman_buttons[i].setAttribute('data-postman-action', 'collection/import');
+            postman_buttons[i].setAttribute('data-postman-var-1', '065786285c2e5ed75509');
+            postman_buttons[i].setAttribute('data-postman-param', 'env%5BMyParcel%20public%5D=W3siZW5hYmxlZCI6dHJ1ZSwia2V5IjoiYXBpX2tleSIsInZhbHVlIjoiIn0seyJrZXkiOiJVc2VyLUFnZW50IiwidmFsdWUiOiJ7e1VzZXItQWdlbnR9fSIsImRlc2NyaXB0aW9uIjoiIiwiZW5hYmxlZCI6dHJ1ZX0seyJrZXkiOiJhdXRoX3Rva2VuIiwidmFsdWUiOiIiLCJkZXNjcmlwdGlvbiI6IiIsImVuYWJsZWQiOnRydWV9XQ==');
+        }
+    
+    (function (p,o,s,t,m,a,n) {
+        !p[s] && (p[s] = function () { (p[t] || (p[t] = [])).push(arguments); });
+        !o.getElementById(s+t) && o.getElementsByTagName("head")[0].appendChild((
+                                                                                 (n = o.createElement("script")),
+                                                                                 (n.id = s+t), (n.async = 1), (n.src = m), n
+                                                                                 ));
+    }(window, document, "_pm", "PostmanRunObject", "https://run.pstmn.io/button.js"));
+    </script>
+    
+</body>
+</html>
