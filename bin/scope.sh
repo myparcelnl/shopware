@@ -27,16 +27,27 @@ composer install --no-dev --no-interaction --no-progress
 
 # php-scoper lives outside the plugin vendor on purpose: anything inside
 # vendor/ ends up scoped, and a scoped scoper cannot scope.
-if [[ ! -f "${SCOPER_DIR}/vendor/bin/php-scoper" ]]; then
-  echo "==> Installing php-scoper ${SCOPER_VERSION}"
+#
+# Reuse is decided by running it, not by the binary being there. Composer
+# resolves php-scoper's dependencies against the PHP version that installed it,
+# so a copy cached under a different PHP fails its platform check with an
+# exit code and no output at all.
+if php "${SCOPER_DIR}/vendor/bin/php-scoper" --version >/dev/null 2>&1; then
+  echo "==> Reusing php-scoper from ${SCOPER_DIR#"${PLUGIN_DIR}/"} (PHP $(php -r 'echo PHP_VERSION;'))"
+else
+  echo "==> Installing php-scoper ${SCOPER_VERSION} for PHP $(php -r 'echo PHP_VERSION;')"
+  rm -rf "${SCOPER_DIR}"
   mkdir -p "${SCOPER_DIR}"
   composer require "humbug/php-scoper:${SCOPER_VERSION}" \
     --working-dir="${SCOPER_DIR}" \
     --ignore-platform-req=ext-* \
     --no-interaction \
     --no-progress
-else
-  echo "==> Reusing php-scoper from ${SCOPER_DIR#"${PLUGIN_DIR}/"}"
+
+  if ! php "${SCOPER_DIR}/vendor/bin/php-scoper" --version >/dev/null 2>&1; then
+    echo "FAILED: php-scoper ${SCOPER_VERSION} does not run on this PHP version" >&2
+    exit 1
+  fi
 fi
 
 echo "==> Scoping vendor"
