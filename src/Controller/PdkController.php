@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace MyParcelNL\Shopware\Controller;
 
 use MyParcelNL\Pdk\App\Api\PdkEndpoint;
-use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Facade\Pdk as PdkFacade;
-use MyParcelNL\Shopware\Pdk\PdkBootstrapper;
-use Psr\Log\LoggerInterface;
+use MyParcelNL\Shopware\Pdk\PdkInitializer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class PdkController
 {
-    public function __construct(private readonly LoggerInterface $myparcelLogger)
+    public function __construct(private readonly PdkInitializer $pdkInitializer)
     {
     }
 
@@ -32,13 +30,7 @@ class PdkController
     )]
     public function pdk(Request $request): Response
     {
-        PdkBootstrapper::setLogger($this->myparcelLogger);
-        PdkBootstrapper::boot(
-            '0.1.0',
-            dirname(__DIR__, 2),
-            $request->getSchemeAndHttpHost(),
-            Pdk::MODE_DEVELOPMENT
-        );
+        $this->pdkInitializer->boot();
 
         $scopedRequest = \_MyParcelNL\Symfony\Component\HttpFoundation\Request::create(
             $request->getUri(),
