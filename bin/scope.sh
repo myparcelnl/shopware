@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Produces a scoped vendor directory: every third-party dependency gets the
-# _MyParcelNL prefix so the PDK's Symfony 6 and php-di 6 can coexist with the
+# _MyParcel prefix so the PDK's Symfony 6 and php-di 6 can coexist with the
 # Symfony 7 runtime Shopware 6.7 ships. Without this the plugin cannot boot.
 #
 # Unlike the WooCommerce and PrestaShop plugins, which only scope when building a
@@ -91,10 +91,10 @@ composer dump-autoload --no-dev --optimize --no-interaction
 # The one thing worth asserting: a silently unprefixed http-foundation would mean
 # two Symfony versions in one process, which fails far away from here.
 if grep -rq '^namespace Symfony\\Component\\HttpFoundation;' "${VENDOR_DIR}" \
-  || ! grep -rq '^namespace _MyParcelNL\\Symfony\\Component\\HttpFoundation;' "${VENDOR_DIR}"; then
+  || ! grep -rq '^namespace _MyParcel\\Symfony\\Component\\HttpFoundation;' "${VENDOR_DIR}"; then
   echo "FAILED: Symfony\\Component\\HttpFoundation is not correctly prefixed" >&2
   exit 1
 fi
 
 rm -rf "${BACKUP_DIR}"
-echo "Done. vendor/ is scoped with the _MyParcelNL prefix."
+echo "Done. vendor/ is scoped with the _MyParcel prefix."

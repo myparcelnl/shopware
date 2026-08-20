@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MyParcelNL\Shopware;
+namespace MyParcel\Shopware;
 
 use MyParcelNL\Pdk\Base\Pdk as BasePdk;
 use MyParcelNL\Pdk\Facade\Pdk;
-use MyParcelNL\Shopware\Pdk\PdkBootstrapper;
+use MyParcel\Shopware\Pdk\PdkBootstrapper;
 use RuntimeException;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
@@ -19,7 +19,7 @@ if (is_file($autoloader)) {
     require_once $autoloader;
 }
 
-class MyParcelNLShopware extends Plugin
+class MyParcelShopware extends Plugin
 {
     public function build(ContainerBuilder $container): void
     {

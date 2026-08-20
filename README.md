@@ -22,13 +22,13 @@ MyParcel plug-in for Shopware 6.7 and up, built on the
 
 Use [docker-shopware](https://github.com/myparcelnl/docker-shopware) for a running
 Shopware 6.7 environment. Check this repository out at
-`custom/plugins/MyParcelNLShopware` — the directory name is the plug-in's technical
+`custom/plugins/MyParcelShopware` — the directory name is the plug-in's technical
 name and Shopware installs it by that name.
 
 ### The vendor directory has to be scoped
 
 The PDK requires `symfony/http-foundation` 6 or lower and `php-di` 6, while Shopware
-6.7 runs on Symfony 7.4. php-scoper gives the bundled dependencies a `_MyParcelNL`
+6.7 runs on Symfony 7.4. php-scoper gives the bundled dependencies a `_MyParcel`
 prefix, after which both versions live in the same process. Without this the
 plug-in cannot boot.
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyParcelNL\Shopware\Pdk\Logger;
+namespace MyParcel\Shopware\Pdk\Logger;
 
 use MyParcelNL\Pdk\Logger\AbstractLogger;
 use Psr\Log\LoggerInterface;

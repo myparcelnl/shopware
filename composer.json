@@ -14,7 +14,7 @@
     "humbug/php-scoper": "^0.18.0"
   },
   "extra": {
-    "shopware-plugin-class": "MyParcelNL\\Shopware\\MyParcelNLShopware",
+    "shopware-plugin-class": "MyParcel\\Shopware\\MyParcelShopware",
     "label": {
       "en-GB": "MyParcel",
       "nl-NL": "MyParcel",
@@ -28,14 +28,14 @@
   },
   "autoload": {
     "psr-4": {
-      "MyParcelNL\\Shopware\\": "src/"
+      "MyParcel\\Shopware\\": "src/"
     }
   },
   "scripts": {
     "scope": "bin/scope.sh"
   },
   "scripts-descriptions": {
-    "scope": "Produce a vendor directory scoped with the _MyParcelNL prefix"
+    "scope": "Produce a vendor directory scoped with the _MyParcel prefix"
   },
   "config": {
     "prepend-autoloader": false

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MyParcelNL\Shopware\Pdk;
+namespace MyParcel\Shopware\Pdk;
 
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
-use MyParcelNL\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Logger\PdkLogger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -49,8 +49,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // scoped PSR key, so both have to point at the same instance. The
             // prefixed name is what exists at runtime: config/pdk.php is not
             // scoped, and neither is our src.
-            \_MyParcelNL\Psr\Log\LoggerInterface::class => \_MyParcelNL\DI\value($logger),
-            PdkLoggerInterface::class                   => \_MyParcelNL\DI\value($logger),
+            \_MyParcel\Psr\Log\LoggerInterface::class => \_MyParcel\DI\value($logger),
+            PdkLoggerInterface::class                   => \_MyParcel\DI\value($logger),
         ];
     }
 }
