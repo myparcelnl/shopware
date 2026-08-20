@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace MyParcelNL\Shopware;
 
-use MyParcelNL\Shopware\Pdk\PdkContainerCache;
+use MyParcelNL\Pdk\Base\Pdk as BasePdk;
+use MyParcelNL\Pdk\Facade\Pdk;
+use MyParcelNL\Shopware\Pdk\PdkBootstrapper;
 use RuntimeException;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
@@ -35,13 +37,30 @@ class MyParcelNLShopware extends Plugin
     {
         parent::update($updateContext);
 
-        // The PDK compiled its container for the version we are replacing.
-        PdkContainerCache::clear();
+        // The PDK compiles its container in production and never invalidates it, so
+        // after an update the definitions still describe the version being replaced.
+        //
+        // Booting in development mode on purpose: clearCache() is mode-independent,
+        // but a production boot would compile the container first, and compilation
+        // requires every PDK template contract to be instantiable — which it is not
+        // until the adapter layer lands. Development mode skips compilation, so this
+        // reaches the facade without building what we are about to delete.
+        //
+        // Not routed through PdkInitializer: Shopware updates inactive plugins too,
+        // and then our services are not in its container.
+        PdkBootstrapper::boot(
+            $updateContext->getUpdatePluginVersion(),
+            dirname(__DIR__),
+            '',
+            BasePdk::MODE_DEVELOPMENT
+        );
+
+        Pdk::clearCache();
     }
 
     /**
      * composer.json is the single source of truth for the version: Shopware reads
-     * it from there too when refreshing the plug-in list.
+     * it from there too when refreshing the plugin list.
      */
     private function readVersion(): string
     {

@@ -42,10 +42,12 @@ class PdkController
         $endpoint       = PdkFacade::get(PdkEndpoint::class);
         $scopedResponse = $endpoint->call($scopedRequest, PdkEndpoint::CONTEXT_BACKEND);
 
+        // Forward the PDK's own headers rather than forcing JSON: it sets the
+        // content type itself, and actions may add cache or attachment headers.
         return new Response(
             (string) $scopedResponse->getContent(),
             $scopedResponse->getStatusCode(),
-            ['Content-Type' => 'application/json']
+            $scopedResponse->headers->all()
         );
     }
 }

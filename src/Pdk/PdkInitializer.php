@@ -11,10 +11,8 @@ use Psr\Log\LoggerInterface;
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
  * hardcoded at the call site.
  *
- * The mode follows Shopware's debug flag, and that choice has teeth: in
- * development the PDK skips compiling its container entirely, while in production
- * it compiles to vendor/myparcelnl/pdk/.cache and never cleans up after itself.
- * See PdkContainerCache for the other half of that story.
+ * The mode follows Shopware's debug flag: in development the PDK skips compiling
+ * its container, in production it compiles to vendor/myparcelnl/pdk/.cache.
  */
 final class PdkInitializer
 {

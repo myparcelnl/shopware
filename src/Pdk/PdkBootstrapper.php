@@ -13,19 +13,17 @@ use Psr\Log\NullLogger;
 /**
  * Hands Shopware-owned services to the PDK.
  *
- * The PDK builds its own php-di container, so anything Shopware constructs has
- * to be handed over before boot(). Since PdkBootstrapper::boot() is final and
- * static in the PDK, that handover goes through a static seam: Shopware
- * autowires the services into whatever calls setLogger(), and this class puts
- * them into the container definitions.
+ * The PDK builds its own php-di container, so anything Shopware constructs has to
+ * be registered here before boot() runs. Call the setters first; afterwards the
+ * definitions are compiled and later values are ignored.
  */
 final class PdkBootstrapper extends AbstractPdkBootstrapper
 {
     private static ?LoggerInterface $shopwareLogger = null;
 
     /**
-     * Call before boot(). Afterwards the definitions are already compiled and
-     * a later logger is ignored.
+     * A static seam because the PDK declares boot() final and static, so there is
+     * no instance to inject into. Shopware autowires the logger into the caller.
      */
     public static function setLogger(LoggerInterface $logger): void
     {

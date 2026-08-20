@@ -6,9 +6,12 @@
   "version": "0.1.0",
   "require": {
     "php": ">=8.2",
-    "myparcelnl/pdk": "^4.1",
+    "myparcelnl/pdk": "^4.4",
     "myparcelnl/sdk": "^11.0.0-beta.28@beta",
     "guzzlehttp/guzzle": "^7.5"
+  },
+  "require-dev": {
+    "humbug/php-scoper": "^0.18.0"
   },
   "extra": {
     "shopware-plugin-class": "MyParcelNL\\Shopware\\MyParcelNLShopware",
@@ -20,7 +23,7 @@
     "description": {
       "en-GB": "MyParcel integration for Shopware",
       "nl-NL": "MyParcel integratie voor Shopware",
-      "de-DE": "MyParcel Integration für Shopware"
+      "de-DE": "MyParcel Integration f\u00fcr Shopware"
     }
   },
   "autoload": {
