@@ -1,0 +1,4 @@
+monolog:
+    handlers:
+        myparcel:
+            level: debug

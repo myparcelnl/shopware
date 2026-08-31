@@ -1,0 +1,10 @@
+monolog:
+    channels: ['myparcel']
+
+    handlers:
+        myparcel:
+            type: rotating_file
+            path: '%kernel.logs_dir%/myparcel_%kernel.environment%.log'
+            level: info
+            max_files: 14
+            channels: ['myparcel']
