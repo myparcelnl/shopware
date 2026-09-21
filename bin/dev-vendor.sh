@@ -17,7 +17,17 @@ STAMP="${DEV_VENDOR_DIR}/.installed-for"
 
 cd "${PLUGIN_DIR}"
 
-TARGET="$(cat composer.json composer.lock 2>/dev/null | shasum | cut -d' ' -f1)"
+# php -r rather than shasum: the Shopware image this also has to run in does
+# not ship shasum, but it is nothing without PHP.
+TARGET="$(php -r '
+$contents = "";
+foreach (["composer.json", "composer.lock"] as $file) {
+    if (is_file($file)) {
+        $contents .= file_get_contents($file);
+    }
+}
+echo hash("sha256", $contents);
+')"
 
 if [[ -f "${STAMP}" ]] && [[ "$(cat "${STAMP}")" == "${TARGET}" ]]; then
   exit 0
