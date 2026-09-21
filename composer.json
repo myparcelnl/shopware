@@ -8,10 +8,13 @@
     "php": ">=8.2",
     "myparcelnl/pdk": "^4.4",
     "myparcelnl/sdk": "^11.0.0-beta.28@beta",
-    "guzzlehttp/guzzle": "^7.5"
+    "guzzlehttp/guzzle": "^7.5",
+    "psr/log": "^1.0.0 || ^2.0.0 || ^3.0.0"
   },
   "require-dev": {
-    "humbug/php-scoper": "^0.18.0"
+    "humbug/php-scoper": "^0.18.0",
+    "pestphp/pest": "^1.0.0",
+    "phpstan/phpstan": "^1.10"
   },
   "extra": {
     "shopware-plugin-class": "MyParcel\\Shopware\\MyParcelShopware",
@@ -23,7 +26,7 @@
     "description": {
       "en-GB": "MyParcel integration for Shopware",
       "nl-NL": "MyParcel integratie voor Shopware",
-      "de-DE": "MyParcel Integration f\u00fcr Shopware"
+      "de-DE": "MyParcel Integration für Shopware"
     }
   },
   "autoload": {
@@ -31,13 +34,25 @@
       "MyParcel\\Shopware\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "MyParcel\\Shopware\\Tests\\": "tests"
+    }
+  },
   "scripts": {
-    "scope": "bin/scope.sh"
+    "scope": "bin/scope.sh",
+    "test": "bin/test.sh",
+    "test:coverage": "bin/test.sh --coverage-clover=clover.xml"
   },
   "scripts-descriptions": {
-    "scope": "Produce a vendor directory scoped with the _MyParcel prefix"
+    "scope": "Produce a vendor directory scoped with the _MyParcel prefix",
+    "test": "Run the Pest test suite",
+    "test:coverage": "Run the Pest test suite and write clover.xml"
   },
   "config": {
-    "prepend-autoloader": false
+    "prepend-autoloader": false,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
   }
 }
