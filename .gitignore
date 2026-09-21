@@ -1,3 +1,9 @@
 /.idea/
 /.tmp/
 /vendor/
+
+###
+# Plans and specs — never committed
+###
+/docs/superpowers/
+/.superpowers/
