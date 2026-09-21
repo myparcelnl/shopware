@@ -94,7 +94,53 @@ install in `vendor/` for the length of a run, and a scope landing in the middle 
 that would write to the wrong tree.
 
 Remove the path repository and run `composer update myparcelnl/pdk` again before
-you commit, so the branch carries the published version.
+you commit, so the branch carries the published version:
+
+```shell
+composer update myparcelnl/pdk
+composer scope
+```
+
+`composer update` alone leaves `vendor/` unscoped and mixed with the development
+dependencies, and the shop will not boot until `composer scope` puts a scoped,
+production-only `vendor/` back.
+
+### Tests
+
+```shell
+composer test
+```
+
+For the length of the run, `vendor/` and a second, unscoped install in
+`.tmp/dev-vendor` swap places, so Pest runs against the development dependencies
+while the shop, which needs the scoped `vendor/`, does not boot. The swap reverses
+itself once the run ends, including on failure. `.tmp/dev-vendor` is built the
+first time and reused after that, unless `composer.json` or `composer.lock`
+changed.
+
+Do not run `composer test` and `composer watch` at the same time: a scope landing
+mid-swap would write to the wrong tree.
+
+Arguments pass straight through, e.g. `composer test -- --filter=logger`.
+
+### Static analysis
+
+```shell
+composer analyse
+```
+
+Run `composer scope` first. PHPStan reads three worlds at once: the plug-in's own
+`src/`, Shopware's Symfony 7 runtime and the `_MyParcel`-prefixed copies in the
+scoped `vendor/`. Without a scoped `vendor/`, PHPStan reports every `_MyParcel`
+class as missing instead of analysing the plug-in.
+
+Shopware and the PDK cannot live in one composer install: the PDK caps
+`symfony/http-foundation` at 6, Shopware 6.7 needs 7.4. The first run installs
+Shopware on its own in `.tmp/shopware` and PHPStan itself in `.tmp/tools`. Later
+runs reuse both and finish in seconds.
+
+The baseline in `phpstan-baseline.php` is empty on purpose. Fix what PHPStan
+reports; do not add to it.
 
 ## Logging
 
