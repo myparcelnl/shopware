@@ -23,7 +23,7 @@ fi
 
 bin/dev-vendor.sh
 
-if [[ ! -d "${SHOPWARE_DIR}/vendor" ]]; then
+if [[ ! -f "${SHOPWARE_DIR}/vendor/autoload.php" ]]; then
   echo "==> Installing Shopware for analysis only"
   mkdir -p "${SHOPWARE_DIR}"
   # --no-plugins: this install only ever supplies classes for PHPStan to read.
