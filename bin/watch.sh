@@ -60,7 +60,11 @@ changed_since_stamp() {
   # Directories count as well as files. Deleting a file leaves nothing newer than
   # the stamp behind — it bumps the mtime of the directory that held it and
   # nothing else — so a probe on files alone would never notice a removed class,
-  # and the scoped tree would go on serving it.
+  # and the scoped tree would go on serving it. The cost is that any other churn
+  # in a directory fires a round too, an editor writing and removing a temporary
+  # file for instance. That spurious round is accepted on purpose: it re-scopes
+  # code that is already current, which is cheap, while a missed deletion shows
+  # the developer a class that no longer exists.
   #
   # find exits non-zero on an unreadable or vanished path. That must not end the
   # watch, so the failure reads as "nothing changed" and the next round tries
@@ -101,14 +105,30 @@ full_scope() {
   # outcome here and the step below is the answer to it. Any other non-zero
   # status is a real failure and bin/scope.sh has already put the previous vendor
   # back.
+  #
+  # This function reports its own failures rather than leaving it to the caller,
+  # because what is left on disk depends on how far it got and only it knows.
   local status=0
   in_container "cd custom/plugins/MyParcelShopware && composer scope" || status=$?
 
   if [[ "${status}" -ne 0 ]] && [[ "${status}" -ne 3 ]]; then
+    echo "Scoping failed. The previous vendor is still in place." >&2
     return 1
   fi
 
-  scope_pdk
+  scope_pdk && return 0
+
+  # Exit 3 means bin/scope.sh dropped its backup on purpose, so that vendor is
+  # gone: vendor/ is the tree it just built, and that tree has no PDK in it. The
+  # plug-in cannot boot at all until the PDK lands, and no further save will
+  # retry this on its own.
+  if [[ "${status}" -eq 3 ]]; then
+    echo "vendor/ has no PDK. Run bin/scope-pdk.sh in the web container; the shop will not boot until it succeeds." >&2
+  else
+    echo "Scoping the PDK failed. The previous PDK is still in place." >&2
+  fi
+
+  return 1
 }
 
 scope_pdk() {
@@ -145,24 +165,27 @@ while true; do
 
   # The new stamp is taken before the probe and put in place after it, so a write
   # that lands while the probe runs is still newer than the stamp and the next
-  # round picks it up. Stamping after the probe would drop that window.
+  # round picks it up. Stamping after the probe would drop that window. A watch
+  # killed between the two leaves ${STAMP}.next behind; nothing reads it and the
+  # next round overwrites it.
   touch "${STAMP}.next"
   probe
   mv "${STAMP}.next" "${STAMP}"
 
-  # Failure must not end the watch: the previous, working vendor stays in place
-  # and the next save gets another try.
+  # Failure must not end the watch. full_scope says for itself what it left
+  # behind; the other two have one outcome each.
   scoped=1
   if [[ -n "${pdk_json}" ]] || [[ -n "${own_json}" ]]; then
-    full_scope || { scoped=0; echo "Scoping failed. The previous vendor is still in place." >&2; }
+    full_scope || scoped=0
   elif [[ -n "${pdk_php}" ]]; then
-    scope_pdk || { scoped=0; echo "Scoping failed. The previous vendor is still in place." >&2; }
+    scope_pdk || { scoped=0; echo "Scoping failed. The previous PDK is still in place." >&2; }
   else
     echo "==> Plug-in source changed"
   fi
 
-  # Only worth doing when something did change. After a failed scope the cache
-  # already matches what is in vendor/.
+  # Only worth doing when the step above got somewhere. After a failure the cache
+  # is either still right, because nothing in vendor/ changed, or the plug-in has
+  # no PDK and no cache clear is going to make it boot.
   if [[ "${scoped}" -eq 1 ]]; then
     clear_cache \
       || echo "The scoped vendor is current, but the cache clear failed. Run 'bin/console cache:clear' in the web container." >&2
