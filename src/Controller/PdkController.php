@@ -40,13 +40,16 @@ class PdkController
 
         /** @var PdkEndpoint $endpoint */
         $endpoint = PdkFacade::get(PdkEndpoint::class);
-        // PdkEndpoint::call()'s own PHPDoc still names the real (unscoped)
-        // Symfony\Component\HttpFoundation\Request: php-scoper only rewrites a
-        // docblock FQCN when the file also imports it through a `use` statement,
-        // and this vendor file does not import Request, only Response and
-        // JsonResponse. The method's actual runtime check
-        // (PdkActionsService::createRequest()) is `instanceof` the scoped Request
-        // we build above, so this call is correct; only the vendor docblock is stale.
+        // PdkEndpoint::call()'s docblock still names the unscoped
+        // Symfony\Component\HttpFoundation\Request: php-scoper does not rewrite a
+        // docblock FQCN unless the file also imports the class, and PdkEndpoint.php
+        // imports only Response and JsonResponse.
+        //
+        // PdkActionsService type-checks against the scoped
+        // _MyParcel\Symfony\Component\HttpFoundation\Request, which is what
+        // $scopedRequest is, so this call is correct.
+        //
+        // Temporary: this ignore comes out once the PDK ships the missing import.
         // @phpstan-ignore argument.type
         $scopedResponse = $endpoint->call($scopedRequest, PdkEndpoint::CONTEXT_BACKEND);
 
