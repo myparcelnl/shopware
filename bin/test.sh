@@ -36,24 +36,29 @@ MESSAGE
   exit 1
 fi
 
-swapped=0
-
+# Stateless, like bin/scope.sh's restore_vendor: keyed only on whether the
+# backup exists, not on a flag set before the move it would guard. If the mv
+# below that creates BACKUP_DIR fails, this is a no-op and the scoped vendor/
+# is left exactly as it was.
 restore_vendor() {
-  [[ "${swapped}" -eq 1 ]] || return 0
-  swapped=0
+  [[ -d "${BACKUP_DIR}" ]] || return 0
 
   if [[ -d "${VENDOR_DIR}" ]]; then
     mv "${VENDOR_DIR}" "${DEV_VENDOR_DIR}"
+
+    # The dump-autoload below bakes its up-level hops for vendor/'s
+    # single-segment depth. Moving that same directory back to
+    # .tmp/dev-vendor, two segments down, would leave it wrong again for the
+    # next run (and for Task 2's PHPStan, which reads it directly) unless it
+    # is re-dumped for that depth here.
+    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction
   fi
 
-  if [[ -d "${BACKUP_DIR}" ]]; then
-    mv "${BACKUP_DIR}" "${VENDOR_DIR}"
-  fi
+  mv "${BACKUP_DIR}" "${VENDOR_DIR}"
 }
 
 trap restore_vendor EXIT
 
-swapped=1
 if [[ -d "${VENDOR_DIR}" ]]; then
   mv "${VENDOR_DIR}" "${BACKUP_DIR}"
 fi
