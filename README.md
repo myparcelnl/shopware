@@ -12,11 +12,11 @@ MyParcel plug-in for Shopware 6.7 and up, built on the
 
 ## Requirements
 
-| | |
-|---|---|
-| Shopware | 6.7.12 or newer |
-| PHP | 8.2 – 8.5 |
-| Node | 24 (only to build assets) |
+|          |                           |
+| -------- | ------------------------- |
+| Shopware | 6.7.12 or newer           |
+| PHP      | 8.2 – 8.5                 |
+| Node     | 24 (only to build assets) |
 
 ## Development
 
@@ -43,6 +43,54 @@ unscoped: it talks to the real Shopware classes.
 
 From the docker environment, `make scope` does the same and clears Shopware's cache
 afterwards.
+
+### Working on the PDK
+
+To work on the PDK and the plug-in at the same time, point composer at your local
+checkout and mount it in the container at the same path. `docker-compose.override.yml`
+in the docker environment already has the mount; uncomment it and run `make up`.
+
+Add the path repository to `composer.json` and install it:
+
+```json
+"repositories": [
+  {
+    "type": "path",
+    "url": "/Users/<user>/Projects/pdk"
+  }
+]
+```
+
+```shell
+composer update myparcelnl/pdk
+```
+
+Composer installs a path repository as a symlink, and `composer scope` cannot use
+one: php-scoper's finder does not follow links, and the scoped copy it writes
+replaces `vendor/` entirely. A full scope therefore leaves `vendor/myparcelnl/pdk`
+missing. Run `bin/scope-pdk.sh` after it to put the scoped PDK back.
+
+```shell
+composer scope && bin/scope-pdk.sh
+```
+
+After that, one command keeps the two in step:
+
+```shell
+composer watch
+```
+
+It polls your PDK checkout and the plug-in's `src/`. A change in the PDK re-scopes
+only `vendor/myparcelnl/pdk` and clears Shopware's cache, which takes about ten
+seconds. A change to either `composer.json` runs a full scope instead. A change in
+`src/` only clears the cache, because that directory is not scoped.
+
+Do not run `composer test` while the watch runs: the tests put the development
+install in `vendor/` for the length of a run, and a scope landing in the middle of
+that would write to the wrong tree.
+
+Remove the path repository and run `composer update myparcelnl/pdk` again before
+you commit, so the branch carries the published version.
 
 ## Logging
 

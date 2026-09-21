@@ -41,6 +41,10 @@
   },
   "scripts": {
     "scope": "bin/scope.sh",
+    "watch": [
+      "Composer\\Config::disableProcessTimeout",
+      "bin/watch.sh"
+    ],
     "test": "bin/test.sh",
     "test:coverage": "bin/test.sh --coverage-clover=clover.xml",
     "analyse": "bin/analyse.sh analyse",
@@ -48,6 +52,7 @@
   },
   "scripts-descriptions": {
     "scope": "Produce a vendor directory scoped with the _MyParcel prefix",
+    "watch": "Re-scope the linked PDK whenever it changes",
     "test": "Run the Pest test suite",
     "test:coverage": "Run the Pest test suite and write clover.xml",
     "analyse": "Run PHPStan over src/",
