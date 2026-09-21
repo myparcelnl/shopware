@@ -45,16 +45,24 @@ restore_vendor() {
 
   if [[ -d "${VENDOR_DIR}" ]]; then
     mv "${VENDOR_DIR}" "${DEV_VENDOR_DIR}"
-
-    # The dump-autoload below bakes its up-level hops for vendor/'s
-    # single-segment depth. Moving that same directory back to
-    # .tmp/dev-vendor, two segments down, would leave it wrong again for the
-    # next run (and for Task 2's PHPStan, which reads it directly) unless it
-    # is re-dumped for that depth here.
-    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction
   fi
 
+  # Restoring the scoped copy has to be unconditional, like bin/scope.sh's
+  # restore: nothing after this point may be able to abort the function and
+  # strand it in BACKUP_DIR. That is why the dev-vendor autoload refresh below
+  # runs after this line, and with `|| true` — a subprocess (composer, PHP
+  # itself) can fail for reasons that have nothing to do with the swap, and
+  # under `set -e` that failure would otherwise cut the restore short.
   mv "${BACKUP_DIR}" "${VENDOR_DIR}"
+
+  # Best-effort: refreshes .tmp/dev-vendor's autoloader for its own depth (see
+  # the comment above the forward dump-autoload below). If this fails,
+  # .tmp/dev-vendor is left with a stale autoloader until something forces a
+  # fresh install (e.g. removing the directory) — recoverable, unlike a
+  # missing vendor/, which is why this step may not gate the restore above.
+  if [[ -d "${DEV_VENDOR_DIR}" ]]; then
+    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction || true
+  fi
 }
 
 trap restore_vendor EXIT
