@@ -39,7 +39,15 @@ class PdkController
         );
 
         /** @var PdkEndpoint $endpoint */
-        $endpoint       = PdkFacade::get(PdkEndpoint::class);
+        $endpoint = PdkFacade::get(PdkEndpoint::class);
+        // PdkEndpoint::call()'s own PHPDoc still names the real (unscoped)
+        // Symfony\Component\HttpFoundation\Request: php-scoper only rewrites a
+        // docblock FQCN when the file also imports it through a `use` statement,
+        // and this vendor file does not import Request, only Response and
+        // JsonResponse. The method's actual runtime check
+        // (PdkActionsService::createRequest()) is `instanceof` the scoped Request
+        // we build above, so this call is correct; only the vendor docblock is stale.
+        // @phpstan-ignore argument.type
         $scopedResponse = $endpoint->call($scopedRequest, PdkEndpoint::CONTEXT_BACKEND);
 
         // Forward the PDK's own headers rather than forcing JSON: it sets the

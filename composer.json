@@ -42,12 +42,16 @@
   "scripts": {
     "scope": "bin/scope.sh",
     "test": "bin/test.sh",
-    "test:coverage": "bin/test.sh --coverage-clover=clover.xml"
+    "test:coverage": "bin/test.sh --coverage-clover=clover.xml",
+    "analyse": "bin/analyse.sh analyse",
+    "analyse:generate": "bin/analyse.sh analyse --generate-baseline phpstan-baseline.php --allow-empty-baseline"
   },
   "scripts-descriptions": {
     "scope": "Produce a vendor directory scoped with the _MyParcel prefix",
     "test": "Run the Pest test suite",
-    "test:coverage": "Run the Pest test suite and write clover.xml"
+    "test:coverage": "Run the Pest test suite and write clover.xml",
+    "analyse": "Run PHPStan over src/",
+    "analyse:generate": "Regenerate the PHPStan baseline"
   },
   "config": {
     "prepend-autoloader": false,
