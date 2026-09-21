@@ -37,31 +37,39 @@ MESSAGE
 fi
 
 # Stateless, like bin/scope.sh's restore_vendor: keyed only on whether the
-# backup exists, not on a flag set before the move it would guard. If the mv
-# below that creates BACKUP_DIR fails, this is a no-op and the scoped vendor/
-# is left exactly as it was.
+# backup exists, not on a flag set before the move it would guard. If nothing
+# below has run yet, this is a no-op and the scoped vendor/ is left exactly as
+# it was.
+#
+# The restore itself is the pair `rm -rf` then `mv` below: nothing that can
+# fail may sit between them, and everything before or after is best-effort.
+# That is the one guarantee bin/scope.sh's restore_vendor has and the earlier
+# version of this function did not — a failure anywhere else must not be able
+# to leave vendor/ holding the wrong install or nothing at all.
 restore_vendor() {
   [[ -d "${BACKUP_DIR}" ]] || return 0
 
-  if [[ -d "${VENDOR_DIR}" ]]; then
-    mv "${VENDOR_DIR}" "${DEV_VENDOR_DIR}"
+  # Keeping the tested install saves the next run an install, but it is only
+  # worth doing if it cannot get in the way: dev-vendor.sh rebuilds it from
+  # scratch. Everything up to the mv below is therefore best-effort.
+  if [[ -d "${VENDOR_DIR}" ]] && [[ ! -d "${DEV_VENDOR_DIR}" ]]; then
+    mv "${VENDOR_DIR}" "${DEV_VENDOR_DIR}" || true
   fi
 
-  # Restoring the scoped copy has to be unconditional, like bin/scope.sh's
-  # restore: nothing after this point may be able to abort the function and
-  # strand it in BACKUP_DIR. That is why the dev-vendor autoload refresh below
-  # runs after this line, and with `|| true` — a subprocess (composer, PHP
-  # itself) can fail for reasons that have nothing to do with the swap, and
-  # under `set -e` that failure would otherwise cut the restore short.
+  rm -rf "${VENDOR_DIR}" || true
+
+  # mv into an existing directory would nest the backup inside it instead of
+  # replacing it, which hides the scoped vendor rather than restoring it.
+  if [[ -d "${VENDOR_DIR}" ]]; then
+    echo "FATAL: could not clear ${VENDOR_DIR}. The scoped vendor is in ${BACKUP_DIR}; move it back by hand." >&2
+    return 0
+  fi
+
   mv "${BACKUP_DIR}" "${VENDOR_DIR}"
 
-  # Best-effort: refreshes .tmp/dev-vendor's autoloader for its own depth (see
-  # the comment above the forward dump-autoload below). If this fails,
-  # .tmp/dev-vendor is left with a stale autoloader until something forces a
-  # fresh install (e.g. removing the directory) — recoverable, unlike a
-  # missing vendor/, which is why this step may not gate the restore above.
   if [[ -d "${DEV_VENDOR_DIR}" ]]; then
-    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction || true
+    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction \
+      || echo "warning: could not refresh the autoloader in ${DEV_VENDOR_DIR}. It stays stale until the next test run." >&2
   fi
 }
 
