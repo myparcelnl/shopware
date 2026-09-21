@@ -1,0 +1,25 @@
+name: '⚙️ On pull request'
+
+on:
+  pull_request:
+    branches:
+      - main
+
+run-name: 'PR #${{ github.event.pull_request.number }}'
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+    with:
+      ref: ${{ github.ref }}
+
+  analyse:
+    uses: ./.github/workflows/analyse.yml
+    secrets: inherit
+    with:
+      ref: ${{ github.ref }}

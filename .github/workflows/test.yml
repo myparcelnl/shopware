@@ -1,0 +1,50 @@
+name: '🧪 Run tests'
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Ref to run on'
+        type: string
+        required: false
+        default: ${{ github.ref }}
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+
+      # This step only gives the image tag. bin/test.sh builds its own vendor in
+      # .tmp/dev-vendor and never reads the vendor/ this step installs. The
+      # install still runs, so it needs COMPOSER_IGNORE_PLATFORM_REQ too: without
+      # it, the install fails on ext-zip and ext-gd before the image tag comes
+      # out.
+      - uses: myparcelnl/actions/composer-install@v5
+        id: setup
+        env:
+          COMPOSER_IGNORE_PLATFORM_REQ: 'ext-*,lib-*'
+        with:
+          php-version: '8.2'
+
+      # ghcr.io/myparcelnl/php-xd is an Alpine image. It has no bash, and no
+      # ext-zip or ext-gd. bin/test.sh needs bash to run, and its composer
+      # install needs the platform requirements ignored. Add both here too:
+      # this is a new container, so nothing from the setup step above carries
+      # over.
+      #
+      # composer test builds its own unscoped install in .tmp/dev-vendor, which
+      # is what keeps the scoped vendor/ and the development dependencies apart.
+      - name: 'Run Pest'
+        env:
+          IMAGE: ${{ steps.setup.outputs.image }}
+        shell: bash
+        #language=bash
+        run: |
+          docker run -t \
+            --volume $PWD:/app \
+            --env COMPOSER_IGNORE_PLATFORM_REQ='ext-*,lib-*' \
+            $IMAGE \
+            sh -c 'apk add --no-cache bash && composer test'
