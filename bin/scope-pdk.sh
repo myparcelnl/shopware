@@ -81,6 +81,21 @@ php -d memory_limit=-1 "${SCOPER_DIR}/vendor/bin/php-scoper" add-prefix \
   --no-ansi \
   --no-interaction
 
+# php-scoper exits 0 on a config whose finder found the right files and whose
+# prefixing did nothing, and after the swap the shop runs whatever came out. So
+# assert here, before the window, where a failure costs nothing: the old tree is
+# untouched and OUTPUT_DIR is thrown away by the next run.
+#
+# Two-sided, like the assertion in bin/scope.sh: an unprefixed http-foundation
+# inside the PDK would put two Symfony versions in one process, which fails far
+# away from here.
+if [[ ! -d "${OUTPUT_DIR}/src" ]] \
+  || grep -rq '^use Symfony\\Component\\HttpFoundation\\' "${OUTPUT_DIR}/src" \
+  || ! grep -rq '^use _MyParcel\\Symfony\\Component\\HttpFoundation\\' "${OUTPUT_DIR}/src"; then
+  echo "FAILED: the scoped PDK in ${OUTPUT_DIR} is missing or not correctly prefixed" >&2
+  exit 1
+fi
+
 # The swap. Between moving the old tree aside and moving the new one in, the
 # plug-in has no PDK at all and cannot boot, so that window holds nothing that
 # can fail: no test, no command, no message. Everything that can fail runs

@@ -68,11 +68,15 @@ composer update myparcelnl/pdk
 Composer installs a path repository as a symlink, and `composer scope` cannot use
 one: php-scoper's finder does not follow links, and the scoped copy it writes
 replaces `vendor/` entirely. A full scope therefore leaves `vendor/myparcelnl/pdk`
-missing. Run `bin/scope-pdk.sh` after it to put the scoped PDK back.
+missing. It says so and exits 3, with the rest of `vendor/` scoped and in place.
+`bin/scope-pdk.sh` adds the PDK to it.
 
 ```shell
-composer scope && bin/scope-pdk.sh
+composer scope; bin/scope-pdk.sh
 ```
+
+Use `;`, not `&&`: on a linked checkout the first command is supposed to end in
+that failure, and the second is the answer to it.
 
 After that, one command keeps the two in step:
 

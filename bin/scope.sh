@@ -96,5 +96,32 @@ if grep -rq '^namespace Symfony\\Component\\HttpFoundation;' "${VENDOR_DIR}" \
   exit 1
 fi
 
+# The prefix check above passes on a vendor directory with no PDK in it at all,
+# which is exactly what a linked checkout produces: composer installs a path
+# repository as a symlink, php-scoper's finder does not follow symlinks, and the
+# mv above replaces vendor/ with what the finder returned. Without this check the
+# script prints "Done" over a plug-in that cannot boot.
+#
+# Exit 3, not 1, so bin/watch.sh can tell this apart from a real failure. And the
+# backup goes first, on purpose: bin/scope-pdk.sh writes into the vendor
+# directory that is here now, so restoring the previous one would put the
+# dependency change that prompted this scope back out of reach. The plug-in
+# cannot boot until the remedy below has run, which is what the message says.
+if [[ ! -d "${VENDOR_DIR}/myparcelnl/pdk" ]]; then
+  rm -rf "${BACKUP_DIR}"
+  cat >&2 <<'MESSAGE'
+FAILED: vendor/myparcelnl/pdk is missing.
+
+php-scoper cannot follow the symlink a composer path repository installs, so a
+full scope leaves the linked PDK out. The rest of vendor/ is scoped and in place;
+the plug-in cannot boot until you add the PDK to it:
+
+  bin/scope-pdk.sh
+
+See "Working on the PDK" in the README.
+MESSAGE
+  exit 3
+fi
+
 rm -rf "${BACKUP_DIR}"
 echo "Done. vendor/ is scoped with the _MyParcel prefix."
