@@ -23,6 +23,17 @@ VENDOR_DIR="${PLUGIN_DIR}/vendor"
 
 cd "${PLUGIN_DIR}"
 
+# The swap below only reverses itself because there is something to move aside:
+# restore_vendor is keyed on the backup existing. Without a vendor/ no backup is
+# made, the development install is moved in under that name and stays there, and
+# .tmp/dev-vendor is gone as well — an unscoped install left where the shop
+# expects the scoped one. Refuse before anything moves, with the same remedy
+# bin/analyse.sh names.
+if [[ ! -f vendor/autoload.php ]]; then
+  echo "vendor/ is missing. Run 'composer scope' first." >&2
+  exit 1
+fi
+
 bin/dev-vendor.sh
 
 # Only a run that was killed outright leaves this behind. Restoring it

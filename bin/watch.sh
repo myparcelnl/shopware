@@ -136,24 +136,43 @@ scope_pdk() {
   in_container "cd custom/plugins/MyParcelShopware && bin/scope-pdk.sh"
 }
 
+# What the probes cover has to match what the two scopes rewrite, or the watch
+# stays quiet over a shop running the previous code.
+#
+# On the PDK side bin/scope-pdk.sh scopes the whole checkout except tests,
+# node_modules, vendor and .cache, so src/ alone is too narrow: the php-di
+# container is built from config/pdk-default.php and its six siblings, and none
+# of those is under src/. The pattern is '*' rather than '*.php' for the same
+# reason — the scoper's finder is not limited to PHP, and src/Frontend/Template
+# holds the .html the PDK renders.
+#
+# On the plug-in side config/pdk.php is read at boot and is not scoped at all,
+# so it takes the same branch as src/: a cache clear and nothing more.
+#
+# Neither config directory can make the watch re-trigger itself. bin/scope.sh
+# and bin/scope-pdk.sh write to .tmp/, to vendor/ and to nothing else, and the
+# PDK's own build output (.cache, node_modules, .tmp) sits at the root of the
+# checkout, not under src/ or config/.
 probe() {
-  pdk_php="$(changed_since_stamp "${PDK_DIR}/src" '*.php')"
+  pdk_src="$(changed_since_stamp "${PDK_DIR}/src" '*')"
+  pdk_config="$(changed_since_stamp "${PDK_DIR}/config" '*')"
   pdk_json="$(manifest_changed_since_stamp "${PDK_DIR}")"
   own_json="$(manifest_changed_since_stamp "${PLUGIN_DIR}")"
   own_src="$(changed_since_stamp "${PLUGIN_DIR}/src" '*')"
+  own_config="$(changed_since_stamp "${PLUGIN_DIR}/config" '*')"
 }
 
 mkdir -p "${TMP_DIR}"
 touch "${STAMP}"
 
-echo "Watching ${PDK_DIR} and src/. Press Ctrl-C to stop."
+echo "Watching ${PDK_DIR}/src, ${PDK_DIR}/config, src/ and config/. Press Ctrl-C to stop."
 
 while true; do
   sleep "${INTERVAL}"
 
   probe
 
-  if [[ -z "${pdk_php}${pdk_json}${own_json}${own_src}" ]]; then
+  if [[ -z "${pdk_src}${pdk_config}${pdk_json}${own_src}${own_config}${own_json}" ]]; then
     continue
   fi
 
@@ -177,10 +196,10 @@ while true; do
   scoped=1
   if [[ -n "${pdk_json}" ]] || [[ -n "${own_json}" ]]; then
     full_scope || scoped=0
-  elif [[ -n "${pdk_php}" ]]; then
+  elif [[ -n "${pdk_src}" ]] || [[ -n "${pdk_config}" ]]; then
     scope_pdk || { scoped=0; echo "Scoping failed. The previous PDK is still in place." >&2; }
   else
-    echo "==> Plug-in source changed"
+    echo "==> Plug-in source or config changed"
   fi
 
   # Only worth doing when the step above got somewhere. After a failure the cache
