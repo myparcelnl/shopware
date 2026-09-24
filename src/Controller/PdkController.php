@@ -49,7 +49,9 @@ class PdkController
         // _MyParcel\Symfony\Component\HttpFoundation\Request, which is what
         // $scopedRequest is, so this call is correct.
         //
-        // Temporary: this ignore comes out once the PDK ships the missing import.
+        // Temporary: this ignore comes out once the PDK ships the missing import,
+        // tracked in INT-1948. PHPStan then reports it as unmatched, so the analysis
+        // fails until somebody deletes these lines.
         // @phpstan-ignore argument.type
         $scopedResponse = $endpoint->call($scopedRequest, PdkEndpoint::CONTEXT_BACKEND);
 
