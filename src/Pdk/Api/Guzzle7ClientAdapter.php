@@ -11,7 +11,6 @@ use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
 use MyParcelNL\Pdk\Api\Contract\ClientResponseInterface;
 use MyParcelNL\Pdk\Api\Response\ClientResponse;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Sends the PDK's HTTP requests with the Guzzle copy bundled in the scoped
@@ -50,11 +49,9 @@ final class Guzzle7ClientAdapter implements ClientAdapterInterface
         try {
             $response = $this->client->request(strtolower($httpMethod), $uri, $requestOptions);
         } catch (GuzzleException $exception) {
-            // ->log() directly, not ->error(): the PDK's AbstractLogger would
-            // prefix the message with "[PDK]: " otherwise.
             // Headers and body stay out of the log: they carry the API key and
             // customer data.
-            $this->logger->log(LogLevel::ERROR, 'MyParcel API request failed', [
+            $this->logger->error('MyParcel API request failed', [
                 'method'     => strtoupper($httpMethod),
                 'uri'        => $uri,
                 'exception'  => get_class($exception),
