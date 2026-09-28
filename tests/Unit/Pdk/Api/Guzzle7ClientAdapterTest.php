@@ -75,7 +75,7 @@ it('logs a network failure with context and throws it again', function () {
 
     expect($logger->records)->toHaveCount(1)
         ->and($logger->records[0]['level'])->toBe(LogLevel::ERROR)
-        ->and($logger->records[0]['message'])->toBe('MyParcel API request failed')
+        ->and($logger->records[0]['message'])->toBe('[PDK]: MyParcel API request failed')
         ->and($logger->records[0]['context'])->toMatchArray([
             'method'    => 'GET',
             'uri'       => 'https://api.myparcel.nl/accounts',
