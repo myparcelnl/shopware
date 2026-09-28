@@ -44,15 +44,16 @@ final class Guzzle7ClientAdapter implements ClientAdapterInterface
             RequestOptions::BODY            => $options['body'] ?? null,
         ], static fn ($value) => null !== $value);
 
-        $start = microtime(true);
+        $method = strtoupper($httpMethod);
+        $start  = microtime(true);
 
         try {
-            $response = $this->client->request(strtolower($httpMethod), $uri, $requestOptions);
+            $response = $this->client->request($method, $uri, $requestOptions);
         } catch (GuzzleException $exception) {
             // Headers and body stay out of the log: they carry the API key and
             // customer data.
             $this->logger->error('MyParcel API request failed', [
-                'method'     => strtoupper($httpMethod),
+                'method'     => $method,
                 'uri'        => $uri,
                 'exception'  => get_class($exception),
                 'message'    => $exception->getMessage(),
