@@ -185,11 +185,15 @@ Until the admin settings screen exists, set the API key from the console. The
 key is validated when it is saved:
 
 ```shell
-bin/console myparcel:account:update '<api key>' --acceptance
-bin/console myparcel:account:show
+read -rs MYPARCEL_API_KEY && export MYPARCEL_API_KEY
+docker compose exec -e MYPARCEL_API_KEY web bin/console myparcel:account:update --acceptance
+unset MYPARCEL_API_KEY
+docker compose exec web bin/console myparcel:account:show
 ```
 
-Run these in the web container, from the shop root.
+These commands run on the host, from the docker-shopware root. `-e MYPARCEL_API_KEY`
+without `=value` copies the variable from your shell, so the key is not on a
+command line, in `ps` or in the shell history.
 
 Leave out `--acceptance` to use the production API. A Belgian account runs on
 the SendMyParcel proposition automatically. `myparcel:account:show` never prints
