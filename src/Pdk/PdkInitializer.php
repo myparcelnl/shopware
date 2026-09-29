@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use Psr\Log\LoggerInterface;
 
@@ -18,6 +20,8 @@ final class PdkInitializer
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly ConfigStorageInterface $configStorage,
+        private readonly LocaleResolverInterface $localeResolver,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -30,6 +34,7 @@ final class PdkInitializer
     public function boot(): Pdk
     {
         PdkBootstrapper::setLogger($this->logger);
+        PdkBootstrapper::setServices(new ShopwareServices($this->configStorage, $this->localeResolver));
 
         return PdkBootstrapper::boot(
             $this->pluginVersion,
