@@ -33,10 +33,14 @@ final class AccountShowCommand extends Command
         $io       = new SymfonyStyle($input, $output);
         $settings = Pdk::get(PdkSettingsRepositoryInterface::class)->all()->account;
 
+        // The PDK defaults apiKeyValid to true, so without a key that would read as a
+        // contradictory "valid: yes"; show "n/a" instead until a key is set.
+        $apiKeyValid = $settings->apiKey ? ($settings->apiKeyValid ? 'yes' : 'no') : 'n/a';
+
         $io->definitionList(
             ['Environment' => $settings->environment ?? Config::ENVIRONMENT_PRODUCTION],
             ['API key set' => $settings->apiKey ? 'yes' : 'no'],
-            ['API key valid' => $settings->apiKeyValid ? 'yes' : 'no']
+            ['API key valid' => $apiKeyValid]
         );
 
         $account = Pdk::get(PdkAccountRepositoryInterface::class)->getAccount();
