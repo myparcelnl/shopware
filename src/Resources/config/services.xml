@@ -20,11 +20,6 @@
             <argument>%env(string:APP_URL)%</argument>
         </service>
 
-        <service id="MyParcel\Shopware\Controller\PdkController" public="true">
-            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
-            <tag name="controller.service_arguments"/>
-        </service>
-
         <service id="MyParcel\Shopware\Command\AccountShowCommand">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <tag name="console.command"/>
