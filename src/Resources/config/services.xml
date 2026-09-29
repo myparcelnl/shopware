@@ -30,5 +30,10 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <tag name="console.command"/>
         </service>
+
+        <service id="MyParcel\Shopware\Command\AccountUpdateCommand">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>
