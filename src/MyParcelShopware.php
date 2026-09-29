@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware;
 
+use Doctrine\DBAL\Connection;
 use MyParcelNL\Pdk\Base\Pdk as BasePdk;
 use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcel\Shopware\Pdk\PdkBootstrapper;
+use MyParcel\Shopware\Pdk\Storage\SystemConfigStorage;
 use RuntimeException;
 use Shopware\Core\Framework\Plugin;
+use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -31,6 +34,23 @@ class MyParcelShopware extends Plugin
         $this->buildDefaultConfig($container);
 
         $container->setParameter('myparcel.plugin_version', $this->readVersion());
+    }
+
+    public function uninstall(UninstallContext $uninstallContext): void
+    {
+        parent::uninstall($uninstallContext);
+
+        if ($uninstallContext->keepUserData()) {
+            return;
+        }
+
+        // system_config keeps only what config.xml declares under
+        // MyParcelShopware.config.*; the PDK's own keys, the API key among them,
+        // are ours to remove.
+        $this->container->get(Connection::class)->executeStatement(
+            'DELETE FROM system_config WHERE configuration_key LIKE :prefix',
+            ['prefix' => SystemConfigStorage::KEY_PREFIX . '%']
+        );
     }
 
     public function update(UpdateContext $updateContext): void

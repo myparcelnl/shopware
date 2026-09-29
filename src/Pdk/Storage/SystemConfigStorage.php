@@ -14,7 +14,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  */
 final class SystemConfigStorage implements ConfigStorageInterface
 {
-    private const KEY_PREFIX = 'MyParcelShopware.pdk.';
+    public const KEY_PREFIX = 'MyParcelShopware.pdk.';
 
     public function __construct(private readonly SystemConfigService $systemConfig)
     {
