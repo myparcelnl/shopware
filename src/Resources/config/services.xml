@@ -18,7 +18,6 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
-            <argument>%kernel.debug%</argument>
         </service>
 
         <service id="MyParcel\Shopware\Controller\PdkController" public="true">
