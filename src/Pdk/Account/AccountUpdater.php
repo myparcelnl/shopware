@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Account;
 
 use MyParcelNL\Pdk\App\Action\Backend\Account\UpdateAccountAction;
+use MyParcelNL\Pdk\App\Api\Contract\PdkActionsServiceInterface;
 use MyParcelNL\Pdk\App\Api\PdkEndpoint;
-use MyParcelNL\Pdk\Facade\Actions;
+use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Settings\Model\AccountSettings;
 
 /**
@@ -27,13 +28,7 @@ final class AccountUpdater extends UpdateAccountAction
     {
         // updateAndSaveAccount() executes the subscription features action,
         // and the PDK only resolves actions for a known context.
-        //
-        // Actions::setContext() exists: PdkActionsServiceInterface declares it and
-        // the Facade forwards unknown static calls to the bound service. The
-        // Actions facade's own @method docblock lists only execute() and
-        // executeAutomatic(), so PHPStan cannot see it through the facade.
-        // @phpstan-ignore staticMethod.notFound
-        Actions::setContext(PdkEndpoint::CONTEXT_BACKEND);
+        Pdk::get(PdkActionsServiceInterface::class)->setContext(PdkEndpoint::CONTEXT_BACKEND);
 
         $accountSettings = $this->updateAccountSettings([
             AccountSettings::API_KEY     => $apiKey,
