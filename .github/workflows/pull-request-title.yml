@@ -5,6 +5,10 @@ on:
     types:
       - opened
       - edited
+      # Without synchronize the status stays on the commit that was head when the
+      # pull request was opened. Branch protection requires this context, so after
+      # any push it would wait for ever on a status that never arrives again.
+      - synchronize
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event.pull_request.number }}'
