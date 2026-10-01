@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use Psr\Log\LoggerInterface;
 
@@ -11,16 +13,20 @@ use Psr\Log\LoggerInterface;
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
  * hardcoded at the call site.
  *
- * The mode follows Shopware's debug flag: in development the PDK skips compiling
- * its container, in production it compiles to vendor/myparcelnl/pdk/.cache.
+ * The PDK always boots in development mode for now, because production mode
+ * compiles the container, and that needs every PDK template contract bound
+ * (order, cart, shipping method, webhooks, cron, endpoints, order status,
+ * view), which happens in the adapter layer of epic INT-1748. Switch back to
+ * following kernel.debug then.
  */
 final class PdkInitializer
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly ConfigStorageInterface $configStorage,
+        private readonly LocaleResolverInterface $localeResolver,
         private readonly string $pluginVersion,
-        private readonly string $appUrl,
-        private readonly bool $debug
+        private readonly string $appUrl
     ) {
     }
 
@@ -30,12 +36,13 @@ final class PdkInitializer
     public function boot(): Pdk
     {
         PdkBootstrapper::setLogger($this->logger);
+        PdkBootstrapper::setServices(new ShopwareServices($this->configStorage, $this->localeResolver));
 
         return PdkBootstrapper::boot(
             $this->pluginVersion,
             $this->getPluginPath(),
             $this->appUrl,
-            $this->debug ? Pdk::MODE_DEVELOPMENT : Pdk::MODE_PRODUCTION
+            Pdk::MODE_DEVELOPMENT
         );
     }
 

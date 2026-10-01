@@ -3,16 +3,31 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="MyParcel\Shopware\Pdk\PdkInitializer">
-            <argument type="service" id="monolog.logger.myparcel"/>
-            <argument>%myparcel.plugin_version%</argument>
-            <argument>%env(string:APP_URL)%</argument>
-            <argument>%kernel.debug%</argument>
+        <service id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
 
-        <service id="MyParcel\Shopware\Controller\PdkController" public="true">
+        <service id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver">
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="Shopware\Core\System\Locale\LanguageLocaleCodeProvider"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\PdkInitializer">
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument>%myparcel.plugin_version%</argument>
+            <argument>%env(string:APP_URL)%</argument>
+        </service>
+
+        <service id="MyParcel\Shopware\Command\AccountShowCommand">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
-            <tag name="controller.service_arguments"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Command\AccountUpdateCommand">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <tag name="console.command"/>
         </service>
     </services>
 </container>

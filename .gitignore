@@ -13,3 +13,9 @@
 ###
 /docs/superpowers/
 /.superpowers/
+
+###
+# Node tooling for the translations import
+###
+/node_modules/
+/.yarn/

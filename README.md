@@ -163,6 +163,45 @@ change affects instead of reusing the old install.
 The baseline in `phpstan-baseline.php` is empty on purpose. Fix what PHPStan
 reports; do not add to it.
 
+### Translations
+
+The MyParcel texts come from the shared PDK translations sheet and live in
+`config/pdk/translations`. To refresh them, run this in the web container:
+
+```shell
+corepack yarn install
+corepack yarn translations:import
+```
+
+Commit the changed JSON files. The plug-in shows texts in the language of the
+Shopware request and falls back to English.
+
+`fast-glob` is in `devDependencies` only because `@myparcel-dev/pdk-app-builder`
+imports it without declaring it. Remove it once the builder declares it itself.
+
+## Connecting a MyParcel account
+
+Until the admin settings screen exists, set the API key from the console. The
+key is validated when it is saved:
+
+```shell
+read -rs MYPARCEL_API_KEY && export MYPARCEL_API_KEY
+docker compose exec -e MYPARCEL_API_KEY web bin/console myparcel:account:update --acceptance
+unset MYPARCEL_API_KEY
+docker compose exec web bin/console myparcel:account:show
+```
+
+These commands run on the host, from the docker-shopware root. `-e MYPARCEL_API_KEY`
+without `=value` copies the variable from your shell, so the key is not on a
+command line, in `ps` or in the shell history.
+
+Leave out `--acceptance` to use the production API. A Belgian account runs on
+the SendMyParcel proposition automatically. `myparcel:account:show` never prints
+the key.
+
+Settings and the account are stored installation-wide in `system_config`, under
+`MyParcelShopware.pdk.*`.
+
 ## Logging
 
 The plug-in writes to its own Monolog channel, `myparcel`, which lands in
