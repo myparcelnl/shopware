@@ -1,3 +1,15 @@
 /.idea/
 /.tmp/
 /vendor/
+
+###
+# Written at the repository root by a test run
+###
+/.phpunit.result.cache
+/clover.xml
+
+###
+# Plans and specs — never committed
+###
+/docs/superpowers/
+/.superpowers/

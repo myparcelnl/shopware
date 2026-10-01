@@ -1,0 +1,73 @@
+name: '♻️ Analyse'
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Ref to run on'
+        type: string
+        required: false
+        default: ${{ github.ref }}
+
+jobs:
+  analyse:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: 'Handle PHPStan cache'
+        uses: actions/cache@v6
+        with:
+          path: './.tmp/phpstan'
+          key: phpstan-cache-${{ hashFiles('phpstan.neon.dist', 'composer.json') }}-${{ hashFiles('src/**/*.php') }}
+          restore-keys: |
+            phpstan-cache-${{ hashFiles('phpstan.neon.dist', 'composer.json') }}-
+            phpstan-cache-
+
+      # This step only gives the image tag. composer scope (next step) installs
+      # its own vendor/ and discards what this step installs. The install still
+      # runs, so it needs COMPOSER_IGNORE_PLATFORM_REQ too: without it, the
+      # install fails on ext-zip and ext-gd before the image tag comes out.
+      - uses: myparcelnl/actions/composer-install@v5
+        id: setup
+        env:
+          COMPOSER_IGNORE_PLATFORM_REQ: 'ext-*,lib-*'
+        with:
+          php-version: '8.2'
+
+      # PHPStan reads the _MyParcel-prefixed classes that src/ names, so the
+      # vendor it analyses has to be the scoped one.
+      #
+      # ghcr.io/myparcelnl/php-xd is an Alpine image. It has no bash, and no
+      # ext-zip or ext-gd. bin/scope.sh needs bash to run, and its composer
+      # install needs the platform requirements ignored. Add both here too:
+      # this is a new container, so nothing from the setup step above carries
+      # over.
+      - name: 'Scope the vendor directory'
+        env:
+          IMAGE: ${{ steps.setup.outputs.image }}
+        shell: bash
+        #language=bash
+        run: |
+          docker run -t \
+            --volume $PWD:/app \
+            --env COMPOSER_IGNORE_PLATFORM_REQ='ext-*,lib-*' \
+            $IMAGE \
+            sh -c 'apk add --no-cache bash && composer scope'
+
+      # bin/analyse.sh also installs Shopware and PHPStan itself, on first use.
+      # Both are plain composer commands, so the same two gaps apply here: this
+      # is a third, separate container.
+      - name: 'Run PHPStan analysis'
+        env:
+          IMAGE: ${{ steps.setup.outputs.image }}
+        shell: bash
+        #language=bash
+        run: |
+          docker run -t \
+            --volume $PWD:/app \
+            --env COMPOSER_IGNORE_PLATFORM_REQ='ext-*,lib-*' \
+            $IMAGE \
+            sh -c 'apk add --no-cache bash && composer analyse'

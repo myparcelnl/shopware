@@ -1,0 +1,24 @@
+name: 'Lint pull request title'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      # Without synchronize the status stays on the commit that was head when the
+      # pull request was opened. Branch protection requires this context, so after
+      # any push it would wait for ever on a status that never arrives again.
+      - synchronize
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number }}'
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: myparcelnl/actions/pr-validate-title-conventional@v5
+        with:
+          app-id: ${{ secrets.MYPARCEL_APP_ID }}
+          private-key: ${{ secrets.MYPARCEL_APP_PRIVATE_KEY }}

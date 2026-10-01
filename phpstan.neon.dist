@@ -1,0 +1,17 @@
+includes:
+  - phpstan-baseline.php
+
+parameters:
+  level: 5
+  tmpDir: .tmp/phpstan
+  parallel:
+    maximumNumberOfProcesses: 4
+  paths:
+    - src
+  # src/ is not scoped and references three worlds at once: the plug-in's own
+  # classes, Shopware's Symfony 7 runtime, and the _MyParcel-prefixed copies
+  # inside the scoped vendor. Each lives in its own directory, and none of them
+  # declares a class another one declares.
+  scanDirectories:
+    - vendor
+    - .tmp/shopware/vendor

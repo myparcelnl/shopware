@@ -1,0 +1,21 @@
+name: '⚙️ On merge group'
+
+# The merge queue builds its own temporary branch and runs the checks against it.
+# Those runs come in as merge_group, not pull_request, so without this file nothing
+# reports and the queue drops the pull request once it times out.
+
+on:
+  merge_group:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+
+  analyse:
+    uses: ./.github/workflows/analyse.yml
+    secrets: inherit
