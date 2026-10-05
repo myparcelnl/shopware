@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 
 /**
@@ -15,7 +16,8 @@ final class ShopwareServices
 {
     public function __construct(
         public readonly ConfigStorageInterface $configStorage,
-        public readonly LocaleResolverInterface $localeResolver
+        public readonly LocaleResolverInterface $localeResolver,
+        public readonly UrlResolverInterface $urlResolver
     ) {
     }
 }
