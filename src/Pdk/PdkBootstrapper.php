@@ -18,9 +18,9 @@ use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcel\Shopware\Pdk\Webhook\Repository\PdkWebhooksRepository;
 use MyParcel\Shopware\Pdk\Webhook\Service\PdkWebhookService;
 use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
+use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
 use MyParcelNL\Pdk\App\Api\Contract\BackendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Api\Contract\FrontendEndpointServiceInterface;
-use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
 use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
@@ -54,7 +54,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     }
 
     /**
-     * The same kind of seam as setLogger(), for the services behind the settings, account, language, webhook and endpoint contracts.
+     * The same kind of seam as setLogger(), for the services behind the settings,
+     * account, language, webhook and endpoint contracts.
      */
     public static function setServices(ShopwareServices $services): void
     {
