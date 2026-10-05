@@ -205,6 +205,22 @@ the key.
 Settings and the account are stored installation-wide in `system_config`, under
 `MyParcelShopware.pdk.*`.
 
+## Routes
+
+The plug-in sends three kinds of requests to the PDK:
+
+| Route                          | Used by          | Access                                     |
+| ------------------------------ | ---------------- | ------------------------------------------ |
+| `/api/_action/myparcel/pdk`    | Admin app        | Admin API token with `myparcel:access`     |
+| `/myparcel/pdk`                | Checkout         | Storefront, also via XMLHttpRequest        |
+| `/api/myparcel/webhook/{hash}` | MyParcel webhook | Public; only the stored hash is accepted   |
+
+A webhook with a missing or wrong hash gets `404`. Until the webhooks are
+registered at MyParcel, no hash is stored, and every webhook gets `404`.
+
+`src/Pdk/Http/PdkHttpBridge.php` is the only class that converts between
+Shopware's Symfony classes and the `_MyParcel`-scoped copies in the PDK.
+
 ## Logging
 
 The plug-in writes to its own Monolog channel, `myparcel`, which lands in
