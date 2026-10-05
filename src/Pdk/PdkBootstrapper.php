@@ -5,14 +5,25 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Account\Repository\PdkAccountRepository;
+use MyParcel\Shopware\Pdk\Api\BackendEndpointService;
+use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
+use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcel\Shopware\Pdk\Webhook\Repository\PdkWebhooksRepository;
+use MyParcel\Shopware\Pdk\Webhook\Service\PdkWebhookService;
 use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
+use MyParcelNL\Pdk\App\Api\Contract\BackendEndpointServiceInterface;
+use MyParcelNL\Pdk\App\Api\Contract\FrontendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
+use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
+use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
+use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
 use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
@@ -43,8 +54,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     }
 
     /**
-     * The same kind of seam as setLogger(), for the services behind the
-     * settings, account and language contracts.
+     * The same kind of seam as setLogger(), for the services behind the settings, account, language, webhook and endpoint contracts.
      */
     public static function setServices(ShopwareServices $services): void
     {
@@ -73,6 +83,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             \_MyParcel\Psr\Log\LoggerInterface::class => \_MyParcel\DI\value($logger),
             PdkLoggerInterface::class                   => \_MyParcel\DI\value($logger),
             ClientAdapterInterface::class               => \_MyParcel\DI\autowire(Guzzle7ClientAdapter::class),
+            CronServiceInterface::class                 => \_MyParcel\DI\autowire(SynchronousCronService::class),
             // The PDK puts "myparcelcom_" before every settings key by default.
             // SystemConfigStorage already prefixes with MyParcelShopware.pdk., so
             // keep one prefix only.
@@ -86,11 +97,16 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
         }
 
         return $config + [
-            ConfigStorageInterface::class         => \_MyParcel\DI\value(self::$shopwareServices->configStorage),
-            LocaleResolverInterface::class        => \_MyParcel\DI\value(self::$shopwareServices->localeResolver),
-            PdkSettingsRepositoryInterface::class => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
-            PdkAccountRepositoryInterface::class  => \_MyParcel\DI\autowire(PdkAccountRepository::class),
-            LanguageServiceInterface::class       => \_MyParcel\DI\autowire(LanguageService::class),
+            ConfigStorageInterface::class           => \_MyParcel\DI\value(self::$shopwareServices->configStorage),
+            LocaleResolverInterface::class          => \_MyParcel\DI\value(self::$shopwareServices->localeResolver),
+            UrlResolverInterface::class             => \_MyParcel\DI\value(self::$shopwareServices->urlResolver),
+            PdkSettingsRepositoryInterface::class   => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
+            PdkAccountRepositoryInterface::class    => \_MyParcel\DI\autowire(PdkAccountRepository::class),
+            LanguageServiceInterface::class         => \_MyParcel\DI\autowire(LanguageService::class),
+            PdkWebhooksRepositoryInterface::class   => \_MyParcel\DI\autowire(PdkWebhooksRepository::class),
+            PdkWebhookServiceInterface::class       => \_MyParcel\DI\autowire(PdkWebhookService::class),
+            BackendEndpointServiceInterface::class  => \_MyParcel\DI\autowire(BackendEndpointService::class),
+            FrontendEndpointServiceInterface::class => \_MyParcel\DI\autowire(FrontendEndpointService::class),
         ];
     }
 }
