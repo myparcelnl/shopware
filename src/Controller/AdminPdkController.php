@@ -26,7 +26,7 @@ final class AdminPdkController
         path: '/api/_action/myparcel/pdk',
         name: RouteName::ADMIN_PDK,
         defaults: ['_routeScope' => ['api'], '_acl' => ['myparcel:access']],
-        methods: ['GET', 'POST']
+        methods: ['GET', 'POST', 'PUT']
     )]
     public function pdk(Request $request): Response
     {
