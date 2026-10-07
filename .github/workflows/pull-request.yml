@@ -1,9 +1,9 @@
 name: '⚙️ On pull request'
 
+# No branch filter: a stacked pull request targets the feature branch below it,
+# not main, and must also run the tests and the analysis.
 on:
   pull_request:
-    branches:
-      - main
 
 run-name: 'PR #${{ github.event.pull_request.number }}'
 
