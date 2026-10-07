@@ -66,10 +66,10 @@ class MyParcelShopware extends Plugin
         // after an update the definitions still describe the version being replaced.
         //
         // Booting in development mode on purpose: clearCache() is mode-independent,
-        // but a production boot would compile the container first, and compilation
-        // requires every PDK template contract to be instantiable — which it is not
-        // until the adapter layer lands. Development mode skips compilation, so this
-        // reaches the facade without building what we are about to delete.
+        // but a production boot would compile a container from the old
+        // definitions right before clearCache() deletes it. Development mode
+        // skips compilation, so this reaches the facade without building what we
+        // are about to delete.
         //
         // Not routed through PdkInitializer: Shopware updates inactive plugins too,
         // and then our services are not in its container.

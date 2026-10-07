@@ -13,6 +13,11 @@ use Psr\Log\LoggerInterface;
 /**
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
  * hardcoded at the call site.
+ *
+ * The mode follows kernel.debug, the same as the WooCommerce plugin follows
+ * WP_DEBUG. Production mode compiles the container into the PDK cache
+ * directory. The placeholders in Pdk/Placeholder keep that possible until the
+ * adapter layer of epic INT-1748 lands.
  */
 final class PdkInitializer
 {
@@ -22,7 +27,8 @@ final class PdkInitializer
         private readonly LocaleResolverInterface $localeResolver,
         private readonly UrlResolverInterface $urlResolver,
         private readonly string $pluginVersion,
-        private readonly string $appUrl
+        private readonly string $appUrl,
+        private readonly bool $debug
     ) {
     }
 
@@ -40,12 +46,7 @@ final class PdkInitializer
             $this->pluginVersion,
             $this->getPluginPath(),
             $this->appUrl,
-            // TODO: follow kernel.debug again once the adapter layer of epic
-            // INT-1748 binds every PDK template contract. Order, cart, shipping
-            // method, order status and view are still open. Production mode
-            // compiles the container, and compilation fails while any contract
-            // is unbound.
-            Pdk::MODE_DEVELOPMENT
+            $this->debug ? Pdk::MODE_DEVELOPMENT : Pdk::MODE_PRODUCTION
         );
     }
 

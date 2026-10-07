@@ -21,7 +21,8 @@ final class HttpBridgeFactory
             new FixedLocaleResolver(null),
             new FixedUrlResolver([]),
             '0.0.0-test',
-            'https://shop.test'
+            'https://shop.test',
+            true
         );
 
         return new PdkHttpBridge($initializer, $logger, $debug);
