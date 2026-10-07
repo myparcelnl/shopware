@@ -12,6 +12,8 @@
 # takes seconds, and the swap is two moves on one filesystem.
 #
 # Arguments pass straight through, so `composer test -- --filter=logger` works.
+# PHP_ARGS goes to the PHP binary, e.g. PHP_ARGS=-dpcov.enabled=1 in CI, where
+# the image has pcov installed but disabled.
 
 set -Eeuo pipefail
 
@@ -99,4 +101,6 @@ mv "${DEV_VENDOR_DIR}" "${VENDOR_DIR}"
 # it for the current depth without touching what is installed.
 composer dump-autoload --no-interaction
 
-vendor/bin/pest "$@"
+# PHP_ARGS is unquoted on purpose: it can hold more than one argument.
+# shellcheck disable=SC2086
+php ${PHP_ARGS:-} vendor/bin/pest "$@"
