@@ -20,8 +20,12 @@ use MyParcelNL\Pdk\Webhook\Repository\WebhookSubscriptionRepository;
  */
 final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
 {
+    /**
+     * Public so the webhook controller can read the URL before the PDK boots.
+     */
+    public const KEY_HASHED_URL = 'webhook_hash';
+
     private const KEY_SUBSCRIPTIONS = 'webhooks';
-    private const KEY_HASHED_URL    = 'webhook_hash';
 
     public function __construct(
         StorageInterface $storage,

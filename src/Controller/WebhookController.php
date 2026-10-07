@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Controller;
 
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
-use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Routing\RouteName;
+use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcel\Shopware\Pdk\Webhook\Repository\PdkWebhooksRepository;
 use MyParcel\Shopware\Pdk\Webhook\WebhookUrlValidator;
-use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
-use MyParcelNL\Pdk\Facade\Pdk;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,13 +20,16 @@ use Symfony\Component\Routing\Attribute\Route;
  * same as /api/oauth/token. The hash in the URL is the only protection, so it
  * is checked here, before the PDK answers 202 to anything.
  *
- * The hash defaults to '', so the router can build the base URL without one.
+ * The hash is checked before the PDK boots, so a request without the right
+ * hash costs one config read, not a container build. The hash defaults to '',
+ * so the router can build the base URL without one; an empty hash is rejected
+ * at once, so the base URL never matches.
  */
 final class WebhookController
 {
     public function __construct(
-        private readonly PdkInitializer $pdkInitializer,
         private readonly PdkHttpBridge $bridge,
+        private readonly ConfigStorageInterface $configStorage,
         private readonly WebhookUrlValidator $validator,
         private readonly LoggerInterface $logger
     ) {
@@ -39,15 +41,10 @@ final class WebhookController
         defaults: ['_routeScope' => ['api'], 'auth_required' => false, 'hash' => ''],
         methods: ['POST']
     )]
-    public function webhook(Request $request): Response
+    public function webhook(Request $request, string $hash = ''): Response
     {
-        return $this->bridge->run(function () use ($request): Response {
-            $this->pdkInitializer->boot();
-
-            /** @var PdkWebhooksRepositoryInterface $repository */
-            $repository = Pdk::get(PdkWebhooksRepositoryInterface::class);
-
-            if (!$this->validator->isValid($repository->getHashedUrl(), $request->getRequestUri())) {
+        return $this->bridge->run(function () use ($request, $hash): Response {
+            if ('' === $hash || !$this->hasValidUrl($request)) {
                 // No URL or hash in the log: either one would give the secret away.
                 $this->logger->warning('MyParcel webhook rejected: the URL does not match the stored webhook URL');
 
@@ -56,5 +53,12 @@ final class WebhookController
 
             return $this->bridge->callWebhook($request);
         });
+    }
+
+    private function hasValidUrl(Request $request): bool
+    {
+        $storedUrl = $this->configStorage->get(PdkWebhooksRepository::KEY_HASHED_URL);
+
+        return $this->validator->isValid(is_string($storedUrl) ? $storedUrl : null, $request->getRequestUri());
     }
 }
