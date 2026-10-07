@@ -169,8 +169,8 @@ The MyParcel texts come from the shared PDK translations sheet and live in
 `config/pdk/translations`. To refresh them, run this in the web container:
 
 ```shell
-corepack yarn install
-corepack yarn translations:import
+corepack pnpm install
+corepack pnpm translations:import
 ```
 
 Commit the changed JSON files. The plug-in shows texts in the language of the
