@@ -29,6 +29,15 @@ jobs:
         with:
           php-version: '8.2'
 
+      # The translation files are built, not versioned, and LanguageServiceTest
+      # needs them. The import only reads the shared sheet, so it runs on the
+      # runner without a PHP image.
+      - uses: myparcelnl/actions/pnpm-install@v5
+
+      - uses: myparcelnl/actions/pdk-builder@v5
+        with:
+          command: 'translations'
+
       # ghcr.io/myparcelnl/php-xd is an Alpine image. It has no bash, and no
       # ext-zip or ext-gd. bin/test.sh needs bash to run, and its composer
       # install needs the platform requirements ignored. Add both here too:

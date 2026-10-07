@@ -165,16 +165,19 @@ reports; do not add to it.
 
 ### Translations
 
-The MyParcel texts come from the shared PDK translations sheet and live in
-`config/pdk/translations`. To refresh them, run this in the web container:
+The MyParcel texts come from the shared PDK translations sheet. They are built
+into `config/pdk/translations` and not versioned, the same as in the WooCommerce
+and PrestaShop plug-ins: CI builds them before the tests. To build them locally,
+run this in the web container:
 
 ```shell
 corepack pnpm install
 corepack pnpm translations:import
 ```
 
-Commit the changed JSON files. The plug-in shows texts in the language of the
-Shopware request and falls back to English.
+Without these files every PDK translation lookup throws "File does not exist",
+and `composer test` fails. The plug-in shows texts in the language of the Shopware
+request and falls back to English.
 
 `fast-glob` is in `devDependencies` only because `@myparcel-dev/pdk-app-builder`
 imports it without declaring it. Remove it once the builder declares it itself.
