@@ -22,8 +22,7 @@ final class AccountOutput
             ['Account ID' => (string) $account->id],
             ['Platform ID' => (string) $account->platformId],
             ['Shop' => $shop ? sprintf('%s (%d)', $shop->name, $shop->id) : '-'],
-            ['Default carrier' => $shop->defaultCarrier ?? '-'],
-            ['Subscription features' => (string) count($account->subscriptionFeatures->all())]
+            ['Default carrier' => $shop->defaultCarrier ?? '-']
         );
 
         $carriers = $shop
