@@ -44,8 +44,8 @@
         </service>
 
         <service id="MyParcel\Shopware\Controller\WebhookController" public="true">
-            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Webhook\WebhookUrlValidator"/>
             <argument type="service" id="monolog.logger.myparcel"/>
             <tag name="controller.service_arguments"/>
