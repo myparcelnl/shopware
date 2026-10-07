@@ -17,5 +17,10 @@
     <include>
       <directory suffix=".php">./src</directory>
     </include>
+    <!-- processUncoveredFiles loads every file, and this one extends
+         Shopware's Plugin class, which the test vendor does not have. -->
+    <exclude>
+      <file>./src/MyParcelShopware.php</file>
+    </exclude>
   </coverage>
 </phpunit>

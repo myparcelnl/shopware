@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware;
 
+use Doctrine\DBAL\Connection;
 use MyParcelNL\Pdk\Base\Pdk as BasePdk;
 use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcel\Shopware\Pdk\PdkBootstrapper;
+use MyParcel\Shopware\Pdk\Storage\SystemConfigStorage;
 use RuntimeException;
+use Shopware\Core\Framework\Adapter\Cache\CacheInvalidator;
 use Shopware\Core\Framework\Plugin;
+use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
+use Shopware\Core\System\SystemConfig\CachedSystemConfigLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 // The plugin ships its own (php-scoper prefixed) vendor directory with the
@@ -31,6 +36,26 @@ class MyParcelShopware extends Plugin
         $this->buildDefaultConfig($container);
 
         $container->setParameter('myparcel.plugin_version', $this->readVersion());
+    }
+
+    public function uninstall(UninstallContext $uninstallContext): void
+    {
+        parent::uninstall($uninstallContext);
+
+        if ($uninstallContext->keepUserData()) {
+            return;
+        }
+
+        // system_config keeps only what config.xml declares under
+        // MyParcelShopware.config.*; the PDK's own keys, the API key among them,
+        // are ours to remove. The raw DELETE bypasses SystemConfigService, so its
+        // cache tag is not invalidated by it and we do that ourselves below.
+        $this->container->get(Connection::class)->executeStatement(
+            'DELETE FROM system_config WHERE configuration_key LIKE :prefix',
+            ['prefix' => SystemConfigStorage::KEY_PREFIX . '%']
+        );
+
+        $this->container->get(CacheInvalidator::class)->invalidate([CachedSystemConfigLoader::CACHE_TAG], true);
     }
 
     public function update(UpdateContext $updateContext): void

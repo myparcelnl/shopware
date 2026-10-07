@@ -1,0 +1,24 @@
+name: '⚙️ On push'
+
+# Runs the checks on main after every merge. Besides catching a broken main, the
+# test job uploads the coverage of main to Codecov. Codecov compares each pull
+# request against that report; without it, codecov/patch and codecov/project
+# have nothing to compare against and always pass.
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+
+  analyse:
+    uses: ./.github/workflows/analyse.yml
+    secrets: inherit

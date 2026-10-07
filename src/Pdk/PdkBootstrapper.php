@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
-use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
-use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
+use MyParcel\Shopware\Pdk\Account\Repository\PdkAccountRepository;
+use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
+use MyParcel\Shopware\Pdk\Language\LanguageService;
+use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
+use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
+use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
+use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
+use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
+use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
+use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -21,6 +31,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
 {
     private static ?LoggerInterface $shopwareLogger = null;
 
+    private static ?ShopwareServices $shopwareServices = null;
+
     /**
      * A static seam because the PDK declares boot() final and static, so there is
      * no instance to inject into. Shopware autowires the logger into the caller.
@@ -28,6 +40,15 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     public static function setLogger(LoggerInterface $logger): void
     {
         self::$shopwareLogger = $logger;
+    }
+
+    /**
+     * The same kind of seam as setLogger(), for the services behind the
+     * settings, account and language contracts.
+     */
+    public static function setServices(ShopwareServices $services): void
+    {
+        self::$shopwareServices = $services;
     }
 
     /**
@@ -44,13 +65,32 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     ): array {
         $logger = new PdkLogger(self::$shopwareLogger ?? new NullLogger());
 
-        return [
+        $config = [
             // The PDK's own template binds PdkLoggerInterface to the (deprecated)
             // scoped PSR key, so both have to point at the same instance. The
             // prefixed name is what exists at runtime: config/pdk.php is not
             // scoped, and neither is our src.
             \_MyParcel\Psr\Log\LoggerInterface::class => \_MyParcel\DI\value($logger),
             PdkLoggerInterface::class                   => \_MyParcel\DI\value($logger),
+            ClientAdapterInterface::class               => \_MyParcel\DI\autowire(Guzzle7ClientAdapter::class),
+            // The PDK puts "myparcelcom_" before every settings key by default.
+            // SystemConfigStorage already prefixes with MyParcelShopware.pdk., so
+            // keep one prefix only.
+            'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
+        ];
+
+        // Without the Shopware services, e.g. in MyParcelShopware::update(), the
+        // PDK keeps its template defaults for these contracts.
+        if (null === self::$shopwareServices) {
+            return $config;
+        }
+
+        return $config + [
+            ConfigStorageInterface::class         => \_MyParcel\DI\value(self::$shopwareServices->configStorage),
+            LocaleResolverInterface::class        => \_MyParcel\DI\value(self::$shopwareServices->localeResolver),
+            PdkSettingsRepositoryInterface::class => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
+            PdkAccountRepositoryInterface::class  => \_MyParcel\DI\autowire(PdkAccountRepository::class),
+            LanguageServiceInterface::class       => \_MyParcel\DI\autowire(LanguageService::class),
         ];
     }
 }

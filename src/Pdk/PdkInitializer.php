@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use Psr\Log\LoggerInterface;
 
 /**
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
  * hardcoded at the call site.
- *
- * The mode follows Shopware's debug flag: in development the PDK skips compiling
- * its container, in production it compiles to vendor/myparcelnl/pdk/.cache.
  */
 final class PdkInitializer
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly ConfigStorageInterface $configStorage,
+        private readonly LocaleResolverInterface $localeResolver,
         private readonly string $pluginVersion,
-        private readonly string $appUrl,
-        private readonly bool $debug
+        private readonly string $appUrl
     ) {
     }
 
@@ -30,12 +30,18 @@ final class PdkInitializer
     public function boot(): Pdk
     {
         PdkBootstrapper::setLogger($this->logger);
+        PdkBootstrapper::setServices(new ShopwareServices($this->configStorage, $this->localeResolver));
 
         return PdkBootstrapper::boot(
             $this->pluginVersion,
             $this->getPluginPath(),
             $this->appUrl,
-            $this->debug ? Pdk::MODE_DEVELOPMENT : Pdk::MODE_PRODUCTION
+            // TODO: follow kernel.debug again once the adapter layer of epic
+            // INT-1748 binds every PDK template contract (order, cart, shipping
+            // method, webhooks, cron, endpoints, order status, view). Production
+            // mode compiles the container, and compilation fails while any
+            // contract is unbound.
+            Pdk::MODE_DEVELOPMENT
         );
     }
 

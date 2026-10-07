@@ -1,0 +1,16 @@
+{
+  "name": "@myparcel/shopware",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "translations:import": "pdk-builder translations"
+  },
+  "devDependencies": {
+    "@myparcel-dev/pdk-app-builder": "^4.1.3",
+    "fast-glob": "^3.3.2"
+  }
+}

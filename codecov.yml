@@ -1,0 +1,17 @@
+codecov:
+  require_ci_to_pass: true
+  notify: # Wait for the backend coverage upload before posting the commit checks
+    after_n_builds: 1
+    wait_for_ci: true
+
+# Codecov's defaults, written out so they can be found here: a pull request may
+# not lower the coverage of main (project), and its new lines must be covered at
+# least as well as main (patch).
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+    patch:
+      default:
+        target: auto

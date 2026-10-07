@@ -7,9 +7,15 @@
 ###
 /.phpunit.result.cache
 /clover.xml
+/junit.xml
 
 ###
 # Plans and specs — never committed
 ###
 /docs/superpowers/
 /.superpowers/
+
+###
+# Node tooling for the translations import
+###
+/node_modules/
