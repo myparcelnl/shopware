@@ -13,7 +13,7 @@ use MyParcel\Shopware\Pdk\PdkInitializer;
  */
 final class HttpBridgeFactory
 {
-    public static function create(RecordingLogger $logger): PdkHttpBridge
+    public static function create(RecordingLogger $logger, bool $debug = true): PdkHttpBridge
     {
         $initializer = new PdkInitializer(
             $logger,
@@ -24,6 +24,6 @@ final class HttpBridgeFactory
             'https://shop.test'
         );
 
-        return new PdkHttpBridge($initializer, $logger);
+        return new PdkHttpBridge($initializer, $logger, $debug);
     }
 }
