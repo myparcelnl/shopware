@@ -23,6 +23,7 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
+            <argument>%kernel.debug%</argument>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge">
