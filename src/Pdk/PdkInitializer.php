@@ -12,12 +12,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
  * hardcoded at the call site.
- *
- * The PDK always boots in development mode for now, because production mode
- * compiles the container, and that needs every PDK template contract bound
- * (order, cart, shipping method, webhooks, cron, endpoints, order status,
- * view), which happens in the adapter layer of epic INT-1748. Switch back to
- * following kernel.debug then.
  */
 final class PdkInitializer
 {
@@ -42,6 +36,11 @@ final class PdkInitializer
             $this->pluginVersion,
             $this->getPluginPath(),
             $this->appUrl,
+            // TODO: follow kernel.debug again once the adapter layer of epic
+            // INT-1748 binds every PDK template contract (order, cart, shipping
+            // method, webhooks, cron, endpoints, order status, view). Production
+            // mode compiles the container, and compilation fails while any
+            // contract is unbound.
             Pdk::MODE_DEVELOPMENT
         );
     }
