@@ -73,6 +73,10 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             \_MyParcel\Psr\Log\LoggerInterface::class => \_MyParcel\DI\value($logger),
             PdkLoggerInterface::class                   => \_MyParcel\DI\value($logger),
             ClientAdapterInterface::class               => \_MyParcel\DI\autowire(Guzzle7ClientAdapter::class),
+            // The PDK puts "myparcelcom_" before every settings key by default.
+            // SystemConfigStorage already prefixes with MyParcelShopware.pdk., so
+            // keep one prefix only.
+            'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
         ];
 
         // Without the Shopware services, e.g. in MyParcelShopware::update(), the

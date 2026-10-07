@@ -20,7 +20,12 @@ use MyParcelNL\Pdk\Storage\Contract\StorageInterface;
  */
 final class PdkAccountRepository extends AbstractPdkAccountRepository
 {
-    private const STORAGE_KEY = 'account';
+    /**
+     * Not "account": the PDK stores the account settings, API key included, under
+     * that key. The 'account' passed to save() is the PDK's in-memory cache key,
+     * which AbstractPdkAccountRepository reads back by that literal name.
+     */
+    private const STORAGE_KEY = 'account_data';
 
     public function __construct(
         StorageInterface $storage,

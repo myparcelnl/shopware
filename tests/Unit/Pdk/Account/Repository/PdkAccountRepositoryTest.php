@@ -37,7 +37,7 @@ it('persists the storable form of an account', function () {
     $stored = accountRepository($this, $config)->store($account);
 
     expect($stored)->toBe($account)
-        ->and($config->values['account'])->toBe($account->toStorableArray());
+        ->and($config->values['account_data'])->toBe($account->toStorableArray());
 });
 
 it('reads a stored account back in a new request', function () {
@@ -56,7 +56,7 @@ it('deletes the stored account when given null', function () {
     accountRepository($this, $config)->store(new Account(['id' => 3, 'platformId' => 1]));
 
     expect(accountRepository($this, $config)->store(null))->toBeNull()
-        ->and($config->values)->not->toHaveKey('account');
+        ->and($config->values)->not->toHaveKey('account_data');
 });
 
 it('has no account in storage when nothing was stored', function () {
