@@ -54,4 +54,4 @@ it('ships a translation file for every required language', function (string $iso
 
     expect($file)->toBeFile()
         ->and(json_decode((string) file_get_contents($file), true))->toBeArray()->not->toBeEmpty();
-})->with(['nl', 'en', 'de', 'fr']);
+})->with(['nl', 'en', 'de', 'fr', 'it']);
