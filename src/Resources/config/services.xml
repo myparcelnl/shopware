@@ -28,6 +28,7 @@
         <service id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <argument type="service" id="monolog.logger.myparcel"/>
+            <argument>%kernel.debug%</argument>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Webhook\WebhookUrlValidator"/>

@@ -27,9 +27,12 @@ use Throwable;
  */
 final class PdkHttpBridge
 {
+    private const GENERIC_ERROR_MESSAGE = 'The MyParcel request failed. The MyParcel log has the details.';
+
     public function __construct(
         private readonly PdkInitializer $pdkInitializer,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly bool $debug
     ) {
     }
 
@@ -67,7 +70,9 @@ final class PdkHttpBridge
 
     /**
      * PdkEndpoint catches what goes wrong inside an action. This catches what
-     * goes wrong around it: booting, converting, resolving a service.
+     * goes wrong around it: booting, converting, resolving a service. The
+     * message can hold internals and the routes can be anonymous, so only
+     * debug mode shows it to the caller; the log always has the full exception.
      *
      * @param  Closure(): Response $call
      */
@@ -78,7 +83,10 @@ final class PdkHttpBridge
         } catch (Throwable $exception) {
             $this->logger->error('MyParcel request failed before the PDK could answer', ['exception' => $exception]);
 
-            return new JsonResponse(['message' => $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(
+                ['message' => $this->debug ? $exception->getMessage() : self::GENERIC_ERROR_MESSAGE],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 

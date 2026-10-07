@@ -111,3 +111,18 @@ it('turns an exception outside the pdk into a logged json 500', function () {
         ->and($logger->records[0]['level'])->toBe(LogLevel::ERROR)
         ->and($logger->records[0]['context']['exception'])->toBeInstanceOf(RuntimeException::class);
 });
+
+it('hides the exception message outside debug mode', function () {
+    $logger   = new RecordingLogger();
+    $response = HttpBridgeFactory::create($logger, false)->run(function (): Response {
+        throw new RuntimeException('Secret detail');
+    });
+
+    $body = json_decode((string) $response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(500)
+        ->and($body['message'])->toBe('The MyParcel request failed. The MyParcel log has the details.')
+        ->and((string) $response->getContent())->not->toContain('Secret detail')
+        ->and($logger->records)->toHaveCount(1)
+        ->and($logger->records[0]['context']['exception'])->toBeInstanceOf(RuntimeException::class);
+});
