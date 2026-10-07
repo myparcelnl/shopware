@@ -12,6 +12,11 @@ use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderViewService;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
@@ -21,10 +26,15 @@ use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
 use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
 use MyParcelNL\Pdk\App\Api\Contract\BackendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Api\Contract\FrontendEndpointServiceInterface;
+use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
+use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
+use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
+use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
 use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
+use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
 use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
@@ -89,6 +99,15 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // SystemConfigStorage already prefixes with MyParcelShopware.pdk., so
             // keep one prefix only.
             'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
+
+            // Placeholders for the contracts that the adapter layer of epic
+            // INT-1748 adds. Production mode compiles the container, and php-di
+            // cannot compile an interface without a concrete class.
+            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderRepository::class),
+            PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
+            PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
+            OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderStatusService::class),
+            ViewServiceInterface::class                 => \_MyParcel\DI\autowire(PlaceholderViewService::class),
         ];
 
         // Without the Shopware services, e.g. in MyParcelShopware::update(), the
