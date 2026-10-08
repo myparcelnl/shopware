@@ -51,6 +51,25 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="MyParcel\Shopware\Admin\ShopwareAssetUrlResolver">
+            <argument type="service" id="shopware.asset.asset"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Admin\AdminAssets">
+            <argument type="service" id="MyParcel\Shopware\Admin\ShopwareAssetUrlResolver"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\AdminViewController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer"/>
+            <argument type="service" id="MyParcel\Shopware\Admin\AdminAssets"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="MyParcel\Shopware\Controller\StorefrontPdkController" public="true">
             <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
             <tag name="controller.service_arguments"/>
