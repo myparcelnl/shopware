@@ -2,8 +2,6 @@ name: '⚙️ On pull request'
 
 on:
   pull_request:
-    branches:
-      - main
 
 run-name: 'PR #${{ github.event.pull_request.number }}'
 
