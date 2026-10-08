@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// preset-default renders plain HTML. The minimum to make it usable inside the
+// Shopware admin; Shopware look and feel is a later ticket.
+.myparcel-pdk {
+  input[type='text'],
+  input[type='number'],
+  input[type='password'],
+  select,
+  textarea {
+    @apply mypa-w-full mypa-max-w-md mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-px-2 mypa-py-1;
+  }
+
+  button {
+    @apply mypa-cursor-pointer mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-px-3 mypa-py-1;
+  }
+
+  table {
+    @apply mypa-w-full;
+  }
+}
+
+.mypa-fade-enter-active,
+.mypa-fade-leave-active {
+  @apply mypa-transition-opacity mypa-duration-200;
+}
+
+.mypa-fade-enter-from,
+.mypa-fade-leave-to {
+  @apply mypa-opacity-0;
+}
