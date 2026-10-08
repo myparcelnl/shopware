@@ -13,9 +13,10 @@ use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
+use MyParcel\Shopware\Pdk\Order\OrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
@@ -111,6 +112,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
+    public static function getOrderStatusProvider(): OrderStatusProviderInterface
+    {
+        return self::getShopwareServices()->orderStatusProvider;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
     public static function getViewResolver(): ViewResolverInterface
     {
         return self::getShopwareServices()->viewResolver;
@@ -153,13 +162,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderRepository::class),
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
-            OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderStatusService::class),
 
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
             ViewResolverInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getViewResolver']),
             ViewServiceInterface::class                 => \_MyParcel\DI\autowire(ViewService::class),
+            OrderStatusProviderInterface::class         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusProvider']),
+            OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(OrderStatusService::class),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),
