@@ -20,6 +20,7 @@ final class HttpBridgeFactory
             new InMemoryConfigStorage(),
             new FixedLocaleResolver(null),
             new FixedUrlResolver([]),
+            new FixedViewResolver(null),
             '0.0.0-test',
             'https://shop.test',
             true
