@@ -9,6 +9,7 @@ use MyParcel\Shopware\Pdk\Api\BackendEndpointService;
 use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
+use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
@@ -36,6 +37,7 @@ use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
 use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
+use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
@@ -168,6 +170,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
             ViewResolverInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getViewResolver']),
             ViewServiceInterface::class                 => \_MyParcel\DI\autowire(ViewService::class),
+            FrontendRenderServiceInterface::class       => \_MyParcel\DI\autowire(FrontendRenderService::class),
             OrderStatusProviderInterface::class         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusProvider']),
             OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(OrderStatusService::class),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
