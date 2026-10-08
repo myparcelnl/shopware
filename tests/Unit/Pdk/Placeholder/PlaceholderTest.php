@@ -7,19 +7,16 @@ use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderViewService;
 use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
-use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 
 dataset('placeholders', [
     'order repository'           => [PlaceholderOrderRepository::class, PdkOrderRepositoryInterface::class, 'find', [1]],
     'cart repository'            => [PlaceholderCartRepository::class, PdkCartRepositoryInterface::class, 'get', [null]],
     'shipping method repository' => [PlaceholderShippingMethodRepository::class, PdkShippingMethodRepositoryInterface::class, 'all', []],
     'order status service'       => [PlaceholderOrderStatusService::class, OrderStatusServiceInterface::class, 'updateStatus', [[1], 'done']],
-    'view service'               => [PlaceholderViewService::class, ViewServiceInterface::class, 'isCheckoutPage', []],
 ]);
 
 it('implements its pdk contract', function (string $placeholder, string $contract) {
@@ -39,10 +36,10 @@ it('throws when a method is called, naming the contract', function (
 })->with('placeholders');
 
 it('builds the message from the short contract name', function () {
-    $exception = NotImplementedException::forContract(ViewServiceInterface::class);
+    $exception = NotImplementedException::forContract(OrderStatusServiceInterface::class);
 
     expect($exception)
         ->toBeInstanceOf(LogicException::class)
         ->and($exception->getMessage())
-        ->toBe('ViewServiceInterface is not implemented yet in the Shopware plugin.');
+        ->toBe('OrderStatusServiceInterface is not implemented yet in the Shopware plugin.');
 });
