@@ -14,7 +14,7 @@
   "require-dev": {
     "humbug/php-scoper": "^0.18.0",
     "pestphp/pest": "^1.0.0",
-    "phpstan/phpstan": "^1.10"
+    "phpstan/phpstan": "^2.3"
   },
   "extra": {
     "shopware-plugin-class": "MyParcel\\Shopware\\MyParcelShopware",
