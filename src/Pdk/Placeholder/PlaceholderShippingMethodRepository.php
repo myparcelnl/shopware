@@ -8,14 +8,13 @@ use MyParcelNL\Pdk\App\ShippingMethod\Collection\PdkShippingMethodCollection;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 
 /**
- * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * Temporary. Lists no shipping methods, so that the checkout section of the
+ * plugin settings renders. INT-1961 lists the Shopware shipping methods.
  */
 final class PlaceholderShippingMethodRepository implements PdkShippingMethodRepositoryInterface
 {
     public function all(): PdkShippingMethodCollection
     {
-        throw NotImplementedException::forContract(PdkShippingMethodRepositoryInterface::class);
+        return new PdkShippingMethodCollection();
     }
 }

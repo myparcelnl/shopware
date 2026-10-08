@@ -2,23 +2,27 @@
 
 declare(strict_types=1);
 
-namespace MyParcel\Shopware\Pdk\Placeholder;
+namespace MyParcel\Shopware\Pdk\Order;
 
+use MyParcel\Shopware\Pdk\Placeholder\NotImplementedException;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 
 /**
- * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * The order settings show these states in three dropdowns. Changing a state
+ * follows in INT-1962.
  */
-final class PlaceholderOrderStatusService implements OrderStatusServiceInterface
+final class OrderStatusService implements OrderStatusServiceInterface
 {
+    public function __construct(private readonly OrderStatusProviderInterface $orderStatusProvider)
+    {
+    }
+
     /**
      * @return array<string, string>
      */
     public function all(): array
     {
-        throw NotImplementedException::forContract(OrderStatusServiceInterface::class);
+        return $this->orderStatusProvider->all();
     }
 
     /**
