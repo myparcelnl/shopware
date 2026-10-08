@@ -16,6 +16,6 @@
 /.superpowers/
 
 ###
-# Node tooling for the translations import
+# Node tooling. The PDK admin build keeps its Vite cache next to its config.
 ###
-/node_modules/
+node_modules/
