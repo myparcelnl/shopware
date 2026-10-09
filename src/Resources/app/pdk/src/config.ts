@@ -50,6 +50,8 @@ const FADE = 'mypa-fade';
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({
   logLevel: LogLevel.Info,
   getRequestHeaders,
+  // The Shopware admin routes with the hash; a tab name there is a route it does not know.
+  useLocationHash: false,
 
   components: {
     [AdminComponent.Badge]: DefaultBadge,
