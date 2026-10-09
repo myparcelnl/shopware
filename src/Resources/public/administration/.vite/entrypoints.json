@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/myparcelshopware/administration/",
+  "entryPoints": {
+    "my-parcel-shopware": {
+      "css": [],
+      "dynamic": [
+        "/bundles/myparcelshopware/administration/assets/index-8vcB7PKp.js"
+      ],
+      "js": [
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-pmdxoQEZ.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

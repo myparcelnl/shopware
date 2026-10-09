@@ -1,0 +1,122 @@
+import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from '@myparcel-dev/pdk-admin';
+import {
+  DefaultBadge,
+  DefaultBox,
+  DefaultButton,
+  DefaultButtonGroup,
+  DefaultCheckboxGroup,
+  DefaultCheckboxInput,
+  DefaultCodeEditor,
+  DefaultCol,
+  DefaultCurrencyInput,
+  DefaultDropOffInput,
+  DefaultDropdownButton,
+  DefaultFormGroup,
+  DefaultHeading,
+  DefaultIcon,
+  DefaultImage,
+  DefaultLink,
+  DefaultLoader,
+  DefaultModal,
+  DefaultMultiDateInput,
+  DefaultMultiSelectInput,
+  DefaultNotification,
+  DefaultNumberInput,
+  DefaultRadioGroup,
+  DefaultRadioInput,
+  DefaultRow,
+  DefaultSelectInput,
+  DefaultSettingsDivider,
+  DefaultShippingMethodsInput,
+  DefaultTabNavButton,
+  DefaultTable,
+  DefaultTableCol,
+  DefaultTableRow,
+  DefaultTextArea,
+  DefaultTextInput,
+  DefaultTimeInput,
+  DefaultToggleInput,
+  DefaultTriStateInput,
+} from '@myparcel-dev/pdk-admin-preset-default';
+
+export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
+
+const FADE = 'mypa-fade';
+
+/**
+ * preset-default renders plain HTML. The utilities are the WooCommerce set,
+ * prefixed and scoped to .myparcel-pdk by Tailwind.
+ */
+export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({
+  logLevel: LogLevel.Info,
+  getRequestHeaders,
+  // The Shopware admin routes with the hash; a tab name there is a route it does not know.
+  useLocationHash: false,
+
+  components: {
+    [AdminComponent.Badge]: DefaultBadge,
+    [AdminComponent.Box]: DefaultBox,
+    [AdminComponent.ButtonGroup]: DefaultButtonGroup,
+    [AdminComponent.Button]: DefaultButton,
+    [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
+    [AdminComponent.CheckboxInput]: DefaultCheckboxInput,
+    [AdminComponent.CodeEditor]: DefaultCodeEditor,
+    [AdminComponent.Col]: DefaultCol,
+    [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
+    [AdminComponent.DropOffInput]: DefaultDropOffInput,
+    [AdminComponent.DropdownButton]: DefaultDropdownButton,
+    [AdminComponent.FormGroup]: DefaultFormGroup,
+    [AdminComponent.Heading]: DefaultHeading,
+    [AdminComponent.Icon]: DefaultIcon,
+    [AdminComponent.Image]: DefaultImage,
+    [AdminComponent.Link]: DefaultLink,
+    [AdminComponent.Loader]: DefaultLoader,
+    [AdminComponent.Modal]: DefaultModal,
+    [AdminComponent.MultiDateInput]: DefaultMultiDateInput,
+    [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
+    [AdminComponent.Notification]: DefaultNotification,
+    [AdminComponent.NumberInput]: DefaultNumberInput,
+    [AdminComponent.RadioGroup]: DefaultRadioGroup,
+    [AdminComponent.RadioInput]: DefaultRadioInput,
+    [AdminComponent.Row]: DefaultRow,
+    [AdminComponent.SelectInput]: DefaultSelectInput,
+    [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
+    [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
+    [AdminComponent.TabNavButton]: DefaultTabNavButton,
+    [AdminComponent.TableCol]: DefaultTableCol,
+    [AdminComponent.TableRow]: DefaultTableRow,
+    [AdminComponent.Table]: DefaultTable,
+    [AdminComponent.TextArea]: DefaultTextArea,
+    [AdminComponent.TextInput]: DefaultTextInput,
+    [AdminComponent.TimeInput]: DefaultTimeInput,
+    [AdminComponent.ToggleInput]: DefaultToggleInput,
+    [AdminComponent.TriStateInput]: DefaultTriStateInput,
+  },
+
+  cssUtilities: {
+    animationSpin: 'mypa-animate-spin',
+    animationLoading: 'mypa-opacity-50 mypa-pointer-events-none mypa-select-none mypa-animate-pulse',
+    cursorDefault: 'mypa-cursor-default',
+    displayFlex: 'mypa-flex',
+    flexGrow: 'mypa-flex-grow',
+    marginLAuto: 'mypa-ml-auto',
+    marginYAuto: 'mypa-my-auto',
+    textCenter: 'mypa-text-center',
+    textColorError: 'mypa-text-red-500',
+    textColorSuccess: 'mypa-text-green-500',
+    whitespaceNoWrap: 'mypa-whitespace-nowrap',
+  },
+
+  transitions: {
+    modal: FADE,
+    modalBackdrop: FADE,
+    notification: FADE,
+    shipmentBox: FADE,
+    tabNavigation: FADE,
+    tableRow: 'mypa-table-row',
+  },
+
+  generateFieldId(field) {
+    return `${useAppInfo().name}-${field.name}`;
+  },
+});
