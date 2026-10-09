@@ -13,6 +13,11 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="request_stack"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver">
             <argument type="service" id="router"/>
         </service>
@@ -29,7 +34,7 @@
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\View\RequestViewResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\ShopwareOrderStatusProvider"/>
