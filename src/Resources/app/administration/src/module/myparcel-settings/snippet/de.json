@@ -1,0 +1,19 @@
+{
+    "myparcel-settings": {
+        "general": {
+            "title": "MyParcel",
+            "description": "Versandetiketten und Zustelloptionen"
+        },
+        "index": {
+            "loadError": "Die MyParcel-Einstellungen konnten nicht geladen werden. Die Browserkonsole zeigt die Details."
+        }
+    },
+    "sw-privileges": {
+        "additional_permissions": {
+            "myparcel": {
+                "label": "MyParcel",
+                "access": "MyParcel verwenden"
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "main.js": {
+    "file": "assets/my-parcel-shopware-pmdxoQEZ.js",
+    "name": "my-parcel-shopware",
+    "src": "main.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "module/myparcel-settings/page/myparcel-settings-index/index.js"
+    ]
+  },
+  "module/myparcel-settings/page/myparcel-settings-index/index.js": {
+    "file": "assets/index-8vcB7PKp.js",
+    "name": "index",
+    "src": "module/myparcel-settings/page/myparcel-settings-index/index.js",
+    "isDynamicEntry": true
+  }
+}

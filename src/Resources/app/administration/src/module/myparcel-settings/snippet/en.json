@@ -1,0 +1,19 @@
+{
+    "myparcel-settings": {
+        "general": {
+            "title": "MyParcel",
+            "description": "Shipping labels and delivery options"
+        },
+        "index": {
+            "loadError": "The MyParcel settings could not be loaded. The browser console has the details."
+        }
+    },
+    "sw-privileges": {
+        "additional_permissions": {
+            "myparcel": {
+                "label": "MyParcel",
+                "access": "Use MyParcel"
+            }
+        }
+    }
+}
