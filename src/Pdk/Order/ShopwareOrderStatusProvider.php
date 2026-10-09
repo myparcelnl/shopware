@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order;
 
+use MyParcel\Shopware\Pdk\Language\LanguageIdResolverInterface;
+use MyParcel\Shopware\Pdk\Language\LocaleLanguageChain;
+use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use Shopware\Core\Checkout\Order\OrderStates;
 use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
@@ -26,7 +29,9 @@ final class ShopwareOrderStatusProvider implements OrderStatusProviderInterface
      */
     public function __construct(
         private readonly EntityRepository $stateRepository,
-        private readonly RequestStack $requestStack
+        private readonly RequestStack $requestStack,
+        private readonly LocaleResolverInterface $localeResolver,
+        private readonly LanguageIdResolverInterface $languageIdResolver
     ) {
     }
 
@@ -49,8 +54,8 @@ final class ShopwareOrderStatusProvider implements OrderStatusProviderInterface
 
     /**
      * A system source, because a role with only myparcel:access cannot read
-     * state_machine_state. The language chain of the request keeps the names in
-     * the language of the request.
+     * state_machine_state. The names follow the language of the admin user,
+     * with the language chain of the request as fallback.
      */
     private function createContext(): Context
     {
@@ -60,6 +65,12 @@ final class ShopwareOrderStatusProvider implements OrderStatusProviderInterface
             return Context::createCLIContext();
         }
 
-        return new Context(new SystemSource(), [], $context->getCurrencyId(), $context->getLanguageIdChain());
+        $languageChain = LocaleLanguageChain::build(
+            $context->getLanguageIdChain(),
+            $this->localeResolver->getLocale(),
+            $this->languageIdResolver
+        );
+
+        return new Context(new SystemSource(), [], $context->getCurrencyId(), $languageChain);
     }
 }
