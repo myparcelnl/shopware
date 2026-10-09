@@ -12,12 +12,44 @@
             <argument type="service" id="Shopware\Core\System\Locale\LanguageLocaleCodeProvider"/>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver">
+            <argument type="service" id="router"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
+            <argument>%kernel.debug%</argument>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <argument>%kernel.debug%</argument>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Webhook\WebhookUrlValidator"/>
+
+        <service id="MyParcel\Shopware\Controller\AdminPdkController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\StorefrontPdkController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\WebhookController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Webhook\WebhookUrlValidator"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <tag name="controller.service_arguments"/>
         </service>
 
         <service id="MyParcel\Shopware\Command\AccountShowCommand">
