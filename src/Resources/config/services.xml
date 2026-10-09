@@ -26,9 +26,15 @@
             <argument type="service" id="request_stack"/>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\Language\ShopwareLanguageIdResolver">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\Order\ShopwareOrderStatusProvider">
             <argument type="service" id="state_machine_state.repository"/>
             <argument type="service" id="request_stack"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLanguageIdResolver"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
