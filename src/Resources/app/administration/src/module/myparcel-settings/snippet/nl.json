@@ -1,0 +1,19 @@
+{
+    "myparcel-settings": {
+        "general": {
+            "title": "MyParcel",
+            "description": "Verzendlabels en bezorgopties"
+        },
+        "index": {
+            "loadError": "De MyParcel-instellingen konden niet worden geladen. De browserconsole toont de details."
+        }
+    },
+    "sw-privileges": {
+        "additional_permissions": {
+            "myparcel": {
+                "label": "MyParcel",
+                "access": "MyParcel gebruiken"
+            }
+        }
+    }
+}
