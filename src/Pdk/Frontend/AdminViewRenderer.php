@@ -22,11 +22,14 @@ final class AdminViewRenderer implements AdminViewRendererInterface
     {
         $this->pdkInitializer->boot();
 
-        return Frontend::renderInitScript()
-            . Frontend::renderNotifications()
-            . Frontend::renderModals()
-            . match ($view) {
+        return AdminViewMarkup::compose(
+            $view,
+            Frontend::renderInitScript(),
+            Frontend::renderNotifications(),
+            Frontend::renderModals(),
+            match ($view) {
                 AdminView::PluginSettings => Frontend::renderPluginSettings(),
-            };
+            }
+        );
     }
 }
