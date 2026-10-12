@@ -48,7 +48,7 @@ it('rejects an empty hash, even when the stored url has no hash segment', functi
     expect($response->getStatusCode())->toBe(404)
         ->and($response->getContent())->toBe('')
         ->and($logger->records)->toHaveCount(1)
-        ->and($logger->records[0]['level'])->toBe(LogLevel::WARNING);
+        ->and($logger->records[0]['level'])->toBe(LogLevel::DEBUG);
 });
 
 it('rejects a wrong hash', function () {
@@ -60,7 +60,7 @@ it('rejects a wrong hash', function () {
     expect($response->getStatusCode())->toBe(404)
         ->and($response->getContent())->toBe('')
         ->and($logger->records)->toHaveCount(1)
-        ->and($logger->records[0]['level'])->toBe(LogLevel::WARNING);
+        ->and($logger->records[0]['level'])->toBe(LogLevel::DEBUG);
 });
 
 it('rejects every hash when no url is stored', function () {
@@ -71,7 +71,7 @@ it('rejects every hash when no url is stored', function () {
 
     expect($response->getStatusCode())->toBe(404)
         ->and($logger->records)->toHaveCount(1)
-        ->and($logger->records[0]['level'])->toBe(LogLevel::WARNING);
+        ->and($logger->records[0]['level'])->toBe(LogLevel::DEBUG);
 });
 
 it('rejects a stored value that is not a string', function () {

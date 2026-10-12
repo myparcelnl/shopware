@@ -46,7 +46,9 @@ final class WebhookController
         return $this->bridge->run(function () use ($request, $hash): Response {
             if ('' === $hash || !$this->hasValidUrl($request)) {
                 // No URL or hash in the log: either one would give the secret away.
-                $this->logger->warning('MyParcel webhook rejected: the URL does not match the stored webhook URL');
+                // Debug, not warning: anybody can post to this public URL, and the
+                // web server's access log already records each request.
+                $this->logger->debug('MyParcel webhook rejected: the URL does not match the stored webhook URL');
 
                 return new Response('', Response::HTTP_NOT_FOUND);
             }
