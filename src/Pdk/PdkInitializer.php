@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
@@ -18,6 +19,9 @@ use Psr\Log\LoggerInterface;
  * WP_DEBUG. Production mode compiles the container into the PDK cache
  * directory. The placeholders in Pdk/Placeholder keep that possible until the
  * adapter layer of epic INT-1748 lands.
+ *
+ * When that directory is read-only, production mode runs without a compiled
+ * container instead of failing on every boot.
  */
 final class PdkInitializer
 {
@@ -41,6 +45,13 @@ final class PdkInitializer
         PdkBootstrapper::setServices(
             new ShopwareServices($this->configStorage, $this->localeResolver, $this->urlResolver)
         );
+
+        if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {
+            // The PDK has no setting for its cache directory, only this switch.
+            // Debug, not warning: this runs on every request on such a host.
+            putenv('PDK_DISABLE_CACHE=1');
+            $this->logger->debug('MyParcel: the PDK cache directory is read-only, so the PDK runs without a compiled container');
+        }
 
         return PdkBootstrapper::boot(
             $this->pluginVersion,
