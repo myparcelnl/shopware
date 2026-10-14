@@ -12,7 +12,7 @@ const COMPONENT_SELECTOR = '[data-pdk-component]';
  * Renders the PDK components in the HTML that the view route returned. The
  * boot element (#myparcel-pdk-boot) must already be in the document.
  *
- * @returns a function that unmounts every rendered app
+ * @returns a function that unmounts every rendered app and stops the PDK admin
  */
 export const mount = async (root: HTMLElement, options: MountOptions): Promise<() => void> => {
   const pdkAdmin = createPdkAdmin(createConfig(options.getRequestHeaders));
@@ -28,5 +28,6 @@ export const mount = async (root: HTMLElement, options: MountOptions): Promise<(
 
   return () => {
     apps.forEach((app: App | undefined) => app?.unmount());
+    pdkAdmin.dispose();
   };
 };
