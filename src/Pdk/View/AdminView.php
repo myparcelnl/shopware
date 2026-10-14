@@ -6,7 +6,9 @@ namespace MyParcel\Shopware\Pdk\View;
 
 /**
  * The admin screens that show a PDK view. The admin app asks for one by its
- * value; INT-1960 adds the order list, the order detail and the product.
+ * value.
+ *
+ * @TODO INT-1960: add the order list, the order detail and the product.
  */
 enum AdminView: string
 {

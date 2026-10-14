@@ -27,6 +27,10 @@ final class ShopwareLocaleResolver implements LocaleResolverInterface
     ) {
     }
 
+    /**
+     * The locale of the admin user in an admin API request, otherwise the locale
+     * of the context language. Null outside a Shopware request.
+     */
     public function getLocale(): ?string
     {
         $context = $this->requestStack->getMainRequest()?->attributes->get(PlatformRequest::ATTRIBUTE_CONTEXT_OBJECT);

@@ -11,6 +11,9 @@ namespace MyParcel\Shopware\Pdk\Language;
 final class LocaleLanguageChain
 {
     /**
+     * Puts the language of the locale in front of the request chain. Returns the
+     * request chain unchanged when the shop has no language for the locale.
+     *
      * @param  non-empty-list<string> $requestChain the language chain of the request, used as fallback
      *
      * @return non-empty-list<string>
