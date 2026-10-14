@@ -13,6 +13,9 @@ use RuntimeException;
  */
 final class EmptyAdminViewException extends RuntimeException
 {
+    /**
+     * Use when the PDK rendered no markup for the view or for its boot element.
+     */
     public static function forView(AdminView $view): self
     {
         return new self(sprintf('The PDK rendered no markup for the admin view "%s". The MyParcel log has the cause.', $view->value));

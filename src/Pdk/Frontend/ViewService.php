@@ -10,8 +10,10 @@ use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
 
 /**
  * Tells the PDK which screen it renders for. Only the plugin settings exist so
- * far: the order screens and the product follow in INT-1960, the checkout in
- * INT-1961.
+ * far.
+ *
+ * @TODO INT-1960: recognise the order list, the order detail and the product page.
+ * @TODO INT-1961: recognise the checkout.
  */
 final class ViewService extends AbstractViewService
 {
@@ -39,6 +41,9 @@ final class ViewService extends AbstractViewService
         return false;
     }
 
+    /**
+     * True when the view route renders the plugin settings.
+     */
     public function isPluginSettingsPage(): bool
     {
         return AdminView::PluginSettings === $this->viewResolver->getView();

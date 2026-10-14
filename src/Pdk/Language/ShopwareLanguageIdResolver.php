@@ -16,6 +16,9 @@ final class ShopwareLanguageIdResolver implements LanguageIdResolverInterface
     {
     }
 
+    /**
+     * Finds the shop language with this locale code, for example `de-DE`.
+     */
     public function getLanguageId(string $locale): ?string
     {
         $id = $this->connection->fetchOne(

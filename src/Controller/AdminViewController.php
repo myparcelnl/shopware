@@ -27,6 +27,10 @@ final class AdminViewController
     ) {
     }
 
+    /**
+     * Renders one PDK admin view for the admin module. Answers 400 for an
+     * unknown view, without booting the PDK.
+     */
     #[Route(
         path: '/api/_action/myparcel/view',
         name: RouteName::ADMIN_VIEW,

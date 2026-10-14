@@ -35,6 +35,10 @@ final class ShopwareOrderStatusProvider implements OrderStatusProviderInterface
     ) {
     }
 
+    /**
+     * Lists the order states, sorted by technical name, with their names in the
+     * language of the admin user.
+     */
     public function all(): array
     {
         $criteria = (new Criteria())
