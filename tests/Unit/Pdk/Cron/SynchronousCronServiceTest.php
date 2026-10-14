@@ -34,9 +34,17 @@ it('runs an object method given as array, the way the webhook manager dispatches
     expect($target->calls)->toBe(['hook']);
 });
 
-it('refuses a callback that cannot be called', function () {
+it('refuses a callback that cannot be called, and names it', function () {
     (new SynchronousCronService())->dispatch('this_function_does_not_exist');
-})->throws(InvalidArgumentException::class);
+})->throws(InvalidArgumentException::class, 'The cron callback this_function_does_not_exist cannot be called.');
+
+it('names an object method callback that cannot be called', function () {
+    (new SynchronousCronService())->dispatch([new stdClass(), 'missing']);
+})->throws(InvalidArgumentException::class, 'The cron callback stdClass::missing cannot be called.');
+
+it('names the type of a callback that is neither a string nor an array', function () {
+    (new SynchronousCronService())->dispatch(42);
+})->throws(InvalidArgumentException::class, 'The cron callback int cannot be called.');
 
 it('refuses to schedule, because there is no queue yet', function () {
     (new SynchronousCronService())->schedule(fn () => null, time() + 60);
