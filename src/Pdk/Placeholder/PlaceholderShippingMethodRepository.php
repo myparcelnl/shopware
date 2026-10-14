@@ -9,8 +9,9 @@ use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterf
 
 /**
  * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * mode.
+ *
+ * @TODO INT-1961: replace with the real shipping method repository.
  */
 final class PlaceholderShippingMethodRepository implements PdkShippingMethodRepositoryInterface
 {

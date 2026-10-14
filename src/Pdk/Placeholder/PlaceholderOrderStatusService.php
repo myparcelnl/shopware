@@ -8,8 +8,9 @@ use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 
 /**
  * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * mode.
+ *
+ * @TODO INT-1958: replace with the real order status service.
  */
 final class PlaceholderOrderStatusService implements OrderStatusServiceInterface
 {

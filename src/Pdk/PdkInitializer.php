@@ -49,6 +49,8 @@ final class PdkInitializer
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {
             // The PDK has no setting for its cache directory, only this switch.
             // Debug, not warning: this runs on every request on such a host.
+            // @TODO INT-2036: set the PDK cache directory to Shopware's cache
+            // directory once the PDK has a setting for it, and remove this fallback.
             putenv('PDK_DISABLE_CACHE=1');
             $this->logger->debug('MyParcel: the PDK cache directory is read-only, so the PDK runs without a compiled container');
         }

@@ -8,8 +8,9 @@ use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 
 /**
  * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * mode.
+ *
+ * @TODO INT-1958: replace with the real view service.
  */
 final class PlaceholderViewService implements ViewServiceInterface
 {

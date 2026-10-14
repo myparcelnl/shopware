@@ -49,8 +49,8 @@ final class PdkHttpBridge
             // docblock FQCN unless the file also imports the class. PdkActionsService
             // type-checks against the scoped class, which is what we pass.
             //
-            // Temporary: this ignore comes out once the PDK ships the missing import,
-            // tracked in INT-1948. PHPStan then reports it as unmatched.
+            // @TODO INT-1948: remove this ignore once the PDK ships the missing
+            // import. PHPStan then reports it as unmatched.
             // @phpstan-ignore argument.type
             return $this->toShopwareResponse($endpoint->call($this->toPdkRequest($request), $context));
         });

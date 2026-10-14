@@ -12,8 +12,9 @@ use MyParcelNL\Pdk\Base\Support\Collection;
 
 /**
  * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * mode.
+ *
+ * @TODO INT-1959: replace with the real order repository.
  */
 final class PlaceholderOrderRepository implements PdkOrderRepositoryInterface
 {

@@ -12,8 +12,10 @@ use RuntimeException;
  * Runs PDK work in the current request.
  *
  * The webhook manager dispatches the processing of a webhook through this
- * service. A queue-based version (Shopware Messenger) replaces this class in
- * the fulfilment ticket; until then nothing can be scheduled for later.
+ * service.
+ *
+ * @TODO INT-1962: replace this class with a queue-based cron service (Shopware
+ * Messenger). Until then, nothing can be scheduled for later.
  */
 final class SynchronousCronService implements CronServiceInterface
 {

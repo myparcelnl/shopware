@@ -10,8 +10,9 @@ use MyParcelNL\Pdk\App\Cart\Model\PdkCart;
 
 /**
  * Temporary. It exists only so that the PDK container compiles in production
- * mode. The adapter-layer tickets of epic INT-1748 replace it with the real
- * implementation.
+ * mode.
+ *
+ * @TODO INT-1961: replace with the real cart repository.
  */
 final class PlaceholderCartRepository implements PdkCartRepositoryInterface
 {
