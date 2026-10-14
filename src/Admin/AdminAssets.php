@@ -20,6 +20,8 @@ final class AdminAssets
     }
 
     /**
+     * The script URLs the admin module loads before it mounts the PDK app.
+     *
      * @return list<string>
      */
     public function getScripts(): array
@@ -28,6 +30,8 @@ final class AdminAssets
     }
 
     /**
+     * The stylesheet URLs the admin module loads before it mounts the PDK app.
+     *
      * @return list<string>
      */
     public function getStyles(): array

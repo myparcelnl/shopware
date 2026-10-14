@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-// preset-default renders plain HTML. The minimum to make it usable inside the
-// Shopware admin; Shopware look and feel is a later ticket.
+// preset-default renders plain HTML. This is the minimum to make it usable
+// inside the Shopware admin, not the Shopware look and feel.
 .myparcel-pdk {
   input[type='text'],
   input[type='number'],

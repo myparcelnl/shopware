@@ -16,6 +16,10 @@ final class RequestViewResolver implements ViewResolverInterface
     {
     }
 
+    /**
+     * Reads the view from the main request. Null when the request is not the
+     * view route, or when the attribute holds another value.
+     */
     public function getView(): ?AdminView
     {
         $view = $this->requestStack->getMainRequest()?->attributes->get(AdminView::REQUEST_ATTRIBUTE);

@@ -28,6 +28,10 @@ final class RequestCachedLocaleResolver implements LocaleResolverInterface
         $this->locales = new WeakMap();
     }
 
+    /**
+     * Asks the inner resolver once per main request, and every time outside a
+     * request.
+     */
     public function getLocale(): ?string
     {
         $request = $this->requestStack->getMainRequest();
