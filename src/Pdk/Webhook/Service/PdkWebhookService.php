@@ -18,6 +18,10 @@ final class PdkWebhookService extends AbstractPdkWebhookService
     {
     }
 
+    /**
+     * The absolute URL of the webhook route without a hash. createUrl() adds
+     * the hash as the last path segment.
+     */
     public function getBaseUrl(): string
     {
         return $this->urlResolver->getAbsoluteUrl(RouteName::WEBHOOK);

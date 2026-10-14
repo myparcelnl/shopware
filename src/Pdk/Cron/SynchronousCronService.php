@@ -20,6 +20,8 @@ use RuntimeException;
 final class SynchronousCronService implements CronServiceInterface
 {
     /**
+     * Runs the callback at once, in the current request, with the arguments.
+     *
      * @param  callable|string|callable-string $callback
      */
     public function dispatch($callback, ...$args): void

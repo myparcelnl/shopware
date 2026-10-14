@@ -12,5 +12,8 @@ namespace MyParcel\Shopware\Pdk\Routing;
  */
 interface UrlResolverInterface
 {
+    /**
+     * The absolute URL of a plugin route. Use the names in RouteName.
+     */
     public function getAbsoluteUrl(string $routeName): string;
 }

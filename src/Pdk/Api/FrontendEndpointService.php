@@ -17,6 +17,10 @@ final class FrontendEndpointService extends AbstractFrontendEndpointService
     {
     }
 
+    /**
+     * The absolute URL of the storefront route, which the checkout calls for
+     * every PDK frontend action.
+     */
     public function getBaseUrl(): string
     {
         return $this->urlResolver->getAbsoluteUrl(RouteName::STOREFRONT_PDK);

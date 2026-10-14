@@ -16,6 +16,9 @@ final class ShopwareUrlResolver implements UrlResolverInterface
     {
     }
 
+    /**
+     * The absolute URL of a plugin route, built by the Shopware router.
+     */
     public function getAbsoluteUrl(string $routeName): string
     {
         return $this->router->generate($routeName, [], UrlGeneratorInterface::ABSOLUTE_URL);

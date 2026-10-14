@@ -20,6 +20,10 @@ final class BackendEndpointService extends AbstractPdkBackendEndpointService
     {
     }
 
+    /**
+     * The absolute URL of the admin route, which the admin app calls for every
+     * PDK backend action.
+     */
     public function getBaseUrl(): string
     {
         return $this->urlResolver->getAbsoluteUrl(RouteName::ADMIN_PDK);

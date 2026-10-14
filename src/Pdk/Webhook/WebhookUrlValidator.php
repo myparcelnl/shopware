@@ -14,6 +14,10 @@ namespace MyParcel\Shopware\Pdk\Webhook;
  */
 final class WebhookUrlValidator
 {
+    /**
+     * True when the request URI equals the path (and query) of the stored
+     * hashed URL. False when no URL is stored or its hash is empty.
+     */
     public function isValid(?string $hashedUrl, string $requestUri): bool
     {
         if (null === $hashedUrl || '' === $hashedUrl) {

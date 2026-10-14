@@ -13,6 +13,10 @@ namespace MyParcel\Shopware\Pdk\Cache;
  */
 final class CacheDirectory
 {
+    /**
+     * True when the directory exists and is writable, or when it does not exist
+     * yet and its parent directory is writable, so it can be created.
+     */
     public static function isWritable(string $directory): bool
     {
         if (is_dir($directory)) {

@@ -58,6 +58,10 @@ class MyParcelShopware extends Plugin
         $this->container->get(CacheInvalidator::class)->invalidate([CachedSystemConfigLoader::CACHE_TAG], true);
     }
 
+    /**
+     * Clears the compiled PDK container, so the new plugin version does not
+     * use the definitions of the old one.
+     */
     public function update(UpdateContext $updateContext): void
     {
         parent::update($updateContext);

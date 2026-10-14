@@ -22,6 +22,10 @@ final class AdminPdkController
     {
     }
 
+    /**
+     * Runs a PDK backend action for the admin app. The action comes from the
+     * "action" query parameter; the PDK answer goes back unchanged.
+     */
     #[Route(
         path: '/api/_action/myparcel/pdk',
         name: RouteName::ADMIN_PDK,

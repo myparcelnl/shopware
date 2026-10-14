@@ -36,6 +36,12 @@ final class PdkHttpBridge
     ) {
     }
 
+    /**
+     * Boots the PDK and runs one PDK endpoint action for the admin or the
+     * storefront route.
+     *
+     * @param  string $context PdkEndpoint::CONTEXT_BACKEND or CONTEXT_FRONTEND
+     */
     public function callEndpoint(Request $request, string $context): Response
     {
         return $this->run(function () use ($request, $context): Response {
@@ -56,6 +62,10 @@ final class PdkHttpBridge
         });
     }
 
+    /**
+     * Boots the PDK and hands an incoming webhook to the PDK webhook manager.
+     * Call it only after the webhook hash is checked.
+     */
     public function callWebhook(Request $request): Response
     {
         return $this->run(function () use ($request): Response {

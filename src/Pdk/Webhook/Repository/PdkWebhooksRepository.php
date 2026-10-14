@@ -35,6 +35,9 @@ final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
         parent::__construct($storage, $subscriptionRepository);
     }
 
+    /**
+     * All stored webhook subscriptions, or an empty collection.
+     */
     public function getAll(): WebhookSubscriptionCollection
     {
         return $this->retrieve(self::KEY_SUBSCRIPTIONS, function (): WebhookSubscriptionCollection {
@@ -44,6 +47,9 @@ final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
         });
     }
 
+    /**
+     * The full webhook URL with its hash, or null when no webhook is registered.
+     */
     public function getHashedUrl(): ?string
     {
         $url = $this->config->get(self::KEY_HASHED_URL);
@@ -51,6 +57,9 @@ final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
         return is_string($url) ? $url : null;
     }
 
+    /**
+     * Removes the subscription for one hook and keeps the others.
+     */
     public function remove(string $hook): void
     {
         $this->store(
@@ -63,6 +72,9 @@ final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
         );
     }
 
+    /**
+     * Replaces all stored webhook subscriptions.
+     */
     public function store(WebhookSubscriptionCollection $subscriptions): void
     {
         $this->config->set(self::KEY_SUBSCRIPTIONS, $subscriptions->toArray());
@@ -70,6 +82,10 @@ final class PdkWebhooksRepository extends AbstractPdkWebhooksRepository
         $this->save(self::KEY_SUBSCRIPTIONS, $subscriptions);
     }
 
+    /**
+     * Stores the full webhook URL with its hash. The webhook route accepts
+     * only this URL.
+     */
     public function storeHashedUrl(string $url): void
     {
         $this->config->set(self::KEY_HASHED_URL, $url);

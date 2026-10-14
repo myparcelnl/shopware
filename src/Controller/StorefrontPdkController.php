@@ -21,6 +21,10 @@ final class StorefrontPdkController
     {
     }
 
+    /**
+     * Runs a PDK frontend action for the checkout. The action comes from the
+     * "action" query parameter; the PDK answer goes back unchanged.
+     */
     #[Route(
         path: '/myparcel/pdk',
         name: RouteName::STOREFRONT_PDK,

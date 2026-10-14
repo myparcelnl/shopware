@@ -35,6 +35,12 @@ final class WebhookController
     ) {
     }
 
+    /**
+     * Passes a MyParcel webhook to the PDK when the hash matches the stored
+     * webhook URL. Any other request gets an empty 404.
+     *
+     * @param  string $hash the last path segment, empty for the base URL
+     */
     #[Route(
         path: '/api/myparcel/webhook/{hash}',
         name: RouteName::WEBHOOK,
