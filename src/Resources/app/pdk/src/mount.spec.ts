@@ -26,7 +26,8 @@ describe('mount', () => {
   it('renders every component in the root and unmounts them all', async () => {
     const apps = [{unmount: vi.fn()}, {unmount: vi.fn()}];
     const render = vi.fn().mockResolvedValueOnce(apps[0]).mockResolvedValueOnce(apps[1]);
-    vi.mocked(createPdkAdmin).mockReturnValue({render} as never);
+    const dispose = vi.fn();
+    vi.mocked(createPdkAdmin).mockReturnValue({render, dispose} as never);
     const getRequestHeaders = () => ({Authorization: 'Bearer x'});
 
     const unmount = await mount(createRoot(), {getRequestHeaders});
@@ -41,10 +42,11 @@ describe('mount', () => {
 
     expect(apps[0].unmount).toHaveBeenCalledOnce();
     expect(apps[1].unmount).toHaveBeenCalledOnce();
+    expect(dispose).toHaveBeenCalledOnce();
   });
 
   it('skips an app that did not mount', async () => {
-    vi.mocked(createPdkAdmin).mockReturnValue({render: vi.fn().mockResolvedValue(undefined)} as never);
+    vi.mocked(createPdkAdmin).mockReturnValue({render: vi.fn().mockResolvedValue(undefined), dispose: vi.fn()} as never);
 
     const unmount = await mount(createRoot(), {getRequestHeaders: () => ({})});
 
@@ -53,7 +55,7 @@ describe('mount', () => {
 
   it('mounts again after an unmount, for a second visit to the page', async () => {
     const render = vi.fn().mockResolvedValue({unmount: vi.fn()});
-    vi.mocked(createPdkAdmin).mockReturnValue({render} as never);
+    vi.mocked(createPdkAdmin).mockReturnValue({render, dispose: vi.fn()} as never);
 
     (await mount(createRoot(), {getRequestHeaders: () => ({})}))();
     document.body.innerHTML = '';
