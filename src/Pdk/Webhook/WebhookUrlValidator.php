@@ -8,9 +8,15 @@ namespace MyParcel\Shopware\Pdk\Webhook;
  * Checks an incoming webhook URL against the stored hashed URL, before the
  * request reaches the PDK.
  *
- * The PDK does the same check in PdkWebhookManager::processWebhook(), but only
- * logs a mismatch and still answers 202. This check builds the required path
- * the same way (path, plus "?query" when there is one), so both agree.
+ * Shopware-specific, for two reasons. INT-1759 requires the webhook route to
+ * reject a missing or wrong hash, and the PDK answers 202 to any hash: it only
+ * logs a mismatch later, in PdkWebhookManager::processWebhook(). Also, this
+ * check runs before the PDK boots, so an anonymous request does not build the
+ * PDK container. It builds the required path the same way as the PDK (path,
+ * plus "?query" when there is one), so both agree.
+ *
+ * @TODO INT-2046: once the PDK rejects a wrong hash itself, this class only
+ * saves the PDK boot. Decide then whether to keep it.
  */
 final class WebhookUrlValidator
 {
