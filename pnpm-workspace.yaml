@@ -1,0 +1,6 @@
+# vue-demi picks the Vue 3 entry in its install script. The sass file watcher
+# is not used: the build runs once.
+allowBuilds:
+  vue-demi: true
+  '@parcel/watcher': false
+
