@@ -13,12 +13,15 @@ use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderViewService;
+use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
@@ -71,7 +74,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
 
     /**
      * The same kind of seam as setLogger(), for the services behind the settings,
-     * account, language, webhook and endpoint contracts.
+     * account, language, webhook, endpoint, order and product contracts.
      */
     public static function setServices(ShopwareServices $services): void
     {
@@ -111,6 +114,30 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     public static function getUrlResolver(): UrlResolverInterface
     {
         return self::getShopwareServices()->urlResolver;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getOrderStorage(): OrderStorageInterface
+    {
+        return self::getShopwareServices()->orderStorage;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getProductStorage(): ProductStorageInterface
+    {
+        return self::getShopwareServices()->productStorage;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getOrderStateTransitioner(): OrderStateTransitionerInterface
+    {
+        return self::getShopwareServices()->orderStateTransitioner;
     }
 
     /**
@@ -155,6 +182,9 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
+            OrderStorageInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStorage']),
+            ProductStorageInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductStorage']),
+            OrderStateTransitionerInterface::class      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStateTransitioner']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),
             PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class),
