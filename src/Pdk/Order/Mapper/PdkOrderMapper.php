@@ -14,6 +14,8 @@ use MyParcelNL\Pdk\Facade\Logger;
  * Only product line items become order lines, like in the WooCommerce plugin:
  * weight and customs need products, not promotions. The PDK computes the order
  * totals from the lines and the shipment price, so the mapper does not pass them.
+ * The mapper sets the notes, so every access to PdkOrder::$notes gives the same
+ * collection and the PDK does not read the notes again.
  */
 final class PdkOrderMapper
 {
@@ -65,7 +67,14 @@ final class PdkOrderMapper
         return new PdkOrder(array_replace(
             $base,
             $snapshot['orderData'] ?? [],
-            ['shipments' => $snapshot['shipments'] ?? []]
+            [
+                'shipments' => $snapshot['shipments'] ?? [],
+                'notes'     => OrderNotesBuilder::build(
+                    (string) $snapshot['id'],
+                    $snapshot['notes'] ?? [],
+                    $snapshot['customerComment'] ?? null
+                ),
+            ]
         ));
     }
 
