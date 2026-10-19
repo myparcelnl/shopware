@@ -26,6 +26,8 @@ final class ProductCustomFields
     private const TYPE_TEXT         = 'text';
     private const TYPE_PACKAGE_TYPE = 'packageType';
 
+    private const INHERIT_OPTION = ['label' => ['en-GB' => 'Inherit', 'de-DE' => 'Übernehmen', 'nl-NL' => 'Overnemen'], 'value' => TriStateService::INHERIT];
+
     /**
      * Settings that are not a plain tri-state. Every other key, including the
      * dynamic export* options, is one.
@@ -169,7 +171,9 @@ final class ProductCustomFields
         }
 
         return match ($type) {
-            self::TYPE_TEXT, self::TYPE_PACKAGE_TYPE => trim((string) $value),
+            self::TYPE_TEXT, self::TYPE_PACKAGE_TYPE => (string) TriStateService::INHERIT === trim((string) $value)
+                ? TriStateService::INHERIT
+                : trim((string) $value),
             self::TYPE_INT                           => is_numeric($value) ? (int) $value : TriStateService::INHERIT,
             default                                  => is_numeric($value) && in_array((int) $value, [TriStateService::INHERIT, TriStateService::DISABLED, TriStateService::ENABLED], true)
                 ? (int) $value
@@ -183,21 +187,22 @@ final class ProductCustomFields
     private static function triStateOptions(): array
     {
         return [
-            ['label' => ['en-GB' => 'Inherit', 'de-DE' => 'Übernehmen', 'nl-NL' => 'Overnemen'], 'value' => TriStateService::INHERIT],
+            self::INHERIT_OPTION,
             ['label' => ['en-GB' => 'Off', 'de-DE' => 'Aus', 'nl-NL' => 'Uit'], 'value' => TriStateService::DISABLED],
             ['label' => ['en-GB' => 'On', 'de-DE' => 'An', 'nl-NL' => 'Aan'], 'value' => TriStateService::ENABLED],
         ];
     }
 
     /**
-     * Package types come from the SDK, never from a list in the plugin.
+     * Inherit, then the package types. Package types come from the SDK, never from
+     * a list in the plugin.
      *
-     * @return list<array{label: array<string, string>, value: string}>
+     * @return list<array{label: array<string, string>, value: int|string}>
      */
     private static function packageTypeOptions(): array
     {
         $mapper  = ApiMapperService::forPackageType();
-        $options = [];
+        $options = [self::INHERIT_OPTION];
 
         foreach (RefShipmentPackageType::getAllowableEnumValues() as $id) {
             $name = $mapper->legacyNameFromId((int) $id);
