@@ -39,6 +39,7 @@
             <argument type="service" id="currency.repository"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
             <argument type="service" id="monolog.logger.myparcel"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner">
