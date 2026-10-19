@@ -125,3 +125,13 @@ it('maps an order without a delivery', function () {
         ->and($order->shippingAddress->email)->toBe('test@example.test')
         ->and($order->shipmentPrice)->toBe(0);
 });
+
+it('maps a snapshot that was exported from the demo shop', function () {
+    $snapshot = Fixtures::snapshot('order-demo');
+    $order    = orderMapper()->fromSnapshot($snapshot);
+
+    expect($order->externalIdentifier)->toBe($snapshot['id'])
+        ->and($order->shippingAddress->street)->not->toBeNull()
+        ->and($order->lines->count())->toBeGreaterThan(0)
+        ->and($order->totalPriceAfterVat)->toBeGreaterThan(0);
+});
