@@ -53,6 +53,12 @@ class MyParcelShopware extends Plugin
         $this->createCustomFieldInstaller()->install($installContext->getContext());
     }
 
+    /**
+     * Without keepUserData, removes all plugin data: the PDK settings in
+     * system_config, the custom field set "myparcel_product", the myparcel_* custom
+     * field values of the products, and the tables myparcel_order_data and
+     * myparcel_order_shipment. With keepUserData, it keeps all of this.
+     */
     public function uninstall(UninstallContext $uninstallContext): void
     {
         parent::uninstall($uninstallContext);
@@ -82,7 +88,9 @@ class MyParcelShopware extends Plugin
 
     /**
      * Clears the compiled PDK container, so the new plugin version does not
-     * use the definitions of the old one.
+     * use the definitions of the old one. Then syncs the custom field set with the
+     * plugin definition: it adds a field for each new PDK setting, and resets the
+     * labels and the config of the existing fields, also when a merchant edited them.
      */
     public function update(UpdateContext $updateContext): void
     {
