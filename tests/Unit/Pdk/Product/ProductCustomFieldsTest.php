@@ -80,3 +80,22 @@ it('defines a field per setting with a fitting component', function () {
         ->and(array_column($definitions['myparcel_export_signature']['config']['options'], 'value'))->toBe([-1, 0, 1])
         ->and(array_column($definitions['myparcel_package_type']['config']['options'], 'value'))->toContain('package', 'mailbox');
 });
+
+it('offers inherit as the first package type option', function () {
+    $definitions = array_column(ProductCustomFields::fieldDefinitions(), null, 'name');
+    $options     = $definitions['myparcel_package_type']['config']['options'];
+
+    expect($options[0])->toBe(['label' => ['en-GB' => 'Inherit', 'de-DE' => 'Übernehmen', 'nl-NL' => 'Overnemen'], 'value' => TriStateService::INHERIT]);
+});
+
+it('reads a stored inherit value of a text or package type field as inherit', function (int|string $stored) {
+    $settings = ProductCustomFields::toSettings([
+        'myparcel_package_type'      => $stored,
+        'myparcel_customs_code'      => $stored,
+        'myparcel_country_of_origin' => $stored,
+    ]);
+
+    expect($settings->packageType)->toBe(TriStateService::INHERIT)
+        ->and($settings->customsCode)->toBe(TriStateService::INHERIT)
+        ->and($settings->countryOfOrigin)->toBe(TriStateService::INHERIT);
+})->with([-1, '-1']);
