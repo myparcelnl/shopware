@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order\Storage;
 
+use Doctrine\DBAL\Connection;
 use MyParcel\Shopware\Entity\OrderData\OrderDataEntity;
 use MyParcel\Shopware\Entity\OrderExtension;
 use MyParcel\Shopware\Entity\OrderShipment\OrderShipmentCollection;
@@ -58,7 +59,8 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         private readonly EntityRepository $orderShipmentRepository,
         private readonly EntityRepository $currencyRepository,
         private readonly ProductStorageInterface $productStorage,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly Connection $connection
     ) {
     }
 
@@ -144,20 +146,8 @@ final class ShopwareOrderStorage implements OrderStorageInterface
 
     public function saveShipments(string $orderId, array $shipments): void
     {
-        $context  = Context::createDefaultContext();
-        $existing = $this->orderShipmentRepository
-            ->searchIds((new Criteria())->addFilter(new EqualsFilter('orderId', $orderId)), $context)
-            ->getIds();
-
-        if ([] !== $existing) {
-            $this->orderShipmentRepository->delete(array_map(static fn ($id) => ['id' => $id], array_values($existing)), $context);
-        }
-
-        if ([] === $shipments) {
-            return;
-        }
-
-        $rows = [];
+        $context = Context::createDefaultContext();
+        $rows    = [];
 
         foreach (array_values($shipments) as $position => $shipment) {
             $rows[] = [
@@ -170,7 +160,20 @@ final class ShopwareOrderStorage implements OrderStorageInterface
             ];
         }
 
-        $this->orderShipmentRepository->create($rows, $context);
+        // One transaction: a failed create must not leave the order without its stored shipments.
+        $this->connection->transactional(function () use ($orderId, $rows, $context): void {
+            $existing = $this->orderShipmentRepository
+                ->searchIds((new Criteria())->addFilter(new EqualsFilter('orderId', $orderId)), $context)
+                ->getIds();
+
+            if ([] !== $existing) {
+                $this->orderShipmentRepository->delete(array_map(static fn ($id) => ['id' => $id], array_values($existing)), $context);
+            }
+
+            if ([] !== $rows) {
+                $this->orderShipmentRepository->create($rows, $context);
+            }
+        });
     }
 
     public function getNotes(string $orderId): array
