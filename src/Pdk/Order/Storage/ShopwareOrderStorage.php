@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Order\Aggregate\OrderAddress\OrderAddressEntity;
+use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryEntity;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
@@ -34,6 +35,8 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         'lineItems',
         'primaryOrderDelivery.shippingOrderAddress.country',
         'primaryOrderDelivery.shippingOrderAddress.countryState',
+        'deliveries.shippingOrderAddress.country',
+        'deliveries.shippingOrderAddress.countryState',
         'billingAddress.country',
         'billingAddress.countryState',
         'orderCustomer',
@@ -213,7 +216,7 @@ final class ShopwareOrderStorage implements OrderStorageInterface
      */
     private function toSnapshot(OrderEntity $order, array $products): array
     {
-        $delivery = $order->getPrimaryOrderDelivery();
+        $delivery = self::delivery($order);
 
         /** @var null|OrderDataEntity $orderData */
         $orderData = $order->getExtension(OrderExtension::ORDER_DATA);
@@ -254,6 +257,40 @@ final class ShopwareOrderStorage implements OrderStorageInterface
                 ? []
                 : array_values(array_map(static fn ($shipment) => $shipment->getData(), $shipments->getElements())),
         ];
+    }
+
+    /**
+     * The primary delivery of the order. Only the checkout sets it in Shopware 6.7, so
+     * for an order written through the DAL or the Admin API (an import), use the
+     * delivery with the highest shipping costs, the rule of Shopware 6.8's backfill
+     * (ties go to the lowest id).
+     */
+    private static function delivery(OrderEntity $order): ?OrderDeliveryEntity
+    {
+        $primary = $order->getPrimaryOrderDelivery();
+
+        if (null !== $primary) {
+            return $primary;
+        }
+
+        $chosen = null;
+
+        foreach ($order->getDeliveries() ?? [] as $delivery) {
+            if (null === $chosen) {
+                $chosen = $delivery;
+
+                continue;
+            }
+
+            $cost       = $delivery->getShippingCosts()->getTotalPrice();
+            $chosenCost = $chosen->getShippingCosts()->getTotalPrice();
+
+            if ($cost > $chosenCost || ($cost === $chosenCost && strcmp($delivery->getId(), $chosen->getId()) < 0)) {
+                $chosen = $delivery;
+            }
+        }
+
+        return $chosen;
     }
 
     /**
