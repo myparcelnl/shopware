@@ -54,7 +54,9 @@ interface OrderStorageInterface
     public function getShipments(string $orderId): array;
 
     /**
-     * Replaces all stored shipments of the order with this list.
+     * Replaces all stored shipments of the order with this list. Use it after merging
+     * the stored shipments with the PDK's changed ones; deleted shipments are already
+     * left out of the list.
      *
      * @param  list<array<string, mixed>> $shipments
      */
