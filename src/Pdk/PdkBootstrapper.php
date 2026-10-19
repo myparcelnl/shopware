@@ -12,8 +12,8 @@ use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderViewService;
@@ -141,7 +141,6 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // Placeholders for the contracts that the adapter layer of epic
             // INT-1748 adds. Production mode compiles the container, and php-di
             // cannot compile an interface without a concrete class.
-            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderRepository::class),
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
             OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderStatusService::class),
@@ -151,6 +150,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
+            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),
             PdkWebhooksRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkWebhooksRepository::class),
