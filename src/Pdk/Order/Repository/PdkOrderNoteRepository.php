@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Order\Repository;
 
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
+use MyParcel\Shopware\Pdk\Order\Mapper\OrderNotesBuilder;
 use MyParcelNL\Pdk\App\Order\Collection\PdkOrderNoteCollection;
 use MyParcelNL\Pdk\App\Order\Model\PdkOrder;
 use MyParcelNL\Pdk\App\Order\Model\PdkOrderNote;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderNoteRepository;
 use MyParcelNL\Pdk\Facade\Logger;
-use MyParcelNL\Pdk\Fulfilment\Model\OrderNote;
 use MyParcelNL\Pdk\Storage\Contract\StorageInterface;
 
 /**
@@ -20,7 +20,7 @@ use MyParcelNL\Pdk\Storage\Contract\StorageInterface;
  */
 final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
 {
-    public const CUSTOMER_NOTE_IDENTIFIER = 'customer_comment';
+    public const CUSTOMER_NOTE_IDENTIFIER = OrderNotesBuilder::CUSTOMER_NOTE_IDENTIFIER;
 
     public function __construct(StorageInterface $storage, private readonly OrderStorageInterface $orderStorage)
     {
@@ -29,25 +29,15 @@ final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
 
     /**
      * Returns the notes of an order: the customer comment first, when there is one,
-     * then the stored notes. Use it to show all notes of an order.
+     * then the stored notes. The PDK calls it only for an order without notes; a
+     * PdkOrder from PdkOrderMapper already has them.
      */
     public function getFromOrder(PdkOrder $order): PdkOrderNoteCollection
     {
         $orderId = (string) $order->externalIdentifier;
         $stored  = $this->orderStorage->getNotes($orderId);
-        $notes   = array_map(static fn (array $note) => new PdkOrderNote($note), $stored['notes']);
-        $comment = trim((string) ($stored['customerComment'] ?? ''));
 
-        if ('' !== $comment) {
-            array_unshift($notes, new PdkOrderNote([
-                'externalIdentifier' => self::CUSTOMER_NOTE_IDENTIFIER,
-                'orderIdentifier'    => $orderId,
-                'author'             => OrderNote::AUTHOR_CUSTOMER,
-                'note'               => $comment,
-            ]));
-        }
-
-        return new PdkOrderNoteCollection($notes);
+        return OrderNotesBuilder::build($orderId, $stored['notes'], $stored['customerComment']);
     }
 
     /**

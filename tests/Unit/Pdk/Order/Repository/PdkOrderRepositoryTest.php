@@ -5,6 +5,7 @@ declare(strict_types=1);
 use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
 use MyParcel\Shopware\Pdk\Order\Mapper\MoneyConverter;
 use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
+use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
 use MyParcel\Shopware\Tests\Support\Fixtures;
@@ -14,6 +15,7 @@ use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
 use MyParcelNL\Pdk\Base\Exception\ModelNotFoundException;
 use MyParcelNL\Pdk\Base\Service\CurrencyService;
 use MyParcelNL\Pdk\Base\Service\WeightService;
+use MyParcelNL\Pdk\Fulfilment\Collection\OrderNoteCollection;
 use MyParcelNL\Pdk\Shipment\Collection\ShipmentCollection;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 
@@ -123,4 +125,21 @@ it('returns the updated order from the cache afterwards', function () {
 
     expect($repository->find(NL_ORDER_ID)->exported)->toBeFalse()
         ->and($storage->snapshotReads)->toBe(1);
+});
+
+it('keeps the api identifiers that the pdk sets on the order notes when it stores them', function () {
+    $storedNote                                  = ['externalIdentifier' => 'n1', 'orderIdentifier' => NL_ORDER_ID, 'author' => 'webshop', 'note' => 'Ingepakt'];
+    $storage                                     = storageWithNlOrder();
+    $storage->snapshots[NL_ORDER_ID]['notes']    = [$storedNote];
+    $storage->notes[NL_ORDER_ID]                 = [$storedNote];
+    $storage->customerComments[NL_ORDER_ID]      = 'Graag bij de buren afgeven';
+    $noteRepository                              = new PdkOrderNoteRepository(new MemoryCacheStorage(), $storage);
+    $order                                       = orderRepository($storage)->find(NL_ORDER_ID);
+
+    // What PostOrderNotesAction does after it posted the notes to the API.
+    $order->notes->addApiIdentifiers(new OrderNoteCollection([['uuid' => 'api-note-0'], ['uuid' => 'api-note-1']]));
+    $noteRepository->updateMany($order->notes);
+
+    expect($storage->notes[NL_ORDER_ID])->toHaveCount(1)
+        ->and($storage->notes[NL_ORDER_ID][0])->toMatchArray(['externalIdentifier' => 'n1', 'apiIdentifier' => 'api-note-1']);
 });

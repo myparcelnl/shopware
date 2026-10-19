@@ -79,6 +79,24 @@ it('loads the stored shipments', function () {
         ->and($order->shipments->first()->id)->toBe(101);
 });
 
+it('carries the customer comment as the first note, then the stored notes, in one collection', function () {
+    $snapshot          = Fixtures::snapshot('order-nl');
+    $snapshot['notes'] = [['externalIdentifier' => 'n1', 'orderIdentifier' => $snapshot['id'], 'author' => 'webshop', 'note' => 'Ingepakt']];
+
+    $order = orderMapper()->fromSnapshot($snapshot);
+
+    expect($order->notes)->toHaveCount(2)
+        ->and($order->notes->first()->toArray())->toMatchArray([
+            'externalIdentifier' => 'customer_comment',
+            'orderIdentifier'    => '0190a1b2c3d4e5f60718293a4b5c6d01',
+            'author'             => 'customer',
+            'note'               => 'Graag bij de buren afgeven',
+        ])
+        ->and($order->notes->last()->note)->toBe('Ingepakt')
+        ->and($order->notes)->toBe($order->notes)
+        ->and($order->notes->first())->toBe($order->notes->first());
+});
+
 it('maps a belgian net order with a variant product', function () {
     $order = orderMapper()->fromSnapshot(Fixtures::snapshot('order-be-net'));
 
