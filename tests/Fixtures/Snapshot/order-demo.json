@@ -1,0 +1,95 @@
+{
+    "id": "01a153967e4b72b9b5f160b5f4557dae",
+    "orderNumber": "10000",
+    "orderDateTime": "2026-10-19T09:55:34+00:00",
+    "currencyFactor": 1,
+    "taxStatus": "gross",
+    "customerComment": "Test comment",
+    "customerEmail": "test@example.test",
+    "shippingAddress": {
+        "firstName": "Jan",
+        "lastName": "Test",
+        "company": null,
+        "street": "Teststraat 1",
+        "additionalAddressLine1": null,
+        "additionalAddressLine2": null,
+        "zipcode": "1234 AB",
+        "city": "Teststad",
+        "countryIso": "NL",
+        "stateName": null,
+        "phoneNumber": null
+    },
+    "billingAddress": {
+        "firstName": "Jan",
+        "lastName": "Test",
+        "company": null,
+        "street": "Teststraat 1",
+        "additionalAddressLine1": null,
+        "additionalAddressLine2": null,
+        "zipcode": "1234 AB",
+        "city": "Teststad",
+        "countryIso": "NL",
+        "stateName": null,
+        "phoneNumber": null
+    },
+    "shippingCosts": {
+        "unitPrice": 0,
+        "quantity": 1,
+        "taxes": [
+            {
+                "tax": 0,
+                "taxRate": 21
+            }
+        ]
+    },
+    "lines": [
+        {
+            "type": "product",
+            "quantity": 2,
+            "label": "Variant product",
+            "productNumber": "SWDEMO10005.1",
+            "price": {
+                "unitPrice": 19.99,
+                "quantity": 2,
+                "taxes": [
+                    {
+                        "tax": 6.94,
+                        "taxRate": 21
+                    }
+                ]
+            },
+            "product": {
+                "id": "019fdb799f40710b81159bd1cc968414",
+                "parentId": "43a23e0c03bf4ceabc6055a2185faa87",
+                "productNumber": "SWDEMO10005.1",
+                "ean": null,
+                "name": "Variant product",
+                "priceGross": 19.99,
+                "weight": 0.5,
+                "width": null,
+                "height": null,
+                "length": null,
+                "type": "physical",
+                "customFields": [],
+                "parent": {
+                    "id": "43a23e0c03bf4ceabc6055a2185faa87",
+                    "parentId": null,
+                    "productNumber": "SWDEMO10005",
+                    "ean": null,
+                    "name": "Variant product",
+                    "priceGross": 19.99,
+                    "weight": 0.5,
+                    "width": null,
+                    "height": null,
+                    "length": null,
+                    "type": "physical",
+                    "customFields": [],
+                    "parent": null
+                }
+            }
+        }
+    ],
+    "orderData": null,
+    "notes": [],
+    "shipments": []
+}
