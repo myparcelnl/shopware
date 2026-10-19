@@ -12,6 +12,7 @@ use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
@@ -28,6 +29,7 @@ use MyParcelNL\Pdk\App\Api\Contract\BackendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Api\Contract\FrontendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
+use MyParcelNL\Pdk\App\Order\Contract\PdkOrderNoteRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
@@ -151,6 +153,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),
+            PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),
             PdkWebhooksRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkWebhooksRepository::class),
