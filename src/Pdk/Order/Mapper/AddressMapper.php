@@ -15,7 +15,8 @@ use Throwable;
  * Shopware has one street field. For the countries where MyParcel needs a separate
  * house number (countriesWithSeparateAddressFields), the street is split with the
  * SDK. Some merchants use additionalAddressLine1 as the house number field, so when
- * the street alone has no number, the mapper tries street plus that line. There is
+ * the street alone has no number, the mapper tries street plus that line, and keeps
+ * that split only when the street part stays the same as the street field. There is
  * no configurable template: the old plugin's template was a constant source of
  * support tickets.
  */
@@ -45,6 +46,12 @@ final class AddressMapper
 
             if (null === $split && '' !== $line1) {
                 $split = $this->split($street . ' ' . $line1, $cc);
+
+                // Accept the split only when line 1 holds just the house number. Line 1
+                // "Appartement 3" would otherwise give street "Teststraat Appartement".
+                if (null !== $split && 0 !== strcasecmp(trim($split['street']), $street)) {
+                    $split = null;
+                }
 
                 if (null !== $split) {
                     $extraLines = [$line2];

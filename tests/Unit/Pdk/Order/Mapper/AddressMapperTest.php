@@ -30,6 +30,8 @@ dataset('splits', [
     'NL word suffix'       => [['street' => 'Teststraat 12-bis'], 'Teststraat', '12', 'bis', null, null],
     'BE box number'        => [['street' => 'Kerkstraat 16 bus 2', 'countryIso' => 'BE'], 'Kerkstraat', '16', null, '2', null],
     'number in line 1'     => [['street' => 'Teststraat', 'additionalAddressLine1' => '12', 'additionalAddressLine2' => 'Achterom'], 'Teststraat', '12', null, null, 'Achterom'],
+    'suffix in line 1'     => [['street' => 'Teststraat', 'additionalAddressLine1' => '12A'], 'Teststraat', '12', 'A', null, null],
+    'BE box in line 1'     => [['street' => 'Kerkstraat', 'additionalAddressLine1' => '16 bus 2', 'countryIso' => 'BE'], 'Kerkstraat', '16', null, '2', null],
     'lines stay info'      => [['street' => 'Teststraat 12', 'additionalAddressLine1' => '2e etage', 'additionalAddressLine2' => 'Achterom'], 'Teststraat', '12', null, null, '2e etage Achterom'],
 ]);
 
@@ -60,6 +62,27 @@ it('sends the street unsplit and reports it when no number is found', function (
         ->and($result->contactDetails['street'])->toBe('Teststraat')
         ->and($result->contactDetails['number'])->toBeNull();
 });
+
+dataset('line 1 without house number', [
+    'NL apartment' => ['Teststraat', 'NL', 'Appartement 3'],
+    'NL post box'  => ['Teststraat', 'NL', 'Postbus 12'],
+    'BE apartment' => ['Kerkstraat', 'BE', 'Appartement 3'],
+]);
+
+it('does not take a number from line 1 that is not a house number', function (string $street, string $cc, string $line1) {
+    $result = (new AddressMapper())->map(address([
+        'street'                 => $street,
+        'additionalAddressLine1' => $line1,
+        'countryIso'             => $cc,
+    ]), null);
+
+    expect($result->splitFailed)->toBeTrue()
+        ->and($result->contactDetails)->toMatchArray([
+            'street'               => $street,
+            'number'               => null,
+            'streetAdditionalInfo' => $line1,
+        ]);
+})->with('line 1 without house number');
 
 it('fails a belgian split cleanly, without php warnings', function () {
     $result = (new AddressMapper())->map(address(['street' => 'Kerkstraat', 'countryIso' => 'BE']), null);
