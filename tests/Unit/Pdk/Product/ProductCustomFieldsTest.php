@@ -81,6 +81,16 @@ it('defines a field per setting with a fitting component', function () {
         ->and(array_column($definitions['myparcel_package_type']['config']['options'], 'value'))->toContain('package', 'mailbox');
 });
 
+it('defines the field set without a relation to an entity', function () {
+    $set = ProductCustomFields::setDefinition();
+
+    expect($set)->not->toHaveKey('relations')
+        ->and($set['name'])->toBe(ProductCustomFields::SET_NAME)
+        ->and($set['active'])->toBeTrue()
+        ->and($set['config']['label']['en-GB'])->toBe('MyParcel product settings (managed by the plugin)')
+        ->and($set['customFields'])->toBe(ProductCustomFields::fieldDefinitions());
+});
+
 it('offers inherit as the first package type option', function () {
     $definitions = array_column(ProductCustomFields::fieldDefinitions(), null, 'name');
     $options     = $definitions['myparcel_package_type']['config']['options'];

@@ -120,6 +120,34 @@ final class ProductCustomFields
     }
 
     /**
+     * The custom field set payload for the installer, without ids.
+     *
+     * The set has no relation to an entity on purpose. With a relation to product,
+     * Shopware shows the fields in the "Custom fields" card of the product page. That
+     * card is a second editor next to the MyParcel tab, and its Save sends an old copy
+     * of the custom fields that overwrites what the MyParcel tab stored. Shopware
+     * still stores and types the values, because it reads the type of a custom field
+     * from its name, not from the relation.
+     *
+     * @return array{name: string, active: bool, config: array<string, mixed>, customFields: list<array{name: string, type: string, config: array<string, mixed>}>}
+     */
+    public static function setDefinition(): array
+    {
+        return [
+            'name'         => self::SET_NAME,
+            'active'       => true,
+            'config'       => [
+                'label' => [
+                    'en-GB' => 'MyParcel product settings (managed by the plugin)',
+                    'de-DE' => 'MyParcel-Produkteinstellungen (vom Plugin verwaltet)',
+                    'nl-NL' => 'MyParcel-productinstellingen (beheerd door de plugin)',
+                ],
+            ],
+            'customFields' => self::fieldDefinitions(),
+        ];
+    }
+
+    /**
      * The custom field payloads for the installer, without ids.
      *
      * @return list<array{name: string, type: string, config: array<string, mixed>}>

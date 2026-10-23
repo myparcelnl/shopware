@@ -89,8 +89,9 @@ class MyParcelShopware extends Plugin
     /**
      * Clears the compiled PDK container, so the new plugin version does not
      * use the definitions of the old one. Then syncs the custom field set with the
-     * plugin definition: it adds a field for each new PDK setting, and resets the
-     * labels and the config of the existing fields, also when a merchant edited them.
+     * plugin definition: it adds a field for each new PDK setting, resets the
+     * labels and the config of the existing fields, also when a merchant edited them,
+     * and removes a relation of the set to product.
      */
     public function update(UpdateContext $updateContext): void
     {
@@ -144,7 +145,10 @@ class MyParcelShopware extends Plugin
 
     private function createCustomFieldInstaller(): CustomFieldInstaller
     {
-        return new CustomFieldInstaller($this->container->get('custom_field_set.repository'));
+        return new CustomFieldInstaller(
+            $this->container->get('custom_field_set.repository'),
+            $this->container->get('custom_field_set_relation.repository')
+        );
     }
 
     /**
