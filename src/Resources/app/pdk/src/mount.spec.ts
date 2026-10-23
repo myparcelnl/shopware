@@ -45,6 +45,19 @@ describe('mount', () => {
     expect(dispose).toHaveBeenCalledOnce();
   });
 
+  it('unmounts the rendered apps and stops the PDK admin when one render fails', async () => {
+    const app = {unmount: vi.fn()};
+    const error = new Error('render failed');
+    const render = vi.fn().mockResolvedValueOnce(app).mockRejectedValueOnce(error);
+    const dispose = vi.fn();
+    vi.mocked(createPdkAdmin).mockReturnValue({render, dispose} as never);
+
+    await expect(mount(createRoot(), {getRequestHeaders: () => ({})})).rejects.toBe(error);
+
+    expect(app.unmount).toHaveBeenCalledOnce();
+    expect(dispose).toHaveBeenCalledOnce();
+  });
+
   it('skips an app that did not mount', async () => {
     vi.mocked(createPdkAdmin).mockReturnValue({render: vi.fn().mockResolvedValue(undefined), dispose: vi.fn()} as never);
 
