@@ -18,39 +18,39 @@ use Shopware\Core\Framework\Uuid\Uuid;
  */
 final class CustomFieldInstaller
 {
-    public function __construct(private readonly EntityRepository $customFieldSetRepository)
-    {
+    public function __construct(
+        private readonly EntityRepository $customFieldSetRepository,
+        private readonly EntityRepository $customFieldSetRelationRepository
+    ) {
     }
 
     /**
-     * Creates the field set, or adds the fields it does not have yet.
+     * Creates the field set, or adds the fields it does not have yet. Removes the
+     * relation to product, so the fields do not show in the product page's "Custom
+     * fields" card (see ProductCustomFields::setDefinition()).
      */
     public function install(Context $context): void
     {
-        $this->customFieldSetRepository->upsert([[
-            'id'           => Uuid::fromStringToHex(ProductCustomFields::SET_NAME),
-            'name'         => ProductCustomFields::SET_NAME,
-            'active'       => true,
-            'config'       => [
-                'label' => [
-                    'en-GB' => 'MyParcel (fill in the default language)',
-                    'de-DE' => 'MyParcel (in der Standardsprache ausfüllen)',
-                    'nl-NL' => 'MyParcel (vul in in de standaardtaal)',
-                ],
-            ],
-            'relations'    => [[
-                'id'         => Uuid::fromStringToHex(ProductCustomFields::SET_NAME . '.product'),
-                'entityName' => 'product',
-            ]],
-            'customFields' => array_map(
-                static fn (array $field) => ['id' => Uuid::fromStringToHex($field['name'])] + $field,
-                ProductCustomFields::fieldDefinitions()
-            ),
-        ]], $context);
+        $set                 = ProductCustomFields::setDefinition();
+        $set['id']           = Uuid::fromStringToHex(ProductCustomFields::SET_NAME);
+        $set['customFields'] = array_map(
+            static fn (array $field) => ['id' => Uuid::fromStringToHex($field['name'])] + $field,
+            $set['customFields']
+        );
+
+        $this->customFieldSetRepository->upsert([$set], $context);
+
+        // Earlier development builds related the set to product. An upsert without
+        // relations keeps an existing one, so delete it by its fixed id. A missing
+        // relation is not an error for the DAL.
+        $this->customFieldSetRelationRepository->delete(
+            [['id' => Uuid::fromStringToHex(ProductCustomFields::SET_NAME . '.product')]],
+            $context
+        );
     }
 
     /**
-     * Deletes the field set. Its fields and relation cascade.
+     * Deletes the field set. Its fields cascade.
      */
     public function uninstall(Context $context): void
     {
