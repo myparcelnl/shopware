@@ -229,8 +229,8 @@ overrides:
 
 ## Connecting a MyParcel account
 
-Open Settings → Extensions → MyParcel in the admin, or the "Configure" button of
-the plug-in in the extension list, and enter the API key there. A user needs the
+Open Settings → Extensions → MyParcel in the admin, or "Open extension" in the
+context menu of the plug-in in the extension list, and enter the API key there. A user needs the
 "Use MyParcel" permission (Settings → Users & permissions → Roles → Detailed
 privileges); an admin user has it.
 

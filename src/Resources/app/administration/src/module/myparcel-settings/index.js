@@ -26,7 +26,7 @@ Shopware.Module.register('myparcel-settings', {
         privilege: 'myparcel.access',
     },
 
-    // Makes the "Configure" button in the extension list open this page.
+    // Makes "Open extension" in the context menu of the extension list open this page.
     extensionEntryRoute: {
         extensionName: 'MyParcelShopware',
         route: 'myparcel.settings.index',
