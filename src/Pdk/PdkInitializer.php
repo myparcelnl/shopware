@@ -6,8 +6,13 @@ namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
+use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
+use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcel\Shopware\Pdk\View\ViewResolverInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use Psr\Log\LoggerInterface;
 
@@ -23,13 +28,18 @@ use Psr\Log\LoggerInterface;
  * When that directory is read-only, production mode runs without a compiled
  * container instead of failing on every boot.
  */
-final class PdkInitializer
+final class PdkInitializer implements PdkBootInterface
 {
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ConfigStorageInterface $configStorage,
         private readonly LocaleResolverInterface $localeResolver,
         private readonly UrlResolverInterface $urlResolver,
+        private readonly ViewResolverInterface $viewResolver,
+        private readonly OrderStatusProviderInterface $orderStatusProvider,
+        private readonly OrderStorageInterface $orderStorage,
+        private readonly ProductStorageInterface $productStorage,
+        private readonly OrderStateTransitionerInterface $orderStateTransitioner,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -43,7 +53,16 @@ final class PdkInitializer
     {
         PdkBootstrapper::setLogger($this->logger);
         PdkBootstrapper::setServices(
-            new ShopwareServices($this->configStorage, $this->localeResolver, $this->urlResolver)
+            new ShopwareServices(
+                $this->configStorage,
+                $this->localeResolver,
+                $this->urlResolver,
+                $this->viewResolver,
+                $this->orderStatusProvider,
+                $this->orderStorage,
+                $this->productStorage,
+                $this->orderStateTransitioner
+            )
         );
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

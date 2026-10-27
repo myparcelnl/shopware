@@ -3,6 +3,18 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
+        <service id="MyParcel\Shopware\Entity\OrderData\OrderDataDefinition">
+            <tag name="shopware.entity.definition" entity="myparcel_order_data"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Entity\OrderShipment\OrderShipmentDefinition">
+            <tag name="shopware.entity.definition" entity="myparcel_order_shipment"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Entity\OrderExtension">
+            <tag name="shopware.entity.extension"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
@@ -10,17 +22,64 @@
         <service id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver">
             <argument type="service" id="request_stack"/>
             <argument type="service" id="Shopware\Core\System\Locale\LanguageLocaleCodeProvider"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="request_stack"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver">
             <argument type="service" id="router"/>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\View\RequestViewResolver">
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Language\ShopwareLanguageIdResolver">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Order\ShopwareOrderStatusProvider">
+            <argument type="service" id="state_machine_state.repository"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLanguageIdResolver"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage">
+            <argument type="service" id="product.repository"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="myparcel_order_data.repository"/>
+            <argument type="service" id="myparcel_order_shipment.repository"/>
+            <argument type="service" id="currency.repository"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="state_machine_transition.repository"/>
+            <argument type="service" id="Shopware\Core\System\StateMachine\StateMachineRegistry"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\View\RequestViewResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\ShopwareOrderStatusProvider"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
             <argument>%kernel.debug%</argument>
@@ -36,6 +95,26 @@
 
         <service id="MyParcel\Shopware\Controller\AdminPdkController" public="true">
             <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Admin\ShopwareAssetUrlResolver">
+            <argument type="service" id="shopware.asset.asset"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Admin\AdminAssets">
+            <argument type="service" id="MyParcel\Shopware\Admin\ShopwareAssetUrlResolver"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\AdminViewController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer"/>
+            <argument type="service" id="MyParcel\Shopware\Admin\AdminAssets"/>
             <tag name="controller.service_arguments"/>
         </service>
 
@@ -59,6 +138,13 @@
 
         <service id="MyParcel\Shopware\Command\AccountUpdateCommand">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Command\OrderShowCommand">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage"/>
+            <argument type="service" id="order.repository"/>
             <tag name="console.command"/>
         </service>
     </services>

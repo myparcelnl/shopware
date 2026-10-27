@@ -1,0 +1,11 @@
+{% block myparcel_order_detail_tab %}
+<div class="myparcel-order-detail-tab">
+    {% block myparcel_order_detail_tab_content %}
+    <sw-loader v-if="isLoading" />
+    <div
+        ref="pdkRoot"
+        class="myparcel-pdk"
+    ></div>
+    {% endblock %}
+</div>
+{% endblock %}

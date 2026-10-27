@@ -1,0 +1,9 @@
+{
+    "myparcel-product": {
+        "detail": {
+            "tab": "MyParcel",
+            "saveHint": "MyParcel speichert diese Einstellungen sofort. Die Shopware-Schaltfläche Speichern ist dafür nicht nötig.",
+            "loadError": "Die MyParcel-Daten dieses Produkts konnten nicht geladen werden."
+        }
+    }
+}

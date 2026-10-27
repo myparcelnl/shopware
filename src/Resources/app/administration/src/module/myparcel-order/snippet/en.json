@@ -1,0 +1,13 @@
+{
+    "myparcel-order": {
+        "detail": {
+            "tab": "MyParcel",
+            "loadError": "Could not load the MyParcel data of this order."
+        },
+        "list": {
+            "column": "MyParcel",
+            "loadError": "The MyParcel data of the orders could not load.",
+            "actionError": "The MyParcel action could not start."
+        }
+    }
+}

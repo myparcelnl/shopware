@@ -41,3 +41,32 @@ spl_autoload_register(static function (string $class): void {
         }
     }
 });
+
+/*
+ * PDK models resolve services through the Pdk facade, so a test that builds one
+ * needs a booted PDK. The PDK ships its own mock environment in its tests/
+ * directory (MockPdkFactory, TestBootstrapper, model factories). Composer does not
+ * autoload a dependency's autoload-dev, so map those namespaces here. Only the
+ * test run sees this: the shop's scoped vendor never loads tests/Pest.php.
+ */
+$pdkTestsDir = dirname(__DIR__) . '/vendor/myparcelnl/pdk/tests';
+
+require_once $pdkTestsDir . '/functions.php';
+
+spl_autoload_register(static function (string $class) use ($pdkTestsDir): void {
+    $candidates = [];
+
+    if (str_starts_with($class, 'MyParcelNL\\Pdk\\Tests\\')) {
+        $candidates[] = $pdkTestsDir . '/' . str_replace('\\', '/', substr($class, strlen('MyParcelNL\\Pdk\\Tests\\'))) . '.php';
+    } elseif (str_starts_with($class, 'MyParcelNL\\Pdk\\')) {
+        $candidates[] = $pdkTestsDir . '/factories/' . str_replace('\\', '/', substr($class, strlen('MyParcelNL\\Pdk\\'))) . '.php';
+    }
+
+    foreach ($candidates as $file) {
+        if (is_file($file)) {
+            require_once $file;
+
+            return;
+        }
+    }
+});

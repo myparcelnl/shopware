@@ -182,10 +182,70 @@ request and falls back to English.
 `fast-glob` is in `devDependencies` only because `@myparcel-dev/pdk-app-builder`
 imports it without declaring it. Remove it once the builder declares it itself.
 
+### Admin assets
+
+The plug-in ships two built admin bundles. Both are in git, so a shop never
+builds anything:
+
+| Bundle                | Source                             | Output                                |
+| --------------------- | ---------------------------------- | ------------------------------------- |
+| Shopware admin module | `src/Resources/app/administration` | `src/Resources/public/administration` |
+| PDK admin app         | `src/Resources/app/pdk`            | `src/Resources/public/pdk`            |
+
+The PDK admin app is a separate IIFE with its own Vue, because the Shopware build
+replaces `vue` with the Shopware Vue. The admin module loads it on the settings
+page, in the order list (a "MyParcel" column and the PDK bulk actions), in a
+"MyParcel" tab of the order detail and in a "MyParcel" tab of the product detail.
+The order detail and the product tab each open one PDK session
+(`src/Resources/app/pdk/src/session.ts`). The order list opens a new session for
+each load of the list: a new page, sort, filter or column change. They show the
+PDK action and API notifications as Shopware toasts. The settings page shows them
+in the PDK. The product tab shows a banner: the PDK saves product settings
+directly, not with the Shopware save button. Rebuild a bundle after you change
+its source, and commit the output with the change.
+
+Build the PDK admin app, and run the tests of both bundles, in the web container:
+
+```shell
+corepack pnpm build:pdk
+corepack pnpm test:pdk
+```
+
+The shop serves the copy in `public/bundles`, not the build output. After a
+build, run `bin/console assets:install` from the shop root, or the admin keeps
+the old bundle.
+
+Build the Shopware admin module in the web container, from the shop root.
+`bin/build-administration.sh` cannot do it: it runs `npm ci` in every plug-in
+root with a `package.json`, and this plug-in uses pnpm.
+
+```shell
+bin/console bundle:dump && bin/console feature:dump
+cd vendor/shopware/administration/Resources/app/administration
+npm install --prefer-offline --omit=dev
+PROJECT_ROOT=/var/www/html SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS=1 npm run build
+cd /var/www/html && bin/console assets:install
+```
+
+To work on js-pdk at the same time, mount your js-pdk checkout in the web
+container on its host path (see `docker-compose.override.yml` in the docker
+environment), and add `link:` overrides with absolute paths to
+`pnpm-workspace.yaml`. Do not commit them.
+
+```yaml
+overrides:
+  '@myparcel-dev/pdk-admin': 'link:/Users/<user>/Projects/js-pdk/apps/admin'
+  '@myparcel-dev/pdk-admin-preset-default': 'link:/Users/<user>/Projects/js-pdk/apps/admin-preset-default'
+```
+
 ## Connecting a MyParcel account
 
-Until the admin settings screen exists, set the API key from the console. The
-key is validated when it is saved:
+Open Settings → Extensions → MyParcel in the admin, or "Open extension" in the
+context menu of the plug-in in the extension list, and enter the API key there. A user needs the
+"Use MyParcel" permission (Settings → Users & permissions → Roles → Detailed
+privileges); an admin user has it.
+
+The key can also be set from the console. It is validated when it is saved:
 
 ```shell
 read -rs MYPARCEL_API_KEY && export MYPARCEL_API_KEY
@@ -205,15 +265,30 @@ the key.
 Settings and the account are stored installation-wide in `system_config`, under
 `MyParcelShopware.pdk.*`.
 
+## Inspecting orders
+
+`bin/console myparcel:order:show <orderNumber>` prints an order as the PDK sees it:
+the split address, the lines with weight in grams and the amounts in euro cents.
+Add `--snapshot` to print the raw data that the plugin reads from Shopware. The unit
+test fixtures in `tests/Fixtures/Snapshot` are made this way. Replace all personal
+data with synthetic values before you commit a fixture.
+
 ## Routes
 
-The plug-in sends three kinds of requests to the PDK:
+The plug-in sends four kinds of requests to the PDK:
 
 | Route                          | Used by          | Access                                     |
 | ------------------------------ | ---------------- | ------------------------------------------ |
 | `/api/_action/myparcel/pdk`    | Admin app        | Admin API token with `myparcel:access`     |
+| `/api/_action/myparcel/view`   | Admin module     | Admin API token with `myparcel:access`     |
 | `/myparcel/pdk`                | Checkout         | Storefront, also via XMLHttpRequest        |
 | `/api/myparcel/webhook/{hash}` | MyParcel webhook | Public; only the stored hash is accepted   |
+
+The view route returns the PDK markup of one admin screen (`?view=pluginSettings`)
+as JSON, with the URLs of the PDK admin app. The Shopware admin is a single-page
+app, so no PHP page holds that markup. Some screens need a context: `orderIds[]`
+for the order list, `orderId` for the order detail and `productId` for the product
+detail.
 
 A webhook with a missing or wrong hash gets `404`. Until the webhooks are
 registered at MyParcel, no hash is stored, and every webhook gets `404`.

@@ -1,0 +1,64 @@
+// The grid cell is made for one line: a fixed height, no wrapping and hidden overflow.
+// The MyParcel block (logo, barcode, status and buttons) has several lines, so only this column grows with it.
+// The selectors are as specific as the compact rule of the grid, which has the highest specificity.
+.sw-data-grid {
+    .sw-data-grid__body .sw-data-grid__cell--myparcelShipments,
+    &.is--compact .sw-data-grid__body .sw-data-grid__cell--myparcelShipments {
+        overflow: visible;
+
+        .sw-data-grid__cell-content {
+            display: block;
+            height: auto;
+            min-height: 0;
+            overflow: visible;
+            white-space: normal;
+            text-overflow: clip;
+            line-height: normal;
+        }
+    }
+
+    // A compact PDK block: smaller gaps and buttons than the PDK admin uses on its own pages.
+    .sw-data-grid__body .sw-data-grid__cell--myparcelShipments .myparcel-pdk {
+        font-size: var(--font-size-xs);
+        line-height: 1.3;
+
+        button {
+            padding: 2px 8px;
+            font-size: var(--font-size-xs);
+            line-height: 1.3;
+        }
+
+        > * + * {
+            margin-top: var(--scale-size-4);
+        }
+
+        // The PDK puts the barcode with the dropdown, and the package type with the status, in flex rows. They need a gap and may wrap.
+        .mypa-flex:not([role='menu']) {
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: var(--scale-size-8);
+            row-gap: var(--scale-size-4);
+
+            // Items stay in the flow and keep their own width. In a narrow cell the dropdown of a shipment
+            // wraps under the barcode, it does not sit over the lines below.
+            > * {
+                position: static;
+                flex: 0 1 auto;
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            > .mypa-ml-auto {
+                flex: 0 0 auto;
+            }
+        }
+
+        // The order mode shows its action buttons in a group of plain div. Put them side by side.
+        // The dropdown button lays itself out, and its menu is in the body.
+        div:has(> button):not(.mypa-inline-flex, [role='menu']) {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--scale-size-4);
+        }
+    }
+}

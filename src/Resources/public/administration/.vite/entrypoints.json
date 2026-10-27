@@ -1,0 +1,29 @@
+{
+  "base": "/bundles/myparcelshopware/administration/",
+  "entryPoints": {
+    "my-parcel-shopware": {
+      "css": [
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-BdgWpMLs.css"
+      ],
+      "dynamic": [
+        "/bundles/myparcelshopware/administration/assets/index-Cbe4ICCk.js",
+        "/bundles/myparcelshopware/administration/assets/index-NXmuv0sz.js",
+        "/bundles/myparcelshopware/administration/assets/index-DnfThsAW.js"
+      ],
+      "js": [
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-BYsZrsQ3.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}
