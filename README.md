@@ -194,7 +194,12 @@ builds anything:
 
 The PDK admin app is a separate IIFE with its own Vue, because the Shopware build
 replaces `vue` with the Shopware Vue. The admin module loads it on the settings
-page. Rebuild a bundle after you change its source, and commit the output with
+page, in the order list (a "MyParcel" column and the PDK bulk actions), in a
+"MyParcel" tab of the order detail and in a "MyParcel" tab of the product detail.
+Each page opens one PDK session (`src/Resources/app/pdk/src/session.ts`), and the
+PDK action and API notifications show as Shopware toasts. The product tab shows a
+banner: the PDK saves product settings directly, not with the Shopware save
+button. Rebuild a bundle after you change its source, and commit the output with
 the change.
 
 Build the PDK admin app, and run the tests of both bundles, in the web container:
@@ -275,7 +280,9 @@ The plug-in sends four kinds of requests to the PDK:
 
 The view route returns the PDK markup of one admin screen (`?view=pluginSettings`)
 as JSON, with the URLs of the PDK admin app. The Shopware admin is a single-page
-app, so no PHP page holds that markup.
+app, so no PHP page holds that markup. Some screens need a context: `orderIds[]`
+for the order list, `orderId` for the order detail and `productId` for the product
+detail.
 
 A webhook with a missing or wrong hash gets `404`. Until the webhooks are
 registered at MyParcel, no hash is stored, and every webhook gets `404`.
