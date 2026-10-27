@@ -46,7 +46,7 @@ it('rejects an unknown view without rendering', function (array $query) {
         ->and($renderer->rendered)->toBe([]);
 })->with([
     'missing' => [[]],
-    'unknown' => [['view' => 'orderList']],
+    'unknown' => [['view' => 'unknownView']],
     'array'   => [['view' => ['pluginSettings']]],
 ]);
 

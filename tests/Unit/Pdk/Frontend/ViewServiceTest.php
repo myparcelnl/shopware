@@ -27,6 +27,30 @@ it('is no pdk page without a view', function () {
         ->and($service->isAnyPdkPage())->toBeFalse();
 });
 
-it('has no other pages yet', function (string $method) {
-    expect((new ViewService(new FixedViewResolver(AdminView::PluginSettings)))->{$method}())->toBeFalse();
-})->with(['isCheckoutPage', 'isChildProductPage', 'isOrderListPage', 'isOrderPage', 'isProductPage']);
+it('maps each view to its pdk page', function (AdminView $view, string $method) {
+    expect((new ViewService(new FixedViewResolver($view)))->{$method}())->toBeTrue();
+})->with([
+    [AdminView::OrderList, 'isOrderListPage'],
+    [AdminView::Order, 'isOrderPage'],
+    [AdminView::Product, 'isProductPage'],
+    [AdminView::ChildProduct, 'isChildProductPage'],
+]);
+
+it('is one page at a time', function () {
+    $service = new ViewService(new FixedViewResolver(AdminView::Product));
+
+    expect($service->isChildProductPage())->toBeFalse()
+        ->and($service->isOrderPage())->toBeFalse()
+        ->and($service->isPluginSettingsPage())->toBeFalse();
+});
+
+it('has modals on the order pages only', function (AdminView $view, bool $modals) {
+    expect((new ViewService(new FixedViewResolver($view)))->hasModals())->toBe($modals);
+})->with([
+    [AdminView::OrderList, true], [AdminView::Order, true],
+    [AdminView::Product, false], [AdminView::PluginSettings, false],
+]);
+
+it('is never the checkout in the admin', function () {
+    expect((new ViewService(new FixedViewResolver(AdminView::OrderList)))->isCheckoutPage())->toBeFalse();
+});

@@ -9,10 +9,9 @@ use MyParcel\Shopware\Pdk\View\ViewResolverInterface;
 use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
 
 /**
- * Tells the PDK which screen it renders for. Only the plugin settings exist so
- * far.
+ * Tells the PDK which screen it renders for. It maps the admin views. The
+ * checkout is not mapped yet.
  *
- * @TODO INT-1960: recognise the order list, the order detail and the product page.
  * @TODO INT-1961: recognise the checkout.
  */
 final class ViewService extends AbstractViewService
@@ -26,19 +25,28 @@ final class ViewService extends AbstractViewService
         return false;
     }
 
+    /**
+     * True when the view route renders the child product.
+     */
     public function isChildProductPage(): bool
     {
-        return false;
+        return AdminView::ChildProduct === $this->viewResolver->getView();
     }
 
+    /**
+     * True when the view route renders the order list.
+     */
     public function isOrderListPage(): bool
     {
-        return false;
+        return AdminView::OrderList === $this->viewResolver->getView();
     }
 
+    /**
+     * True when the view route renders the order detail.
+     */
     public function isOrderPage(): bool
     {
-        return false;
+        return AdminView::Order === $this->viewResolver->getView();
     }
 
     /**
@@ -49,8 +57,11 @@ final class ViewService extends AbstractViewService
         return AdminView::PluginSettings === $this->viewResolver->getView();
     }
 
+    /**
+     * True when the view route renders the product.
+     */
     public function isProductPage(): bool
     {
-        return false;
+        return AdminView::Product === $this->viewResolver->getView();
     }
 }

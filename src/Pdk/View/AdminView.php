@@ -7,8 +7,6 @@ namespace MyParcel\Shopware\Pdk\View;
 /**
  * The admin screens that show a PDK view. The admin app asks for one by its
  * value.
- *
- * @TODO INT-1960: add the order list, the order detail and the product.
  */
 enum AdminView: string
 {
@@ -18,4 +16,17 @@ enum AdminView: string
     public const REQUEST_ATTRIBUTE = 'myparcel_view';
 
     case PluginSettings = 'pluginSettings';
+    case OrderList = 'orderList';
+    case Order = 'order';
+    case Product = 'product';
+    case ChildProduct = 'childProduct';
+
+    /**
+     * True when the admin app may ask for this view by its value. The child
+     * product is not requestable: the server picks that view itself.
+     */
+    public function isRequestable(): bool
+    {
+        return self::ChildProduct !== $this;
+    }
 }
