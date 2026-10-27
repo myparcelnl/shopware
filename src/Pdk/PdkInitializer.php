@@ -28,7 +28,7 @@ use Psr\Log\LoggerInterface;
  * When that directory is read-only, production mode runs without a compiled
  * container instead of failing on every boot.
  */
-final class PdkInitializer
+final class PdkInitializer implements PdkBootInterface
 {
     public function __construct(
         private readonly LoggerInterface $logger,

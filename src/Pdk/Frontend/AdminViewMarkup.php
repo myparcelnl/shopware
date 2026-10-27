@@ -28,4 +28,25 @@ final class AdminViewMarkup
 
         return $initScript . $notifications . $modals . $component;
     }
+
+    /**
+     * The shell of a view that renders its components one by one, such as the
+     * order list: the boot element, the notifications and the modals. Without
+     * the boot element the app cannot start, so the admin shows a message
+     * instead.
+     *
+     * @throws EmptyAdminViewException
+     */
+    public static function composeShell(
+        AdminView $view,
+        string $initScript,
+        string $notifications,
+        string $modals
+    ): string {
+        if ('' === $initScript) {
+            throw EmptyAdminViewException::forView($view);
+        }
+
+        return $initScript . $notifications . $modals;
+    }
 }

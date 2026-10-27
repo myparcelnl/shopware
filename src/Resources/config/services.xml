@@ -108,6 +108,7 @@
 
         <service id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="request_stack"/>
         </service>
 
         <service id="MyParcel\Shopware\Controller\AdminViewController" public="true">
