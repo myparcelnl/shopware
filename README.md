@@ -204,12 +204,18 @@ corepack pnpm test:pdk
 ```
 
 Build the Shopware admin module in the web container, from the shop root.
-`bin/build-administration.sh` runs `npm ci` in every plug-in root with a
-`package.json`, and this plug-in uses pnpm, so skip that step for it. The admin module has no npm
-dependencies of its own.
+`bin/build-administration.sh` cannot do it here. It runs `npm ci` in every
+plug-in root with a `package.json`, and this plug-in uses pnpm. The script
+skips that step when `SKIP_MY_PARCEL_SHOPWARE` is set, but it makes the name of
+that variable with `\U` of GNU sed. The web container has BusyBox sed, so the
+name never matches and `npm ci` fails. Run the build steps yourself:
 
 ```shell
-SKIP_MY_PARCEL_SHOPWARE=1 SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS=1 bin/build-administration.sh
+bin/console bundle:dump && bin/console feature:dump
+cd vendor/shopware/administration/Resources/app/administration
+npm install --prefer-offline --omit=dev
+PROJECT_ROOT=/var/www/html SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS=1 npm run build
+cd /var/www/html && bin/console assets:install
 ```
 
 To work on js-pdk at the same time, mount your js-pdk checkout in the web
