@@ -10,7 +10,6 @@ import {
   DefaultCol,
   DefaultCurrencyInput,
   DefaultDropOffInput,
-  DefaultDropdownButton,
   DefaultFormGroup,
   DefaultHeading,
   DefaultImage,
@@ -37,6 +36,7 @@ import {
   DefaultToggleInput,
   DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
@@ -45,6 +45,7 @@ const FADE = 'mypa-fade';
 
 /**
  * preset-default renders plain HTML, except the icons: its icon only prints the name, so ShopwareIcon draws them.
+ * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
  */
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({
@@ -64,7 +65,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
     [AdminComponent.DropOffInput]: DefaultDropOffInput,
-    [AdminComponent.DropdownButton]: DefaultDropdownButton,
+    [AdminComponent.DropdownButton]: ShopwareDropdownButton,
     [AdminComponent.FormGroup]: DefaultFormGroup,
     [AdminComponent.Heading]: DefaultHeading,
     [AdminComponent.Icon]: ShopwareIcon,
