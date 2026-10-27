@@ -196,9 +196,10 @@ The PDK admin app is a separate IIFE with its own Vue, because the Shopware buil
 replaces `vue` with the Shopware Vue. The admin module loads it on the settings
 page, in the order list (a "MyParcel" column and the PDK bulk actions), in a
 "MyParcel" tab of the order detail and in a "MyParcel" tab of the product detail.
-Each page opens one PDK session (`src/Resources/app/pdk/src/session.ts`), and the
-PDK action and API notifications show as Shopware toasts. The product tab shows a
-banner: the PDK saves product settings directly, not with the Shopware save
+The order list, the order detail and the product tab each open one PDK session
+(`src/Resources/app/pdk/src/session.ts`), and show the PDK action and API
+notifications as Shopware toasts. The settings page shows them in the PDK. The
+product tab shows a banner: the PDK saves product settings directly, not with the Shopware save
 button. Rebuild a bundle after you change its source, and commit the output with
 the change.
 
