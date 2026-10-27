@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {type App, createApp, defineComponent, h, nextTick} from 'vue';
+import {type App, createApp, defineComponent, h, nextTick, reactive} from 'vue';
 import ShopwareDropdownButton from './ShopwareDropdownButton.vue';
 
 // The real ActionButton dispatches the action through the store. The stub only emits the click.
@@ -42,12 +42,14 @@ const actions = [
 ];
 
 let app: App | undefined;
+let props: {actions: typeof actions; disabled: boolean; hideText: boolean; size: string};
 let container: HTMLElement;
 let outside: HTMLElement;
 
 // The PDK app registers v-test and PdkButton. The test app has no use for the first and stubs the second.
 const mount = () => {
-  app = createApp(ShopwareDropdownButton, {actions, disabled: false, hideText: false, size: 'md'});
+  props = reactive({actions, disabled: false, hideText: false, size: 'md'});
+  app = createApp({render: () => h(ShopwareDropdownButton, {...props})});
   app.directive('test', {});
   app.component(
     'PdkButton',
@@ -59,6 +61,14 @@ const mount = () => {
 const toggle = (): HTMLElement => container.querySelector<HTMLElement>('[aria-haspopup="true"]') as HTMLElement;
 const menu = (): HTMLElement => container.querySelector<HTMLElement>('[role="menu"]') as HTMLElement;
 const isOpen = (): boolean => menu().style.display !== 'none' && toggle().getAttribute('aria-expanded') === 'true';
+
+// The menu is measured when it opens. happy-dom has no layout, so the rects are given.
+const mockRects = (group: Partial<DOMRect>, size: Partial<DOMRect>) => {
+  vi.stubGlobal('innerHeight', 768);
+  vi.stubGlobal('innerWidth', 1024);
+  vi.spyOn(container.firstElementChild as HTMLElement, 'getBoundingClientRect').mockReturnValue(group as DOMRect);
+  vi.spyOn(menu(), 'getBoundingClientRect').mockReturnValue(size as DOMRect);
+};
 
 const click = async (element: Element) => {
   element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
@@ -74,6 +84,7 @@ describe('ShopwareDropdownButton', () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     app?.unmount();
     app = undefined;
     container.remove();
@@ -137,33 +148,63 @@ describe('ShopwareDropdownButton', () => {
     expect(isOpen()).toBe(false);
   });
 
-  it('opens upward when there is no room below', async () => {
-    vi.spyOn(container.firstElementChild as HTMLElement, 'getBoundingClientRect').mockReturnValue({
-      top: 700,
-      bottom: 730,
-    } as DOMRect);
-    vi.spyOn(menu(), 'getBoundingClientRect').mockReturnValue({height: 120} as DOMRect);
-    vi.stubGlobal('innerHeight', 768);
+  it('places the menu below the group at its left edge when there is room', async () => {
+    mockRects({top: 100, bottom: 130, left: 50, right: 150}, {width: 120, height: 80});
 
     await click(toggle());
 
-    expect(menu().classList.contains('mypa-bottom-full')).toBe(true);
-    expect(menu().classList.contains('mypa-top-full')).toBe(false);
-    vi.unstubAllGlobals();
+    expect(menu().style.top).toBe('134px');
+    expect(menu().style.left).toBe('50px');
   });
 
-  it('opens downward when there is room', async () => {
+  it('opens upward near the bottom of the viewport', async () => {
+    mockRects({top: 700, bottom: 730, left: 50, right: 150}, {width: 120, height: 120});
+
     await click(toggle());
 
-    expect(menu().classList.contains('mypa-top-full')).toBe(true);
+    expect(menu().style.top).toBe('576px');
+  });
+
+  it('aligns to the right edge of the group near the right side of the viewport', async () => {
+    mockRects({top: 100, bottom: 130, left: 1000, right: 1100}, {width: 120, height: 80});
+
+    await click(toggle());
+
+    expect(menu().style.left).toBe('980px');
+  });
+
+  it('closes on a scroll anywhere, also of an element', async () => {
+    await click(toggle());
+    container.dispatchEvent(new Event('scroll'));
+    await nextTick();
+
+    expect(isOpen()).toBe(false);
+  });
+
+  it('closes on a resize', async () => {
+    await click(toggle());
+    window.dispatchEvent(new Event('resize'));
+    await nextTick();
+
+    expect(isOpen()).toBe(false);
+  });
+
+  it('closes when it becomes disabled', async () => {
+    await click(toggle());
+    props.disabled = true;
+    await nextTick();
+
+    expect(isOpen()).toBe(false);
   });
 
   it('removes its document listeners on unmount', async () => {
     const remove = vi.spyOn(document, 'removeEventListener');
+    const removeFromWindow = vi.spyOn(window, 'removeEventListener');
 
     app?.unmount();
     app = undefined;
 
     expect(remove.mock.calls.map(([type]) => type)).toEqual(expect.arrayContaining(['click', 'keydown']));
+    expect(removeFromWindow.mock.calls.map(([type]) => type)).toEqual(expect.arrayContaining(['scroll', 'resize']));
   });
 });

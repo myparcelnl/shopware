@@ -34,8 +34,8 @@
       v-if="hasMenu"
       v-show="toggled"
       ref="menu"
-      :class="openUp ? 'mypa-bottom-full mypa-mb-1' : 'mypa-top-full mypa-mt-1'"
-      class="mypa-absolute mypa-left-0 mypa-z-50 mypa-flex mypa-flex-col mypa-items-stretch mypa-gap-1 mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-p-1 mypa-shadow"
+      :style="menuStyle"
+      class="mypa-fixed mypa-z-50 mypa-flex mypa-flex-col mypa-items-stretch mypa-gap-1 mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-p-1 mypa-shadow"
       role="menu">
       <ActionButton
         v-for="(action, index) in dropdownActions.hidden"
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, nextTick, onBeforeUnmount, onMounted, ref} from 'vue';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {
   ActionButton,
   AdminComponent,
@@ -73,12 +73,16 @@ const {translate} = useLanguage();
 
 const root = ref<HTMLElement>();
 const menu = ref<HTMLElement>();
-const openUp = ref(false);
+const menuStyle = ref<{top?: string; left?: string}>({});
 
 const hasMenu = computed(() => dropdownActions.value.hidden.length > 0);
 
+const GAP = 4;
+
 /**
- * Opens the menu below the buttons, or above them when the viewport has no room below. The menu has a size once it is shown, so it is measured after the render.
+ * Opens the menu below the buttons, or above them when the viewport has no room below.
+ * The menu is fixed, because the grid of the order list clips an absolute menu. It has a size once it is shown, so it is
+ * placed after the render: at the left edge of the group, or at its right edge when the menu would pass the viewport.
  */
 const onToggle = async () => {
   const opening = !toggled.value;
@@ -92,10 +96,35 @@ const onToggle = async () => {
   await nextTick();
 
   const group = root.value?.getBoundingClientRect();
-  const height = menu.value?.getBoundingClientRect().height ?? 0;
+  const size = menu.value?.getBoundingClientRect();
 
-  openUp.value = Boolean(group) && height > window.innerHeight - group!.bottom && group!.top > height;
+  if (!group || !size) {
+    return;
+  }
+
+  const fitsBelow = group.bottom + GAP + size.height <= window.innerHeight;
+  const fitsAbove = group.top - GAP - size.height >= 0;
+  const top = fitsBelow || !fitsAbove ? group.bottom + GAP : group.top - GAP - size.height;
+  const left = group.left + size.width > window.innerWidth ? group.right - size.width : group.left;
+
+  menuStyle.value = {top: `${top}px`, left: `${left}px`};
 };
+
+// The fixed menu does not follow its buttons, so it closes instead of moving.
+const close = () => {
+  if (toggled.value) {
+    toggle(false);
+  }
+};
+
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (disabled) {
+      close();
+    }
+  },
+);
 
 // The menu is no hover or focus menu: it only leaves on a click outside, on Escape or after an action.
 const onDocumentClick = (event: MouseEvent) => {
@@ -113,10 +142,15 @@ const onDocumentKeydown = (event: KeyboardEvent) => {
 onMounted(() => {
   document.addEventListener('click', onDocumentClick);
   document.addEventListener('keydown', onDocumentKeydown);
+  // Capture: a scroll does not bubble, and the grid wrapper scrolls, not the window.
+  window.addEventListener('scroll', close, true);
+  window.addEventListener('resize', close);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick);
   document.removeEventListener('keydown', onDocumentKeydown);
+  window.removeEventListener('scroll', close, true);
+  window.removeEventListener('resize', close);
 });
 </script>
