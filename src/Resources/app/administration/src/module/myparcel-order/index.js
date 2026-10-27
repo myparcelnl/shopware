@@ -1,3 +1,4 @@
+import './extension/sw-order-list';
 import './extension/sw-order-detail';
 
 Shopware.Component.register('myparcel-order-detail-tab', () => import('./view/myparcel-order-detail-tab'));

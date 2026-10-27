@@ -3,6 +3,11 @@
         "detail": {
             "tab": "MyParcel",
             "loadError": "De MyParcel-gegevens van deze order konden niet laden."
+        },
+        "list": {
+            "column": "MyParcel",
+            "loadError": "De MyParcel-gegevens van de orders konden niet laden.",
+            "actionError": "De MyParcel-actie kon niet starten."
         }
     }
 }
