@@ -184,8 +184,8 @@ imports it without declaring it. Remove it once the builder declares it itself.
 
 ### Admin assets
 
-The plug-in ships two built admin bundles. Both are in git, so a shop never
-builds anything:
+The plug-in ships two built admin bundles. Neither is in git: the plug-in build
+in CI builds both (INT-1963). Build them yourself after a fresh clone:
 
 | Bundle                | Source                             | Output                                |
 | --------------------- | ---------------------------------- | ------------------------------------- |
@@ -194,8 +194,7 @@ builds anything:
 
 The PDK admin app is a separate IIFE with its own Vue, because the Shopware build
 replaces `vue` with the Shopware Vue. The admin module loads it on the settings
-page. Rebuild a bundle after you change its source, and commit the output with
-the change.
+page. Rebuild a bundle after you change its source.
 
 Build the PDK admin app, and run the tests of both bundles, in the web container:
 

@@ -19,3 +19,10 @@
 # Node tooling. The PDK admin build keeps its Vite cache next to its config.
 ###
 node_modules/
+
+###
+# Built admin bundles. The plug-in build in CI makes them (INT-1963); build
+# them locally with the commands in the README.
+###
+/src/Resources/public/administration/
+/src/Resources/public/pdk/
