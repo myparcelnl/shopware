@@ -38,6 +38,19 @@
             align-items: center;
             column-gap: var(--scale-size-8);
             row-gap: var(--scale-size-4);
+
+            // Items stay in the flow and keep their own width. In a narrow cell the dropdown of a shipment
+            // wraps under the barcode, it does not sit over the lines below.
+            > * {
+                position: static;
+                flex: 0 1 auto;
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            > .mypa-ml-auto {
+                flex: 0 0 auto;
+            }
         }
 
         // The order mode shows its action buttons in a group of plain div. Put them side by side.
