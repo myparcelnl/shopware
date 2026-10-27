@@ -30,7 +30,7 @@ describe('ShopwareIcon', () => {
     expect(svg?.querySelector('path')?.getAttribute('d')).toBeTruthy();
   });
 
-  it.each(['package', 'STANDARD_DELIVERY'])('renders nothing for the name %s', (icon) => {
+  it.each(['package', 'STANDARD_DELIVERY', 'constructor', 'toString', '__proto__'])('renders nothing for the name %s', (icon) => {
     expect(render(icon).querySelector('svg')).toBeNull();
   });
 

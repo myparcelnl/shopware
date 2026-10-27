@@ -22,5 +22,6 @@ import {SHOPWARE_ICONS} from './shopwareIcons';
 const props = defineProps<IconProps>();
 
 // The PDK also passes package and delivery types here. They have no icon and render nothing.
-const shape = computed(() => SHOPWARE_ICONS[props.icon]);
+// Own keys only: a name like "constructor" must not find a member of Object.prototype.
+const shape = computed(() => (Object.hasOwn(SHOPWARE_ICONS, props.icon) ? SHOPWARE_ICONS[props.icon] : undefined));
 </script>
