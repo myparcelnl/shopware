@@ -254,6 +254,14 @@ the key.
 Settings and the account are stored installation-wide in `system_config`, under
 `MyParcelShopware.pdk.*`.
 
+## Inspecting orders
+
+`bin/console myparcel:order:show <orderNumber>` prints an order as the PDK sees it:
+the split address, the lines with weight in grams and the amounts in euro cents.
+Add `--snapshot` to print the raw data that the plugin reads from Shopware. The unit
+test fixtures in `tests/Fixtures/Snapshot` are made this way. Replace all personal
+data with synthetic values before you commit a fixture.
+
 ## Routes
 
 The plug-in sends four kinds of requests to the PDK:

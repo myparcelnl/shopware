@@ -6,7 +6,10 @@ namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
+use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcel\Shopware\Pdk\View\ViewResolverInterface;
@@ -34,6 +37,9 @@ final class PdkInitializer
         private readonly UrlResolverInterface $urlResolver,
         private readonly ViewResolverInterface $viewResolver,
         private readonly OrderStatusProviderInterface $orderStatusProvider,
+        private readonly OrderStorageInterface $orderStorage,
+        private readonly ProductStorageInterface $productStorage,
+        private readonly OrderStateTransitionerInterface $orderStateTransitioner,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -52,7 +58,10 @@ final class PdkInitializer
                 $this->localeResolver,
                 $this->urlResolver,
                 $this->viewResolver,
-                $this->orderStatusProvider
+                $this->orderStatusProvider,
+                $this->orderStorage,
+                $this->productStorage,
+                $this->orderStateTransitioner
             )
         );
 

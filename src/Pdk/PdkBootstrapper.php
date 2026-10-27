@@ -8,17 +8,23 @@ use MyParcel\Shopware\Pdk\Account\Repository\PdkAccountRepository;
 use MyParcel\Shopware\Pdk\Api\BackendEndpointService;
 use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
+use MyParcel\Shopware\Pdk\Audit\Repository\NoopAuditRepository;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
 use MyParcel\Shopware\Pdk\Order\OrderStatusService;
+use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
+use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
+use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
+use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
@@ -31,10 +37,13 @@ use MyParcelNL\Pdk\App\Api\Contract\BackendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Api\Contract\FrontendEndpointServiceInterface;
 use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
+use MyParcelNL\Pdk\App\Order\Contract\PdkOrderNoteRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
+use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
+use MyParcelNL\Pdk\Audit\Contract\PdkAuditRepositoryInterface;
 use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
 use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
@@ -69,7 +78,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
 
     /**
      * The same kind of seam as setLogger(), for the services behind the settings,
-     * account, language, webhook and endpoint contracts.
+     * account, language, webhook, endpoint, order and product contracts.
      */
     public static function setServices(ShopwareServices $services): void
     {
@@ -122,9 +131,33 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
+    public static function getOrderStorage(): OrderStorageInterface
+    {
+        return self::getShopwareServices()->orderStorage;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
     public static function getViewResolver(): ViewResolverInterface
     {
         return self::getShopwareServices()->viewResolver;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getProductStorage(): ProductStorageInterface
+    {
+        return self::getShopwareServices()->productStorage;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getOrderStateTransitioner(): OrderStateTransitionerInterface
+    {
+        return self::getShopwareServices()->orderStateTransitioner;
     }
 
     /**
@@ -161,7 +194,6 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // Placeholders for the contracts that the adapter layer of epic
             // INT-1748 adds. Production mode compiles the container, and php-di
             // cannot compile an interface without a concrete class.
-            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderRepository::class),
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
 
@@ -173,7 +205,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             FrontendRenderServiceInterface::class       => \_MyParcel\DI\autowire(FrontendRenderService::class),
             OrderStatusProviderInterface::class         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusProvider']),
             OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(OrderStatusService::class),
+            OrderStorageInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStorage']),
+            ProductStorageInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductStorage']),
+            OrderStateTransitionerInterface::class      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStateTransitioner']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
+            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),
+            PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class),
+            PdkProductRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkProductRepository::class),
+            PdkAuditRepositoryInterface::class          => \_MyParcel\DI\autowire(NoopAuditRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),
             PdkWebhooksRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkWebhooksRepository::class),

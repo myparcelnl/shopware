@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace MyParcel\Shopware;
 
 use Doctrine\DBAL\Connection;
+use MyParcel\Shopware\Installer\CustomFieldInstaller;
 use MyParcelNL\Pdk\Base\Pdk as BasePdk;
 use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcel\Shopware\Pdk\PdkBootstrapper;
+use MyParcel\Shopware\Pdk\Product\ProductCustomFields;
 use MyParcel\Shopware\Pdk\Storage\SystemConfigStorage;
 use RuntimeException;
 use Shopware\Core\Framework\Adapter\Cache\CacheInvalidator;
 use Shopware\Core\Framework\Plugin;
+use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\System\SystemConfig\CachedSystemConfigLoader;
@@ -38,6 +41,24 @@ class MyParcelShopware extends Plugin
         $container->setParameter('myparcel.plugin_version', $this->readVersion());
     }
 
+    /**
+     * Creates the custom field set for the product settings. The tables come from
+     * the migrations in src/Migration.
+     */
+    public function install(InstallContext $installContext): void
+    {
+        parent::install($installContext);
+
+        $this->bootPdkForLifecycle($installContext->getCurrentPluginVersion());
+        $this->createCustomFieldInstaller()->install($installContext->getContext());
+    }
+
+    /**
+     * Without keepUserData, removes all plugin data: the PDK settings in
+     * system_config, the custom field set "myparcel_product", the myparcel_* custom
+     * field values of the products, and the tables myparcel_order_data and
+     * myparcel_order_shipment. With keepUserData, it keeps all of this.
+     */
     public function uninstall(UninstallContext $uninstallContext): void
     {
         parent::uninstall($uninstallContext);
@@ -50,17 +71,27 @@ class MyParcelShopware extends Plugin
         // MyParcelShopware.config.*; the PDK's own keys, the API key among them,
         // are ours to remove. The raw DELETE bypasses SystemConfigService, so its
         // cache tag is not invalidated by it and we do that ourselves below.
-        $this->container->get(Connection::class)->executeStatement(
+        $connection = $this->container->get(Connection::class);
+        $connection->executeStatement(
             'DELETE FROM system_config WHERE configuration_key LIKE :prefix',
             ['prefix' => SystemConfigStorage::KEY_PREFIX . '%']
         );
 
         $this->container->get(CacheInvalidator::class)->invalidate([CachedSystemConfigLoader::CACHE_TAG], true);
+
+        $this->bootPdkForLifecycle($this->readVersion());
+        $this->createCustomFieldInstaller()->uninstall($uninstallContext->getContext());
+        $this->removeProductCustomFieldValues($connection);
+
+        $connection->executeStatement('DROP TABLE IF EXISTS `myparcel_order_shipment`, `myparcel_order_data`');
     }
 
     /**
      * Clears the compiled PDK container, so the new plugin version does not
-     * use the definitions of the old one.
+     * use the definitions of the old one. Then syncs the custom field set with the
+     * plugin definition: it adds a field for each new PDK setting, resets the
+     * labels and the config of the existing fields, also when a merchant edited them,
+     * and removes a relation of the set to product.
      */
     public function update(UpdateContext $updateContext): void
     {
@@ -77,14 +108,12 @@ class MyParcelShopware extends Plugin
         //
         // Not routed through PdkInitializer: Shopware updates inactive plugins too,
         // and then our services are not in its container.
-        PdkBootstrapper::boot(
-            $updateContext->getUpdatePluginVersion(),
-            dirname(__DIR__),
-            '',
-            BasePdk::MODE_DEVELOPMENT
-        );
+        $this->bootPdkForLifecycle($updateContext->getUpdatePluginVersion());
 
         Pdk::clearCache();
+
+        // New PDK settings get a field. Fields of settings the PDK dropped stay.
+        $this->createCustomFieldInstaller()->install($updateContext->getContext());
     }
 
     /**
@@ -102,5 +131,40 @@ class MyParcelShopware extends Plugin
         }
 
         return $decoded['version'];
+    }
+
+    /**
+     * Boots the PDK without the Shopware services: the plugin's own services are
+     * not in the container while it is installed, updated or uninstalled. Nothing
+     * here resolves them.
+     */
+    private function bootPdkForLifecycle(string $version): void
+    {
+        PdkBootstrapper::boot($version, dirname(__DIR__), '', BasePdk::MODE_DEVELOPMENT);
+    }
+
+    private function createCustomFieldInstaller(): CustomFieldInstaller
+    {
+        return new CustomFieldInstaller(
+            $this->container->get('custom_field_set.repository'),
+            $this->container->get('custom_field_set_relation.repository')
+        );
+    }
+
+    /**
+     * product.custom_fields is translated, so the values live in product_translation.
+     * JSON_REMOVE ignores paths that do not exist.
+     */
+    private function removeProductCustomFieldValues(Connection $connection): void
+    {
+        $paths = array_map(
+            static fn (string $key) => sprintf("'$.%s'", ProductCustomFields::fieldName($key)),
+            ProductCustomFields::keys()
+        );
+
+        $connection->executeStatement(sprintf(
+            'UPDATE `product_translation` SET `custom_fields` = JSON_REMOVE(`custom_fields`, %s) WHERE `custom_fields` IS NOT NULL',
+            implode(', ', $paths)
+        ));
     }
 }
