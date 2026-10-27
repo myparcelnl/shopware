@@ -1,0 +1,8 @@
+{
+    "myparcel-order": {
+        "detail": {
+            "tab": "MyParcel",
+            "loadError": "De MyParcel-gegevens van deze order konden niet laden."
+        }
+    }
+}

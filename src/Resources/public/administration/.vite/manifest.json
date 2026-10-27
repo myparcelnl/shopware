@@ -1,17 +1,34 @@
 {
+  "_pdk-loader-D2wFQbQU.js": {
+    "file": "assets/pdk-loader-D2wFQbQU.js",
+    "name": "pdk-loader"
+  },
   "main.js": {
-    "file": "assets/my-parcel-shopware-pmdxoQEZ.js",
+    "file": "assets/my-parcel-shopware-DYsKHCWb.js",
     "name": "my-parcel-shopware",
     "src": "main.js",
     "isEntry": true,
     "dynamicImports": [
-      "module/myparcel-settings/page/myparcel-settings-index/index.js"
+      "module/myparcel-settings/page/myparcel-settings-index/index.js",
+      "module/myparcel-order/view/myparcel-order-detail-tab/index.js"
+    ]
+  },
+  "module/myparcel-order/view/myparcel-order-detail-tab/index.js": {
+    "file": "assets/index-C71mt5U-.js",
+    "name": "index",
+    "src": "module/myparcel-order/view/myparcel-order-detail-tab/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_pdk-loader-D2wFQbQU.js"
     ]
   },
   "module/myparcel-settings/page/myparcel-settings-index/index.js": {
-    "file": "assets/index-8vcB7PKp.js",
+    "file": "assets/index-BtMO0nCi.js",
     "name": "index",
     "src": "module/myparcel-settings/page/myparcel-settings-index/index.js",
-    "isDynamicEntry": true
+    "isDynamicEntry": true,
+    "imports": [
+      "_pdk-loader-D2wFQbQU.js"
+    ]
   }
 }
