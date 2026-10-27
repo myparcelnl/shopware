@@ -1,5 +1,6 @@
 Shopware.Component.register('myparcel-settings-index', () => import('./page/myparcel-settings-index'));
 
+// @TODO INT-2021: build the snippets in ./snippet from a Shopware tab of the PDK translations sheet.
 Shopware.Module.register('myparcel-settings', {
     type: 'plugin',
     name: 'myparcel-settings',
