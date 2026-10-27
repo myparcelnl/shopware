@@ -5,6 +5,9 @@
     .sw-data-grid__body .sw-data-grid__cell--myparcelShipments,
     &.is--compact .sw-data-grid__body .sw-data-grid__cell--myparcelShipments {
         overflow: visible;
+        // The dropdown menu floats over the next cells. A positioned cell with a z-index paints above them.
+        position: relative;
+        z-index: 1;
 
         .sw-data-grid__cell-content {
             display: block;
@@ -32,9 +35,20 @@
             margin-top: var(--scale-size-4);
         }
 
-        img {
-            max-height: var(--scale-size-20);
-            width: auto;
+        // The PDK puts the barcode with the dropdown, and the package type with the status, in flex rows. They need a gap and may wrap.
+        .mypa-flex:not([role='menu']) {
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: var(--scale-size-8);
+            row-gap: var(--scale-size-4);
+        }
+
+        // The order mode shows its action buttons in a group of plain div. Put them side by side.
+        // The dropdown button and its menu lay themselves out.
+        div:has(> button):not(.mypa-inline-flex, [role='menu']) {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--scale-size-4);
         }
     }
 }

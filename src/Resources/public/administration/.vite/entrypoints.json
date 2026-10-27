@@ -3,15 +3,15 @@
   "entryPoints": {
     "my-parcel-shopware": {
       "css": [
-        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-DcIMaMb5.css"
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-C2JRURtD.css"
       ],
       "dynamic": [
-        "/bundles/myparcelshopware/administration/assets/index-kOm4N8GA.js",
-        "/bundles/myparcelshopware/administration/assets/index-rXskRBM6.js",
-        "/bundles/myparcelshopware/administration/assets/index-CfqG_0_V.js"
+        "/bundles/myparcelshopware/administration/assets/index-B923Yomm.js",
+        "/bundles/myparcelshopware/administration/assets/index-D8_TA6EB.js",
+        "/bundles/myparcelshopware/administration/assets/index-BgxI1taD.js"
       ],
       "js": [
-        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-Bi0fkmD5.js"
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-DXpAAvbn.js"
       ],
       "legacy": false,
       "preload": []
