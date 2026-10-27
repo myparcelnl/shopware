@@ -20,6 +20,9 @@ final class ViewService extends AbstractViewService
     {
     }
 
+    /**
+     * Always false: the admin is never the checkout.
+     */
     public function isCheckoutPage(): bool
     {
         return false;
