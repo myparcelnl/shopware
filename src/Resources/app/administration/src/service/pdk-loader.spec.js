@@ -77,14 +77,6 @@ describe('pdk-loader', () => {
         expect(() => unmount()).not.toThrow();
     });
 
-    it('fails when the view is empty', async () => {
-        get.mockResolvedValue({data: {html: '', scripts: [], styles: []}});
-        const {mountView} = await loadModule();
-
-        await expect(mountView('pluginSettings', document.createElement('div'), () => true)).rejects.toThrow('is empty');
-        expect(mountPdk).not.toHaveBeenCalled();
-    });
-
     it('reads the token again for every request', async () => {
         const {getRequestHeaders} = await loadModule();
 

@@ -108,12 +108,9 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
   },
 
   transitions: {
-    modal: FADE,
-    modalBackdrop: FADE,
     notification: FADE,
     shipmentBox: FADE,
     tabNavigation: FADE,
-    tableRow: 'mypa-table-row',
   },
 
   generateFieldId(field) {

@@ -66,10 +66,6 @@ export async function mountView(view, root, isActive) {
         headers: {...getRequestHeaders(), Accept: 'application/json'},
     });
 
-    if (!data?.html) {
-        throw new Error(`The MyParcel view "${view}" is empty. The MyParcel log has the details.`);
-    }
-
     await Promise.all([
         ...data.styles.map((url) => loadOnce(url, createStylesheet)),
         ...data.scripts.map((url) => loadOnce(url, createScript)),
