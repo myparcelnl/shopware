@@ -21,6 +21,15 @@
   table {
     @apply mypa-w-full;
   }
+
+  // The icons size with the text around them and take its color.
+  .mypa-icon {
+    @apply mypa-inline-block mypa-h-[1em] mypa-w-[1em] mypa-align-[-0.125em];
+  }
+
+  .mypa-icon--spin {
+    @apply mypa-animate-spin;
+  }
 }
 
 .mypa-fade-enter-active,
