@@ -14,6 +14,8 @@ export default {
             isLoading: true,
             isActive: true,
             session: null,
+            // The element of the current load. Each load gets its own, so a late load cannot wipe a newer one.
+            loadRoot: null,
             // Counts the loads, so a slow load of an earlier order does not replace a later one.
             loadId: 0,
         };
@@ -21,7 +23,11 @@ export default {
 
     watch: {
         // The user opened another order while the tab stays the same component.
-        '$route.params.id'() {
+        '$route.params.id'(id) {
+            if (!id) {
+                return;
+            }
+
             this.load();
         },
     },
@@ -37,15 +43,13 @@ export default {
 
     methods: {
         /**
-         * Closes the open PDK session and empties the root element.
+         * Closes the open PDK session and removes the element of that load.
          */
         closeSession() {
             this.session?.unmount();
             this.session = null;
-
-            if (this.$refs.pdkRoot) {
-                this.$refs.pdkRoot.innerHTML = '';
-            }
+            this.loadRoot?.remove();
+            this.loadRoot = null;
         },
 
         /**
@@ -59,11 +63,17 @@ export default {
             this.isLoading = true;
             this.closeSession();
 
+            // A fresh element for this load only. A superseded load cleans up its own element.
+            const root = document.createElement('div');
+
+            this.$refs.pdkRoot.appendChild(root);
+            this.loadRoot = root;
+
             try {
                 const {session} = await openSession(
                     'order',
-                    {orderId: this.$route.params.id},
-                    this.$refs.pdkRoot,
+                    {orderId: this.$route.params.id.toLowerCase()},
+                    root,
                     isCurrent,
                     {onNotification: notifyShopware(this)},
                 );

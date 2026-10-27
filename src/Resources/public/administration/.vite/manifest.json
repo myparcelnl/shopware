@@ -4,7 +4,7 @@
     "name": "pdk-loader"
   },
   "main.js": {
-    "file": "assets/my-parcel-shopware-DYsKHCWb.js",
+    "file": "assets/my-parcel-shopware-Cf9z70RI.js",
     "name": "my-parcel-shopware",
     "src": "main.js",
     "isEntry": true,
@@ -14,7 +14,7 @@
     ]
   },
   "module/myparcel-order/view/myparcel-order-detail-tab/index.js": {
-    "file": "assets/index-C71mt5U-.js",
+    "file": "assets/index-BLNx0nsu.js",
     "name": "index",
     "src": "module/myparcel-order/view/myparcel-order-detail-tab/index.js",
     "isDynamicEntry": true,
