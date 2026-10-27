@@ -34,6 +34,7 @@ export function createOrderListController({root, getCells, isActive, onNotificat
     return {
         /**
          * Loads the PDK order list view for the orders and puts each item in its cell.
+         * It loads also when no cell is shown, because the bulk actions need the session.
          * Call it after every change of the orders or of the cells in the grid.
          * A response that is no longer the latest is thrown away.
          *
@@ -45,7 +46,7 @@ export function createOrderListController({root, getCells, isActive, onNotificat
 
             close();
 
-            if (orderIds.length === 0 || getCells().length === 0) {
+            if (orderIds.length === 0) {
                 return;
             }
 
@@ -72,7 +73,22 @@ export function createOrderListController({root, getCells, isActive, onNotificat
 
             session = result.session;
             bulkActions = result.data.bulkActions ?? [];
-            stopRender = await session.render(cells);
+
+            // Without cells (column hidden) only the session and the bulk actions are needed.
+            if (cells.length === 0) {
+                return;
+            }
+
+            // The PDK renders each element by its own data-pdk-component and id, so pass the components.
+            const stop = await session.render(
+                cells.flatMap((cell) => Array.from(cell.querySelectorAll('[data-pdk-component]'))),
+            );
+
+            if (isCurrent()) {
+                stopRender = stop;
+            } else {
+                stop();
+            }
         },
 
         /**
