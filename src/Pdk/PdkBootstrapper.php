@@ -10,19 +10,15 @@ use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
-use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
-use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
-use MyParcel\Shopware\Pdk\Order\OrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
-use MyParcel\Shopware\Pdk\View\ViewResolverInterface;
 use MyParcel\Shopware\Pdk\Webhook\Repository\PdkWebhooksRepository;
 use MyParcel\Shopware\Pdk\Webhook\Service\PdkWebhookService;
 use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
@@ -114,17 +110,17 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
-    public static function getOrderStatusProvider(): OrderStatusProviderInterface
+    public static function getOrderStatusService(): OrderStatusServiceInterface
     {
-        return self::getShopwareServices()->orderStatusProvider;
+        return self::getShopwareServices()->orderStatusService;
     }
 
     /**
      * @internal Only the PDK container calls this.
      */
-    public static function getViewResolver(): ViewResolverInterface
+    public static function getViewService(): ViewServiceInterface
     {
-        return self::getShopwareServices()->viewResolver;
+        return self::getShopwareServices()->viewService;
     }
 
     /**
@@ -168,11 +164,9 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
-            ViewResolverInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getViewResolver']),
-            ViewServiceInterface::class                 => \_MyParcel\DI\autowire(ViewService::class),
+            ViewServiceInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getViewService']),
             FrontendRenderServiceInterface::class       => \_MyParcel\DI\autowire(FrontendRenderService::class),
-            OrderStatusProviderInterface::class         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusProvider']),
-            OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(OrderStatusService::class),
+            OrderStatusServiceInterface::class          => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusService']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),

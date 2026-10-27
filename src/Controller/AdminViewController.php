@@ -46,8 +46,6 @@ final class AdminViewController
             return new JsonResponse(['message' => 'Unknown MyParcel admin view.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $request->attributes->set(AdminView::REQUEST_ATTRIBUTE, $view);
-
         return $this->bridge->run(fn (): Response => new JsonResponse([
             'html'    => $this->renderer->render($view),
             'scripts' => $this->assets->getScripts(),

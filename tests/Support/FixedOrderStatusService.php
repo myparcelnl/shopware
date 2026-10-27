@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Tests\Support;
 
-use MyParcel\Shopware\Pdk\Order\OrderStatusProviderInterface;
+use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 
-final class FixedOrderStatusProvider implements OrderStatusProviderInterface
+final class FixedOrderStatusService implements OrderStatusServiceInterface
 {
     /**
      * @param  array<string, string> $statuses
@@ -18,5 +18,9 @@ final class FixedOrderStatusProvider implements OrderStatusProviderInterface
     public function all(): array
     {
         return $this->statuses;
+    }
+
+    public function updateStatus(array $orderIds, string $status): void
+    {
     }
 }

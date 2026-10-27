@@ -7,8 +7,10 @@ use MyParcel\Shopware\Controller\AdminViewController;
 use MyParcel\Shopware\Pdk\View\AdminView;
 use MyParcel\Shopware\Tests\Support\FixedAdminViewRenderer;
 use MyParcel\Shopware\Tests\Support\HttpBridgeFactory;
-use MyParcel\Shopware\Tests\Support\PrefixAssetUrlResolver;
 use MyParcel\Shopware\Tests\Support\RecordingLogger;
+use Symfony\Component\Asset\Packages;
+use Symfony\Component\Asset\UrlPackage;
+use Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy;
 use Symfony\Component\HttpFoundation\Request;
 
 function viewController(FixedAdminViewRenderer $renderer, RecordingLogger $logger = new RecordingLogger()): AdminViewController
@@ -16,7 +18,9 @@ function viewController(FixedAdminViewRenderer $renderer, RecordingLogger $logge
     return new AdminViewController(
         HttpBridgeFactory::create($logger),
         $renderer,
-        new AdminAssets(new PrefixAssetUrlResolver())
+        new AdminAssets(new Packages(null, [
+            '@MyParcelShopware' => new UrlPackage('https://shop.test/bundles/myparcelshopware', new StaticVersionStrategy('1')),
+        ]))
     );
 }
 
@@ -32,8 +36,7 @@ it('returns the rendered view with its assets', function () {
             'scripts' => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
             'styles'  => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
         ])
-        ->and($renderer->rendered)->toBe([AdminView::PluginSettings])
-        ->and($request->attributes->get(AdminView::REQUEST_ATTRIBUTE))->toBe(AdminView::PluginSettings);
+        ->and($renderer->rendered)->toBe([AdminView::PluginSettings]);
 });
 
 it('rejects an unknown view without rendering', function (array $query) {

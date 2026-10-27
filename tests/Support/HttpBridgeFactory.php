@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Tests\Support;
 
+use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\PdkInitializer;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * A bridge whose initializer is never booted: the tests call the conversion
@@ -20,8 +22,8 @@ final class HttpBridgeFactory
             new InMemoryConfigStorage(),
             new FixedLocaleResolver(null),
             new FixedUrlResolver([]),
-            new FixedViewResolver(null),
-            new FixedOrderStatusProvider(),
+            new ViewService(new RequestStack()),
+            new FixedOrderStatusService(),
             '0.0.0-test',
             'https://shop.test',
             true

@@ -4,15 +4,30 @@ declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\View\AdminView;
-use MyParcel\Shopware\Tests\Support\FixedViewResolver;
 use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+
+function viewService(?AdminView $view): ViewService
+{
+    $requestStack = new RequestStack();
+    $request      = new Request();
+
+    if (null !== $view) {
+        $request->attributes->set(AdminView::REQUEST_ATTRIBUTE, $view);
+    }
+
+    $requestStack->push($request);
+
+    return new ViewService($requestStack);
+}
 
 it('is a pdk view service', function () {
-    expect(new ViewService(new FixedViewResolver(null)))->toBeInstanceOf(AbstractViewService::class);
+    expect(viewService(null))->toBeInstanceOf(AbstractViewService::class);
 });
 
 it('is the plugin settings page for the plugin settings view', function () {
-    $service = new ViewService(new FixedViewResolver(AdminView::PluginSettings));
+    $service = viewService(AdminView::PluginSettings);
 
     expect($service->isPluginSettingsPage())->toBeTrue()
         ->and($service->isAnyPdkPage())->toBeTrue()
@@ -21,12 +36,16 @@ it('is the plugin settings page for the plugin settings view', function () {
 });
 
 it('is no pdk page without a view', function () {
-    $service = new ViewService(new FixedViewResolver(null));
+    $service = viewService(null);
 
     expect($service->isPluginSettingsPage())->toBeFalse()
         ->and($service->isAnyPdkPage())->toBeFalse();
 });
 
+it('is no pdk page outside a request', function () {
+    expect((new ViewService(new RequestStack()))->isPluginSettingsPage())->toBeFalse();
+});
+
 it('has no other pages yet', function (string $method) {
-    expect((new ViewService(new FixedViewResolver(AdminView::PluginSettings)))->{$method}())->toBeFalse();
+    expect(viewService(AdminView::PluginSettings)->{$method}())->toBeFalse();
 })->with(['isCheckoutPage', 'isChildProductPage', 'isOrderListPage', 'isOrderPage', 'isProductPage']);

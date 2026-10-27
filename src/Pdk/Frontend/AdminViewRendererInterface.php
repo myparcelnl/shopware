@@ -6,6 +6,10 @@ namespace MyParcel\Shopware\Pdk\Frontend;
 
 use MyParcel\Shopware\Pdk\View\AdminView;
 
+/**
+ * A seam of our own so the controller can be tested without booting the PDK,
+ * which needs the Shopware container.
+ */
 interface AdminViewRendererInterface
 {
     /**
