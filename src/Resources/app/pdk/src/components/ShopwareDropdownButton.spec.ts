@@ -2,19 +2,34 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {type App, createApp, defineComponent, h, nextTick, reactive} from 'vue';
 import ShopwareDropdownButton from './ShopwareDropdownButton.vue';
 
+const actionCalls = vi.hoisted(() => [] as {id: string; menuInDom: boolean}[]);
+
 // The real ActionButton dispatches the action through the store. The stub only emits the click.
 vi.mock('@myparcel-dev/pdk-admin', async () => {
   const {computed, defineComponent: define, h: render, ref} = await import('vue');
 
   return {
     AdminComponent: {DropdownButton: 'DropdownButton'},
+    Variant: {Error: 'error'},
     AdminIcon: {ArrowUp: 'arrow-up', ArrowDown: 'arrow-down'},
     ActionButton: define({
       props: ['action'],
       emits: ['click'],
       setup: (props, {emit}) =>
         () =>
-          render('button', {'data-action': props.action.id, onClick: () => emit('click')}, props.action.id),
+          render(
+            'button',
+            {
+              'data-action': props.action.id,
+              'data-variant': props.action.variant,
+              // As the real one: it emits the click and then runs the action in the same tick.
+              onClick: () => {
+                emit('click');
+                actionCalls.push({id: props.action.id, menuInDom: document.querySelector('[role="menu"]') !== null});
+              },
+            },
+            props.action.id,
+          ),
     }),
     useLanguage: () => ({translate: (key: string) => key}),
     useDropdownButtonContext: (props: {actions: {standalone?: boolean}[]}) => {
@@ -38,7 +53,7 @@ vi.mock('@myparcel-dev/pdk-admin', async () => {
 const actions = [
   {id: 'print', label: 'print', standalone: true},
   {id: 'edit', label: 'edit'},
-  {id: 'delete', label: 'delete'},
+  {id: 'delete', label: 'delete', variant: 'error'},
 ];
 
 let app: App | undefined;
@@ -61,14 +76,22 @@ const mount = () => {
 const toggle = (): HTMLElement => container.querySelector<HTMLElement>('[aria-haspopup="true"]') as HTMLElement;
 // The menu is teleported to the body.
 const menu = (): HTMLElement => document.body.querySelector<HTMLElement>('[role="menu"]') as HTMLElement;
-const isOpen = (): boolean => menu().style.display !== 'none' && toggle().getAttribute('aria-expanded') === 'true';
+const isOpen = (): boolean => document.querySelector('[role="menu"]') !== null && toggle().getAttribute('aria-expanded') === 'true';
 
 // The menu is measured when it opens. happy-dom has no layout, so the rects are given.
+// The menu only exists while open, so the rect is picked by element.
 const mockRects = (group: Partial<DOMRect>, size: Partial<DOMRect>) => {
+  const root = container.firstElementChild;
+
   vi.stubGlobal('innerHeight', 768);
   vi.stubGlobal('innerWidth', 1024);
-  vi.spyOn(container.firstElementChild as HTMLElement, 'getBoundingClientRect').mockReturnValue(group as DOMRect);
-  vi.spyOn(menu(), 'getBoundingClientRect').mockReturnValue(size as DOMRect);
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    if (this === root) {
+      return group as DOMRect;
+    }
+
+    return (this.getAttribute('role') === 'menu' ? size : {}) as DOMRect;
+  });
 };
 
 const click = async (element: Element) => {
@@ -85,6 +108,8 @@ describe('ShopwareDropdownButton', () => {
   });
 
   afterEach(() => {
+    actionCalls.length = 0;
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     app?.unmount();
     app = undefined;
@@ -92,21 +117,33 @@ describe('ShopwareDropdownButton', () => {
     outside.remove();
   });
 
-  it('shows the standalone action next to the toggle and the other actions in a closed menu', () => {
+  it('shows the standalone action next to the toggle and renders no menu while closed', () => {
     expect(container.querySelectorAll('[data-action="print"]')).toHaveLength(1);
-    expect(menu().querySelectorAll('[data-action]')).toHaveLength(2);
+    expect(document.body.querySelector('[role="menu"]')).toBeNull();
+    expect(document.body.querySelector('.myparcel-pdk')).toBeNull();
     expect(isOpen()).toBe(false);
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('renders the menu under the body, in a .myparcel-pdk wrapper, not in the component', () => {
+  it('renders the menu under the body, in a .myparcel-pdk wrapper, not in the component', async () => {
+    await click(toggle());
+
+    expect(menu().querySelectorAll('[data-action]')).toHaveLength(2);
     expect(container.querySelector('[role="menu"]')).toBeNull();
     expect(menu().parentElement?.classList.contains('myparcel-pdk')).toBe(true);
     expect(menu().parentElement?.parentElement).toBe(document.body);
     expect(menu().classList.contains('mypa-z-[1100]')).toBe(true);
   });
 
-  it('removes the menu from the body on unmount', () => {
+  it('removes the menu from the body when it closes', async () => {
+    await click(toggle());
+    await click(toggle());
+
+    expect(document.body.querySelector('.myparcel-pdk')).toBeNull();
+  });
+
+  it('removes the menu from the body on unmount', async () => {
+    await click(toggle());
     app?.unmount();
     app = undefined;
 
@@ -145,6 +182,22 @@ describe('ShopwareDropdownButton', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     await nextTick();
 
+    expect(isOpen()).toBe(false);
+  });
+
+  it('passes the variant of an action on, and marks the error variant as danger', async () => {
+    await click(toggle());
+
+    expect(menu().querySelector('[data-action="delete"]')?.getAttribute('data-variant')).toBe('error');
+    expect(menu().querySelector('[data-action="delete"]')?.classList.contains('mypa-dropdown-menu__item--danger')).toBe(true);
+    expect(menu().querySelector('[data-action="edit"]')?.classList.contains('mypa-dropdown-menu__item--danger')).toBe(false);
+  });
+
+  it('runs the chosen action while the menu is still in the document, then closes it', async () => {
+    await click(toggle());
+    await click(menu().querySelector('[data-action="edit"]') as HTMLElement);
+
+    expect(actionCalls).toEqual([{id: 'edit', menuInDom: true}]);
     expect(isOpen()).toBe(false);
   });
 

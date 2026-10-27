@@ -2,7 +2,7 @@
   <div
     ref="root"
     v-test="AdminComponent.DropdownButton"
-    class="mypa-relative mypa-inline-flex mypa-align-top">
+    class="mypa-inline-flex mypa-align-top">
     <ActionButton
       v-for="(action, index) in dropdownActions.standalone"
       :key="action.id"
@@ -32,14 +32,13 @@
 
     <!-- The menu leaves the grid cell: a cell is a stacking context that the sticky columns of the grid paint over. -->
     <Teleport
-      v-if="hasMenu"
+      v-if="hasMenu && toggled"
       to="body">
       <div class="myparcel-pdk">
         <div
-          v-show="toggled"
           ref="menu"
           :style="menuStyle"
-          class="mypa-fixed mypa-z-[1100] mypa-flex mypa-flex-col mypa-items-stretch mypa-gap-1 mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-p-1 mypa-shadow"
+          class="mypa-dropdown-menu mypa-fixed mypa-z-[1100] mypa-flex mypa-flex-col mypa-items-stretch mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-py-1 mypa-shadow"
           role="menu">
           <ActionButton
             v-for="(action, index) in dropdownActions.hidden"
@@ -49,7 +48,9 @@
             :disabled="disabled"
             :icon="action.icon"
             :size="size"
-            class="mypa-whitespace-nowrap mypa-text-left"
+            :variant="action.variant"
+            :class="{'mypa-dropdown-menu__item--danger': action.variant === Variant.Error}"
+            class="mypa-dropdown-menu__item"
             @click="toggle(false)" />
         </div>
       </div>
@@ -66,6 +67,7 @@ import {
   type DropdownButtonSlots,
   useDropdownButtonContext,
   useLanguage,
+  Variant,
 } from '@myparcel-dev/pdk-admin';
 
 // eslint-disable-next-line vue/no-unused-properties
@@ -87,13 +89,15 @@ const GAP = 4;
 
 /**
  * Opens the menu below the buttons, or above them when the viewport has no room below.
- * The menu is fixed, because the grid of the order list clips an absolute menu, and teleported to the body, because the cell
+ * The menu exists only while open. It is fixed, because the grid of the order list clips an absolute menu, and teleported to the body, because the cell
  * is a stacking context. It has a size once it is shown, so it is
  * placed after the render: at the left edge of the group, or at its right edge when the menu would pass the viewport.
  */
 const onToggle = async () => {
   const opening = !toggled.value;
 
+  // A new menu is measured at its natural place, not at the place of the last time.
+  menuStyle.value = {};
   toggle(opening);
 
   if (!opening) {

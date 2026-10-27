@@ -27,6 +27,30 @@
     @apply mypa-inline-block mypa-h-[1em] mypa-w-[1em] mypa-align-[-0.125em];
   }
 
+  // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
+  .mypa-dropdown-menu {
+    min-width: 8rem;
+  }
+
+  .mypa-dropdown-menu__item {
+    @apply mypa-flex mypa-w-full mypa-items-center mypa-gap-2 mypa-whitespace-nowrap mypa-rounded-none mypa-border-0 mypa-bg-transparent mypa-px-3 mypa-py-1.5 mypa-text-left;
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-primary-default, inherit);
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background: var(--color-background-tertiary-default, theme('colors.gray.100'));
+    }
+
+    &:disabled {
+      @apply mypa-cursor-default mypa-opacity-50;
+    }
+  }
+
+  .mypa-dropdown-menu__item--danger {
+    color: var(--color-text-critical-default, theme('colors.red.500'));
+  }
+
   .mypa-icon--spin {
     @apply mypa-animate-spin;
   }
