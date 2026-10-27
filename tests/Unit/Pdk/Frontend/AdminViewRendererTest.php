@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer;
+use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
 use MyParcel\Shopware\Pdk\Order\Mapper\MoneyConverter;
@@ -21,9 +22,12 @@ use MyParcel\Shopware\Tests\Support\InMemoryProductStorage;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
+use MyParcelNL\Pdk\Base\FileSystemInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Base\Service\CurrencyService;
 use MyParcelNL\Pdk\Base\Service\WeightService;
+use MyParcelNL\Pdk\Context\Contract\ContextServiceInterface;
+use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,6 +65,11 @@ function rendererWithStorage(?AdminView $view): array
     }
 
     TestPdk::boot([
+        FrontendRenderServiceInterface::class => fn () => new FrontendRenderService(
+            \MyParcelNL\Pdk\Facade\Pdk::get(ContextServiceInterface::class),
+            \MyParcelNL\Pdk\Facade\Pdk::get(ViewServiceInterface::class),
+            \MyParcelNL\Pdk\Facade\Pdk::get(FileSystemInterface::class)
+        ),
         ViewServiceInterface::class          => new ViewService(new RequestViewResolver($stack)),
         PdkOrderRepositoryInterface::class   => new PdkOrderRepository(
             new MemoryCacheStorage(),
@@ -105,7 +114,7 @@ it('renders one item per order', function () {
 
     expect($result->html)->not->toBe('')
         ->and(array_keys($result->items))->toBe([RENDERER_ORDER_ID])
-        ->and($result->items[RENDERER_ORDER_ID])->toContain("render('OrderListItem'");
+        ->and($result->items[RENDERER_ORDER_ID])->toContain('data-pdk-component="OrderListItem"');
 });
 
 it('skips orders that do not exist', function () {
@@ -132,7 +141,7 @@ it('renders a product with its settings', function () {
 
     $result = $renderer->render(new AdminViewRequest(AdminView::Product, [RENDERER_PRODUCT_ID]));
 
-    expect($result->html)->toContain("render('ProductSettings'")
+    expect($result->html)->toContain('data-pdk-component="ProductSettings"')
         ->and($request->attributes->get(AdminView::REQUEST_ATTRIBUTE))->toBe(AdminView::Product);
 });
 
@@ -141,8 +150,21 @@ it('renders a variant as a child product', function () {
 
     $result = $renderer->render(new AdminViewRequest(AdminView::Product, [RENDERER_VARIANT_ID]));
 
-    expect($result->html)->toContain("render('ChildProductSettings'")
+    expect($result->html)->toContain('data-pdk-component="ChildProductSettings"')
         ->and($request->attributes->get(AdminView::REQUEST_ATTRIBUTE))->toBe(AdminView::ChildProduct);
+});
+
+it('gives the variant component the product settings view context', function () {
+    [$renderer] = rendererWithStorage(AdminView::Product);
+
+    $result = $renderer->render(new AdminViewRequest(AdminView::Product, [RENDERER_VARIANT_ID]));
+
+    preg_match('/<div data-pdk-component="ChildProductSettings" data-pdk-context="([^"]*)"/', $result->html, $matches);
+    $context = json_decode(html_entity_decode($matches[1] ?? ''), true);
+
+    expect($context)->toBeArray()
+        ->and($context)->toHaveKey('productSettingsView')
+        ->and($context)->toHaveKey('productData');
 });
 
 it('renders an order', function () {
@@ -150,7 +172,7 @@ it('renders an order', function () {
 
     $result = $renderer->render(new AdminViewRequest(AdminView::Order, [RENDERER_ORDER_ID]));
 
-    expect($result->html)->toContain("render('OrderBox'")
+    expect($result->html)->toContain('data-pdk-component="OrderBox"')
         ->and($result->items)->toBe([]);
 });
 
