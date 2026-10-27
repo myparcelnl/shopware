@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use MyParcel\Shopware\Admin\AdminAssets;
 use MyParcel\Shopware\Controller\AdminViewController;
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcel\Shopware\Tests\Support\FixedAdminViewRenderer;
 use MyParcel\Shopware\Tests\Support\HttpBridgeFactory;
 use MyParcel\Shopware\Tests\Support\RecordingLogger;
@@ -36,7 +36,7 @@ it('returns the rendered view with its assets', function () {
             'scripts' => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
             'styles'  => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
         ])
-        ->and($renderer->rendered)->toBe([AdminView::PluginSettings]);
+        ->and($renderer->rendered)->toBe([AdminScreen::PluginSettings]);
 });
 
 it('rejects an unknown view without rendering', function (array $query) {

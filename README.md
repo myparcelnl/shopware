@@ -204,15 +204,12 @@ corepack pnpm test:pdk
 ```
 
 Build the Shopware admin module in the web container, from the shop root.
-`bin/build-administration.sh` cannot do it: it runs `npm ci` in every plug-in
-root with a `package.json`, and this plug-in uses pnpm.
+`bin/build-administration.sh` runs `npm ci` in every plug-in root with a
+`package.json`, and this plug-in uses pnpm, so skip that step for it. The admin module has no npm
+dependencies of its own.
 
 ```shell
-bin/console bundle:dump && bin/console feature:dump
-cd vendor/shopware/administration/Resources/app/administration
-npm install --prefer-offline --omit=dev
-PROJECT_ROOT=/var/www/html SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS=1 npm run build
-cd /var/www/html && bin/console assets:install
+SKIP_MY_PARCEL_SHOPWARE=1 SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS=1 bin/build-administration.sh
 ```
 
 To work on js-pdk at the same time, mount your js-pdk checkout in the web
@@ -255,7 +252,7 @@ Settings and the account are stored installation-wide in `system_config`, under
 
 ## Routes
 
-The plug-in sends four kinds of requests to the PDK:
+The plug-in sends several kinds of requests to the PDK:
 
 | Route                          | Used by          | Access                                     |
 | ------------------------------ | ---------------- | ------------------------------------------ |

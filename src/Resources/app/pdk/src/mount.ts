@@ -10,7 +10,7 @@ const COMPONENT_SELECTOR = '[data-pdk-component]';
 
 /**
  * Renders the PDK components in the HTML that the view route returned. The
- * boot element (#myparcel-pdk-boot) must already be in the document. When one
+ * bootstrap container (#myparcel-pdk-boot) must already be in the document. When one
  * render fails, it unmounts what did render, stops the PDK admin and rethrows.
  *
  * @returns a function that unmounts every rendered app and stops the PDK admin

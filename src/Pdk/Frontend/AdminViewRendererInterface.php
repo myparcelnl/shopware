@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 
 /**
  * A seam of our own so the controller can be tested without booting the PDK,
@@ -13,8 +13,8 @@ use MyParcel\Shopware\Pdk\View\AdminView;
 interface AdminViewRendererInterface
 {
     /**
-     * The HTML the admin app needs to show the view: the boot element, the
-     * notifications, the modals and the view itself.
+     * Render the HTML that the admin app needs to show the view: the bootstrap
+     * container, the notifications, the modals and the view itself.
      */
-    public function render(AdminView $view): string;
+    public function render(AdminScreen $view): string;
 }

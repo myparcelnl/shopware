@@ -8,7 +8,7 @@ use MyParcel\Shopware\Admin\AdminAssets;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRendererInterface;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\Routing\RouteName;
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +40,7 @@ final class AdminViewController
     public function view(Request $request): Response
     {
         $value = $request->query->all()['view'] ?? null;
-        $view  = is_string($value) ? AdminView::tryFrom($value) : null;
+        $view  = is_string($value) ? AdminScreen::tryFrom($value) : null;
 
         if (null === $view) {
             return new JsonResponse(['message' => 'Unknown MyParcel admin view.'], Response::HTTP_BAD_REQUEST);

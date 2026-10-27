@@ -40,7 +40,7 @@ it('builds the message from the short contract name', function () {
         ->toBe('PdkOrderRepositoryInterface is not implemented yet in the Shopware plugin.');
 });
 
-it('lists no shipping methods until the checkout ticket', function () {
+it('lists no shipping methods until INT-1961 adds the checkout', function () {
     $methods = (new PlaceholderShippingMethodRepository())->all();
 
     expect($methods)->toBeInstanceOf(PdkShippingMethodCollection::class)

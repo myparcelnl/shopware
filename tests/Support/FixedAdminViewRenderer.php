@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Tests\Support;
 
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRendererInterface;
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use Throwable;
 
 final class FixedAdminViewRenderer implements AdminViewRendererInterface
 {
     /**
-     * @var list<AdminView>
+     * @var list<AdminScreen>
      */
     public array $rendered = [];
 
@@ -19,7 +19,7 @@ final class FixedAdminViewRenderer implements AdminViewRendererInterface
     {
     }
 
-    public function render(AdminView $view): string
+    public function render(AdminScreen $view): string
     {
         if (null !== $this->error) {
             throw $this->error;

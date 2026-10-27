@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-function viewService(?AdminView $view): ViewService
+function viewService(?AdminScreen $view): ViewService
 {
     $requestStack = new RequestStack();
     $request      = new Request();
 
     if (null !== $view) {
-        $request->attributes->set(AdminView::REQUEST_ATTRIBUTE, $view);
+        $request->attributes->set(AdminScreen::REQUEST_ATTRIBUTE, $view);
     }
 
     $requestStack->push($request);
@@ -27,7 +27,7 @@ it('is a pdk view service', function () {
 });
 
 it('is the plugin settings page for the plugin settings view', function () {
-    $service = viewService(AdminView::PluginSettings);
+    $service = viewService(AdminScreen::PluginSettings);
 
     expect($service->isPluginSettingsPage())->toBeTrue()
         ->and($service->isAnyPdkPage())->toBeTrue()
@@ -47,5 +47,5 @@ it('is no pdk page outside a request', function () {
 });
 
 it('has no other pages yet', function (string $method) {
-    expect(viewService(AdminView::PluginSettings)->{$method}())->toBeFalse();
+    expect(viewService(AdminScreen::PluginSettings)->{$method}())->toBeFalse();
 })->with(['isCheckoutPage', 'isChildProductPage', 'isOrderListPage', 'isOrderPage', 'isProductPage']);

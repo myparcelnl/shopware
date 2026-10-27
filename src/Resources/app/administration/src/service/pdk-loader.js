@@ -55,7 +55,7 @@ export function getRequestHeaders() {
 /**
  * Shows a PDK view in root. Resolves to a function that removes it again.
  *
- * @param {string} view an AdminView value, e.g. 'pluginSettings'
+ * @param {string} view an AdminScreen value, e.g. 'pluginSettings'
  * @param {HTMLElement} root
  * @param {() => boolean} isActive false once the page is gone; the view is then not mounted
  */

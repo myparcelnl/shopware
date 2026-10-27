@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -47,7 +47,7 @@ final class ViewService extends AbstractViewService
      */
     public function isPluginSettingsPage(): bool
     {
-        return AdminView::PluginSettings === $this->requestStack->getMainRequest()?->attributes->get(AdminView::REQUEST_ATTRIBUTE);
+        return AdminScreen::PluginSettings === $this->requestStack->getMainRequest()?->attributes->get(AdminScreen::REQUEST_ATTRIBUTE);
     }
 
     public function isProductPage(): bool

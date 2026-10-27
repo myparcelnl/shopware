@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 use RuntimeException;
 
 /**
@@ -14,9 +14,9 @@ use RuntimeException;
 final class EmptyAdminViewException extends RuntimeException
 {
     /**
-     * Use when the PDK rendered no markup for the view or for its boot element.
+     * Use when the PDK rendered no markup for the view or for its bootstrap container.
      */
-    public static function forView(AdminView $view): self
+    public static function forView(AdminScreen $view): self
     {
         return new self(sprintf('The PDK rendered no markup for the admin view "%s". The MyParcel log has the cause.', $view->value));
     }

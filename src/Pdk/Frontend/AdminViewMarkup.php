@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
-use MyParcel\Shopware\Pdk\View\AdminView;
+use MyParcel\Shopware\Pdk\View\AdminScreen;
 
 final class AdminViewMarkup
 {
     /**
-     * Notifications and modals can be empty. Without the boot element the app
-     * cannot start, and without the view the admin shows an empty card: both
+     * Notifications and modals can be empty. Without the bootstrap container the
+     * app cannot start, and without the view the admin shows an empty card: both
      * are errors, so the admin shows a message instead.
      *
      * @throws EmptyAdminViewException
      */
     public static function compose(
-        AdminView $view,
+        AdminScreen $view,
         string $initScript,
         string $notifications,
         string $modals,
