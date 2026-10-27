@@ -4,12 +4,12 @@
     "my-parcel-shopware": {
       "css": [],
       "dynamic": [
-        "/bundles/myparcelshopware/administration/assets/index-jKj_K6U6.js",
-        "/bundles/myparcelshopware/administration/assets/index-0qtSTpQP.js",
-        "/bundles/myparcelshopware/administration/assets/index-Bi3ar27Y.js"
+        "/bundles/myparcelshopware/administration/assets/index-BG1Jh0-E.js",
+        "/bundles/myparcelshopware/administration/assets/index-BLI5cn_V.js",
+        "/bundles/myparcelshopware/administration/assets/index-DTrmHs5A.js"
       ],
       "js": [
-        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-DpfeCDCM.js"
+        "/bundles/myparcelshopware/administration/assets/my-parcel-shopware-ECA2F8vo.js"
       ],
       "legacy": false,
       "preload": []

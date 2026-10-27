@@ -1,3 +1,4 @@
+import './extension/sw-bulk-edit-modal';
 import './extension/sw-order-list';
 import './extension/sw-order-detail';
 

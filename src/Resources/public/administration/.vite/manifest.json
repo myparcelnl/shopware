@@ -1,6 +1,6 @@
 {
   "main.js": {
-    "file": "assets/my-parcel-shopware-DpfeCDCM.js",
+    "file": "assets/my-parcel-shopware-ECA2F8vo.js",
     "name": "my-parcel-shopware",
     "src": "main.js",
     "isEntry": true,
@@ -11,7 +11,7 @@
     ]
   },
   "module/myparcel-order/view/myparcel-order-detail-tab/index.js": {
-    "file": "assets/index-0qtSTpQP.js",
+    "file": "assets/index-BLI5cn_V.js",
     "name": "index",
     "src": "module/myparcel-order/view/myparcel-order-detail-tab/index.js",
     "isDynamicEntry": true,
@@ -20,7 +20,7 @@
     ]
   },
   "module/myparcel-product/view/myparcel-product-detail-tab/index.js": {
-    "file": "assets/index-Bi3ar27Y.js",
+    "file": "assets/index-DTrmHs5A.js",
     "name": "index",
     "src": "module/myparcel-product/view/myparcel-product-detail-tab/index.js",
     "isDynamicEntry": true,
@@ -29,7 +29,7 @@
     ]
   },
   "module/myparcel-settings/page/myparcel-settings-index/index.js": {
-    "file": "assets/index-jKj_K6U6.js",
+    "file": "assets/index-BG1Jh0-E.js",
     "name": "index",
     "src": "module/myparcel-settings/page/myparcel-settings-index/index.js",
     "isDynamicEntry": true,

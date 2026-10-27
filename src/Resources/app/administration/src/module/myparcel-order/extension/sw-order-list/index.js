@@ -68,7 +68,7 @@ Shopware.Component.override('sw-order-list', {
         },
 
         /**
-         * Loads the MyParcel blocks for the orders in the grid. Shows a notification when it fails.
+         * Loads the MyParcel blocks for the orders in the grid. Shows a notification and clears the bulk actions when it fails.
          */
         async refreshMyparcel() {
             if (!this.myparcelController || !this.acl.can('myparcel.access')) {
@@ -80,6 +80,8 @@ Shopware.Component.override('sw-order-list', {
                 this.myparcelBulkActions = this.myparcelController.bulkActions;
             } catch (error) {
                 console.error(error);
+                // The links of the last load must not stay: they have no orders to run on.
+                this.myparcelBulkActions = [];
                 this.createNotificationError({message: this.$tc('myparcel-order.list.loadError')});
             }
         },

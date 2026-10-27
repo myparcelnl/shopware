@@ -42,7 +42,9 @@ export default {
                 return;
             }
 
-            // The product page reloads for the new id. The isProductLoading watcher starts the load then.
+            // The core awaits initProductMeasurementUnits() before it sets isLoading, so the page is
+            // not loading yet and this load can start early, for the old product data. The isLoading
+            // watcher loads again when the page finishes, and the loadId check discards this early load.
             if (!this.isProductLoading) {
                 this.load();
             }
