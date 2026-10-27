@@ -211,6 +211,10 @@ corepack pnpm build:pdk
 corepack pnpm test:pdk
 ```
 
+The shop serves the copy in `public/bundles`, not the build output. After a
+build, run `bin/console assets:install` from the shop root, or the admin keeps
+the old bundle.
+
 Build the Shopware admin module in the web container, from the shop root.
 `bin/build-administration.sh` cannot do it: it runs `npm ci` in every plug-in
 root with a `package.json`, and this plug-in uses pnpm.
