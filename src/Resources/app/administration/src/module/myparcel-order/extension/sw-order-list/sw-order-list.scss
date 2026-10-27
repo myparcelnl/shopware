@@ -5,9 +5,6 @@
     .sw-data-grid__body .sw-data-grid__cell--myparcelShipments,
     &.is--compact .sw-data-grid__body .sw-data-grid__cell--myparcelShipments {
         overflow: visible;
-        // The dropdown menu floats over the next cells. A positioned cell with a z-index paints above them.
-        position: relative;
-        z-index: 1;
 
         .sw-data-grid__cell-content {
             display: block;
@@ -44,7 +41,7 @@
         }
 
         // The order mode shows its action buttons in a group of plain div. Put them side by side.
-        // The dropdown button and its menu lay themselves out.
+        // The dropdown button lays itself out, and its menu is in the body.
         div:has(> button):not(.mypa-inline-flex, [role='menu']) {
             display: flex;
             flex-wrap: wrap;

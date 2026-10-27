@@ -59,7 +59,8 @@ const mount = () => {
 };
 
 const toggle = (): HTMLElement => container.querySelector<HTMLElement>('[aria-haspopup="true"]') as HTMLElement;
-const menu = (): HTMLElement => container.querySelector<HTMLElement>('[role="menu"]') as HTMLElement;
+// The menu is teleported to the body.
+const menu = (): HTMLElement => document.body.querySelector<HTMLElement>('[role="menu"]') as HTMLElement;
 const isOpen = (): boolean => menu().style.display !== 'none' && toggle().getAttribute('aria-expanded') === 'true';
 
 // The menu is measured when it opens. happy-dom has no layout, so the rects are given.
@@ -96,6 +97,20 @@ describe('ShopwareDropdownButton', () => {
     expect(menu().querySelectorAll('[data-action]')).toHaveLength(2);
     expect(isOpen()).toBe(false);
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('renders the menu under the body, in a .myparcel-pdk wrapper, not in the component', () => {
+    expect(container.querySelector('[role="menu"]')).toBeNull();
+    expect(menu().parentElement?.classList.contains('myparcel-pdk')).toBe(true);
+    expect(menu().parentElement?.parentElement).toBe(document.body);
+    expect(menu().classList.contains('mypa-z-[1100]')).toBe(true);
+  });
+
+  it('removes the menu from the body on unmount', () => {
+    app?.unmount();
+    app = undefined;
+
+    expect(document.body.querySelector('[role="menu"]')).toBeNull();
   });
 
   it('opens on a click of the toggle', async () => {

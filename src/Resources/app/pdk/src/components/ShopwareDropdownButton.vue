@@ -30,24 +30,30 @@
       <slot />
     </PdkButton>
 
-    <div
+    <!-- The menu leaves the grid cell: a cell is a stacking context that the sticky columns of the grid paint over. -->
+    <Teleport
       v-if="hasMenu"
-      v-show="toggled"
-      ref="menu"
-      :style="menuStyle"
-      class="mypa-fixed mypa-z-50 mypa-flex mypa-flex-col mypa-items-stretch mypa-gap-1 mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-p-1 mypa-shadow"
-      role="menu">
-      <ActionButton
-        v-for="(action, index) in dropdownActions.hidden"
-        :key="`${index}_${action.id}`"
-        v-test="[AdminComponent.DropdownButton, 'item']"
-        :action="action"
-        :disabled="disabled"
-        :icon="action.icon"
-        :size="size"
-        class="mypa-whitespace-nowrap mypa-text-left"
-        @click="toggle(false)" />
-    </div>
+      to="body">
+      <div class="myparcel-pdk">
+        <div
+          v-show="toggled"
+          ref="menu"
+          :style="menuStyle"
+          class="mypa-fixed mypa-z-[1100] mypa-flex mypa-flex-col mypa-items-stretch mypa-gap-1 mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-p-1 mypa-shadow"
+          role="menu">
+          <ActionButton
+            v-for="(action, index) in dropdownActions.hidden"
+            :key="`${index}_${action.id}`"
+            v-test="[AdminComponent.DropdownButton, 'item']"
+            :action="action"
+            :disabled="disabled"
+            :icon="action.icon"
+            :size="size"
+            class="mypa-whitespace-nowrap mypa-text-left"
+            @click="toggle(false)" />
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -81,7 +87,8 @@ const GAP = 4;
 
 /**
  * Opens the menu below the buttons, or above them when the viewport has no room below.
- * The menu is fixed, because the grid of the order list clips an absolute menu. It has a size once it is shown, so it is
+ * The menu is fixed, because the grid of the order list clips an absolute menu, and teleported to the body, because the cell
+ * is a stacking context. It has a size once it is shown, so it is
  * placed after the render: at the left edge of the group, or at its right edge when the menu would pass the viewport.
  */
 const onToggle = async () => {
@@ -128,7 +135,9 @@ watch(
 
 // The menu is no hover or focus menu: it only leaves on a click outside, on Escape or after an action.
 const onDocumentClick = (event: MouseEvent) => {
-  if (toggled.value && !root.value?.contains(event.target as Node)) {
+  const target = event.target as Node;
+
+  if (toggled.value && !root.value?.contains(target) && !menu.value?.contains(target)) {
     toggle(false);
   }
 };
