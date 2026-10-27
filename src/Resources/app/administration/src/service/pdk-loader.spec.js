@@ -161,4 +161,24 @@ describe('pdk-loader', () => {
         expect(component.createNotificationWarning).toHaveBeenCalledWith({message: 'm3'});
         expect(component.createNotificationInfo).toHaveBeenCalledWith({message: 'm4'});
     });
+
+    it('unmounts the session when the page closed while it started', async () => {
+        const session = {render: vi.fn(), dispatchBulkAction: vi.fn(), unmount: vi.fn()};
+        let active = true;
+        const createSession = vi.fn().mockImplementation(async () => {
+            active = false;
+
+            return session;
+        });
+        get.mockResolvedValue(response);
+        window.MyParcelShopwarePdk = {mount: mountPdk, createSession};
+        const {openSession} = await loadModule();
+        const root = document.createElement('div');
+
+        const result = await openSession('order', {orderId: 'o1'}, root, () => active, {});
+
+        expect(result).toEqual({session: null, data: response.data});
+        expect(session.unmount).toHaveBeenCalledTimes(1);
+        expect(root.innerHTML).toBe('');
+    });
 });

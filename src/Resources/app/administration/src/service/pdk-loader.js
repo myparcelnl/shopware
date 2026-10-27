@@ -64,7 +64,7 @@ export function getRequestHeaders() {
 export async function fetchView(view, params = {}) {
     const httpClient = Shopware.Application.getContainer('init').httpClient;
     const {data} = await httpClient.get('_action/myparcel/view', {
-        params: {view, ...params},
+        params: {...params, view},
         headers: {...getRequestHeaders(), Accept: 'application/json'},
     });
 
@@ -102,6 +102,13 @@ export async function openSession(view, params, root, isActive, {onNotification}
     root.innerHTML = data.html;
 
     const session = await window.MyParcelShopwarePdk.createSession(root, {getRequestHeaders, onNotification});
+
+    if (!isActive()) {
+        session.unmount();
+        root.innerHTML = '';
+
+        return {session: null, data};
+    }
 
     return {session, data};
 }
