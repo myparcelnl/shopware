@@ -1,0 +1,40 @@
+// The grid cell is made for one line: a fixed height, no wrapping and hidden overflow.
+// The MyParcel block (logo, barcode, status and buttons) has several lines, so only this column grows with it.
+// The selectors are as specific as the compact rule of the grid, which has the highest specificity.
+.sw-data-grid {
+    .sw-data-grid__body .sw-data-grid__cell--myparcelShipments,
+    &.is--compact .sw-data-grid__body .sw-data-grid__cell--myparcelShipments {
+        overflow: visible;
+
+        .sw-data-grid__cell-content {
+            display: block;
+            height: auto;
+            min-height: 0;
+            overflow: visible;
+            white-space: normal;
+            text-overflow: clip;
+            line-height: normal;
+        }
+    }
+
+    // A compact PDK block: smaller gaps and buttons than the PDK admin uses on its own pages.
+    .sw-data-grid__body .sw-data-grid__cell--myparcelShipments .myparcel-pdk {
+        font-size: var(--font-size-xs);
+        line-height: 1.3;
+
+        button {
+            padding: 2px 8px;
+            font-size: var(--font-size-xs);
+            line-height: 1.3;
+        }
+
+        > * + * {
+            margin-top: var(--scale-size-4);
+        }
+
+        img {
+            max-height: var(--scale-size-20);
+            width: auto;
+        }
+    }
+}

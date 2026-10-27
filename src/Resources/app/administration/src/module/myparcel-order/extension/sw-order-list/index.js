@@ -1,3 +1,4 @@
+import './sw-order-list.scss';
 import template from './sw-order-list.html.twig';
 import {notifyShopware} from '../../../../service/pdk-loader';
 import {createOrderListController} from '../../../../service/order-list-controller';
