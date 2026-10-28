@@ -11,7 +11,8 @@ use Shopware\Core\Framework\Util\Database\TableHelper;
 /**
  * One row per MyParcel shipment of an order, with the PDK's shipment data.
  * position keeps the order of the PDK's list. The PDK finds an order by its API
- * identifier, never by a shipment id, so the table has no shipment id column.
+ * identifier or by its own id (shipment_reference_identifier), never by a
+ * shipment id, so the table has no shipment id column.
  */
 class Migration1792404060CreateOrderShipmentTable extends MigrationStep
 {
