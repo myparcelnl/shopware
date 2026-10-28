@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
+use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
-use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
@@ -29,13 +31,17 @@ use Psr\Log\LoggerInterface;
  */
 final class PdkInitializer
 {
+    /**
+     * @param  EntityRepository<OrderCollection> $orderRepository
+     */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ConfigStorageInterface $configStorage,
         private readonly LocaleResolverInterface $localeResolver,
         private readonly UrlResolverInterface $urlResolver,
-        private readonly OrderStorageInterface $orderStorage,
+        private readonly EntityRepository $orderRepository,
         private readonly ProductStorageInterface $productStorage,
+        private readonly EuroCurrency $euroCurrency,
         private readonly OrderDataWriter $orderDataWriter,
         private readonly OrderStateTransitionerInterface $orderStateTransitioner,
         private readonly string $pluginVersion,
@@ -54,8 +60,9 @@ final class PdkInitializer
             $this->configStorage,
             $this->localeResolver,
             $this->urlResolver,
-            $this->orderStorage,
+            $this->orderRepository,
             $this->productStorage,
+            $this->euroCurrency,
             $this->orderDataWriter,
             $this->orderStateTransitioner
         ));

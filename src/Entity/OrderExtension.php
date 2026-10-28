@@ -14,7 +14,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 
 /**
  * Lets one order criteria load the PDK data and shipments with the order. Not
- * autoloaded: only the plugin's storage asks for them.
+ * autoloaded: only the plugin's repositories ask for them.
  */
 class OrderExtension extends EntityExtension
 {

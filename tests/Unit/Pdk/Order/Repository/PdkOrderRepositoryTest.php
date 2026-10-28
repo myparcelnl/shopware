@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
 use MyParcel\Shopware\Pdk\Order\Mapper\MoneyConverter;
 use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
@@ -10,9 +11,10 @@ use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
+use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
+use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
-use MyParcel\Shopware\Tests\Support\Fixtures;
-use MyParcel\Shopware\Tests\Support\InMemoryOrderStorage;
+use MyParcel\Shopware\Tests\Support\InMemoryProductStorage;
 use MyParcel\Shopware\Tests\Support\RecordingConnection;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
@@ -22,82 +24,108 @@ use MyParcelNL\Pdk\Base\Service\WeightService;
 use MyParcelNL\Pdk\Fulfilment\Collection\OrderNoteCollection;
 use MyParcelNL\Pdk\Shipment\Collection\ShipmentCollection;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
-
-const NL_ORDER_ID = '0190a1b2c3d4e5f60718293a4b5c6d01';
+use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 beforeEach(fn () => TestPdk::boot());
 
+function euroCurrency(): EuroCurrency
+{
+    return new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0)));
+}
+
 /**
- * A repository on this storage. The writes go to $orderData and $shipments.
+ * A repository on these orders. The writes go to $orderData and $shipments.
  */
 function orderRepository(
-    InMemoryOrderStorage $storage,
+    FakeEntityRepository $orders,
     ?FakeEntityRepository $orderData = null,
     ?FakeEntityRepository $shipments = null
 ): PdkOrderRepository {
-    $currency = new CurrencyService();
+    $currency       = new CurrencyService();
+    $productStorage = new InMemoryProductStorage();
+
+    $productStorage->snapshots[Entities::PRODUCT_ID] = [
+        'id' => Entities::PRODUCT_ID, 'parentId' => null, 'productNumber' => 'SW-1', 'ean' => null, 'name' => 'Testproduct',
+        'priceGross' => 12.10, 'weight' => 0.25, 'width' => null, 'height' => null, 'length' => null,
+        'type' => 'physical', 'customFields' => ['myparcel_package_type' => 'mailbox'], 'parent' => null,
+    ];
 
     return new PdkOrderRepository(
         new MemoryCacheStorage(),
-        $storage,
-        new PdkOrderMapper(new AddressMapper(new StreetSplitter()), new MoneyConverter($currency), new PdkProductMapper($currency, new WeightService())),
+        $orders,
+        euroCurrency(),
+        new PdkProductRepository(new MemoryCacheStorage(), $productStorage, new PdkProductMapper($currency, new WeightService())),
+        new PdkOrderMapper(new AddressMapper(new StreetSplitter()), new MoneyConverter($currency)),
         new OrderDataWriter($orderData ?? FakeEntityRepository::with(), $shipments ?? FakeEntityRepository::with(), new RecordingConnection())
     );
 }
 
-function storageWithNlOrder(): InMemoryOrderStorage
-{
-    $storage                         = new InMemoryOrderStorage();
-    $storage->snapshots[NL_ORDER_ID] = Fixtures::snapshot('order-nl');
-
-    return $storage;
-}
-
 it('is a pdk order repository', function () {
-    expect(orderRepository(new InMemoryOrderStorage()))->toBeInstanceOf(AbstractPdkOrderRepository::class);
+    expect(orderRepository(FakeEntityRepository::with()))->toBeInstanceOf(AbstractPdkOrderRepository::class);
 });
 
 it('finds an order by id, by array and by model, and reads it once per request', function () {
-    $storage    = storageWithNlOrder();
-    $repository = orderRepository($storage);
+    $orders     = FakeEntityRepository::with(Entities::order());
+    $repository = orderRepository($orders);
 
-    $order = $repository->find(NL_ORDER_ID);
+    $order = $repository->find(Entities::ORDER_ID);
 
-    expect($order->externalIdentifier)->toBe(NL_ORDER_ID)
-        ->and($repository->get(['externalIdentifier' => NL_ORDER_ID])->referenceIdentifier)->toBe('10001')
-        ->and($repository->get($order)->externalIdentifier)->toBe(NL_ORDER_ID)
-        ->and($storage->snapshotReads)->toBe(1);
+    expect($order->externalIdentifier)->toBe(Entities::ORDER_ID)
+        ->and($repository->get(['externalIdentifier' => Entities::ORDER_ID])->referenceIdentifier)->toBe('10001')
+        ->and($repository->get($order)->externalIdentifier)->toBe(Entities::ORDER_ID)
+        ->and($orders->criteria)->toHaveCount(1);
+});
+
+it('reads the products of the order lines through the product repository', function () {
+    $line = orderRepository(FakeEntityRepository::with(Entities::order()))->find(Entities::ORDER_ID)->lines->first();
+
+    expect($line->product->sku)->toBe('SW-1')
+        ->and($line->product->weight)->toBe(250)
+        ->and($line->product->settings->packageType)->toBe('mailbox');
 });
 
 it('returns null for an unknown or malformed id, and get throws', function () {
-    $repository = orderRepository(new InMemoryOrderStorage());
+    $repository = orderRepository(FakeEntityRepository::with());
 
-    expect($repository->find('not-an-order'))->toBeNull()
+    expect($repository->find(Entities::id()))->toBeNull()
+        ->and($repository->find('not-an-order'))->toBeNull()
         ->and(fn () => $repository->get('not-an-order'))->toThrow(ModelNotFoundException::class)
         ->and(fn () => $repository->findOrFail('not-an-order'))->toThrow(ModelNotFoundException::class);
 });
 
-it('gets many orders and leaves unknown ids out', function () {
-    $orders = orderRepository(storageWithNlOrder())->getMany([NL_ORDER_ID, 'unknown']);
+it('gets many orders in one read and leaves unknown ids out', function () {
+    $orders = FakeEntityRepository::with(Entities::order());
+    $found  = orderRepository($orders)->getMany([Entities::ORDER_ID, Entities::id()]);
 
-    expect($orders)->toHaveCount(1)
-        ->and($orders->first()->externalIdentifier)->toBe(NL_ORDER_ID);
+    expect($found)->toHaveCount(1)
+        ->and($found->first()->externalIdentifier)->toBe(Entities::ORDER_ID)
+        ->and($orders->criteria)->toHaveCount(1);
 });
 
 it('finds an order by its api identifier', function () {
-    $storage                                  = storageWithNlOrder();
-    $storage->apiIdentifiers['api-uuid-0001'] = NL_ORDER_ID;
+    $order  = Entities::order();
+    $orders = new FakeEntityRepository(static function (Criteria $criteria) use ($order): OrderCollection {
+        foreach ($criteria->getFilters() as $filter) {
+            if ($filter instanceof EqualsFilter && 'api-uuid-0001' !== $filter->getValue()) {
+                return new OrderCollection();
+            }
+        }
 
-    expect(orderRepository($storage)->getByApiIdentifier('api-uuid-0001')->externalIdentifier)->toBe(NL_ORDER_ID)
-        ->and(orderRepository($storage)->getByApiIdentifier('unknown'))->toBeNull();
+        return new OrderCollection([$order]);
+    });
+
+    expect(orderRepository($orders)->getByApiIdentifier('api-uuid-0001')->externalIdentifier)->toBe(Entities::ORDER_ID)
+        ->and($orders->criteria[0]->getFilters())->toEqual([new EqualsFilter('myparcelOrderData.apiIdentifier', 'api-uuid-0001')])
+        ->and(orderRepository($orders)->getByApiIdentifier('unknown'))->toBeNull();
 });
 
 it('stores the order data and the shipments', function () {
     $orderData  = FakeEntityRepository::with();
     $shipments  = FakeEntityRepository::with();
-    $storage    = storageWithNlOrder();
-    $repository = orderRepository($storage, $orderData, $shipments);
-    $order      = $repository->find(NL_ORDER_ID);
+    $repository = orderRepository(FakeEntityRepository::with(Entities::order()), $orderData, $shipments);
+    $order      = $repository->find(Entities::ORDER_ID);
 
     $order->exported = false;
     $repository->update($order);
@@ -107,52 +135,52 @@ it('stores the order data and the shipments', function () {
 });
 
 it('merges stored shipments with the incoming ones by id and keeps new ones without an id', function () {
-    $shipments                       = FakeEntityRepository::with();
-    $storage                         = storageWithNlOrder();
-    $storage->shipments[NL_ORDER_ID] = [['id' => 101, 'carrier' => 'POSTNL'], ['id' => 102, 'carrier' => 'POSTNL']];
-    $repository                      = orderRepository($storage, null, $shipments);
-    $order                           = $repository->find(NL_ORDER_ID);
+    $shipments  = FakeEntityRepository::with();
+    $orders     = FakeEntityRepository::with(Entities::order([
+        'shipments' => [['id' => 101, 'carrier' => 'POSTNL'], ['id' => 102, 'carrier' => 'POSTNL']],
+    ]));
+    $repository = orderRepository($orders, null, $shipments);
+    $order      = $repository->find(Entities::ORDER_ID);
 
     $order->shipments = new ShipmentCollection([
         ['id' => 102, 'carrier' => 'POSTNL', 'barcode' => '3STEST0000002'],
         ['id' => null, 'carrier' => 'POSTNL'],
     ]);
-    $repository->update($order);
-
-    $stored = array_column($shipments->upserts, 'data');
+    $updated = $repository->update($order);
 
     // toStorableArray() skips null values, so the shipment without an id has no id key.
+    $stored = array_column($shipments->upserts, 'data');
+
     expect($stored)->toHaveCount(3)
         ->and(array_column($stored, 'id'))->toBe([101, 102])
         ->and($stored[2])->not->toHaveKey('id')
-        ->and($stored[1]['barcode'])->toBe('3STEST0000002');
+        ->and($stored[1]['barcode'])->toBe('3STEST0000002')
+        ->and($updated->shipments)->toHaveCount(3);
 });
 
 it('returns the updated order from the cache afterwards', function () {
-    $storage    = storageWithNlOrder();
-    $repository = orderRepository($storage);
-    $order      = $repository->find(NL_ORDER_ID);
+    $orders     = FakeEntityRepository::with(Entities::order());
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
 
     $order->exported = false;
     $repository->update($order);
 
-    expect($repository->find(NL_ORDER_ID)->exported)->toBeFalse()
-        ->and($storage->snapshotReads)->toBe(1);
+    // One read for find(), one for the stored shipments in update().
+    expect($repository->find(Entities::ORDER_ID)->exported)->toBeFalse()
+        ->and($orders->criteria)->toHaveCount(2);
 });
 
 it('keeps the api identifiers that the pdk sets on the order notes when it stores them', function () {
-    $storedNote                               = ['externalIdentifier' => 'n1', 'orderIdentifier' => NL_ORDER_ID, 'author' => 'webshop', 'note' => 'Ingepakt'];
-    $orderData                                = FakeEntityRepository::with();
-    $storage                                  = storageWithNlOrder();
-    $storage->snapshots[NL_ORDER_ID]['notes'] = [$storedNote];
-    $storage->notes[NL_ORDER_ID]              = [$storedNote];
-    $storage->customerComments[NL_ORDER_ID]   = 'Graag bij de buren afgeven';
-    $noteRepository                           = new PdkOrderNoteRepository(
+    $storedNote     = ['externalIdentifier' => 'n1', 'orderIdentifier' => Entities::ORDER_ID, 'author' => 'webshop', 'note' => 'Ingepakt'];
+    $orders         = FakeEntityRepository::with(Entities::order(['notes' => [$storedNote]]));
+    $orderData      = FakeEntityRepository::with();
+    $noteRepository = new PdkOrderNoteRepository(
         new MemoryCacheStorage(),
-        $storage,
+        $orders,
         new OrderDataWriter($orderData, FakeEntityRepository::with(), new RecordingConnection())
     );
-    $order                                    = orderRepository($storage)->find(NL_ORDER_ID);
+    $order          = orderRepository($orders)->find(Entities::ORDER_ID);
 
     // What PostOrderNotesAction does after it posted the notes to the API.
     $order->notes->addApiIdentifiers(new OrderNoteCollection([['uuid' => 'api-note-0'], ['uuid' => 'api-note-1']]));

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Order\Mapper;
 
 use MyParcelNL\Pdk\Facade\Pdk;
+use Shopware\Core\Checkout\Order\Aggregate\OrderAddress\OrderAddressEntity;
 
 /**
- * Maps a Shopware order address snapshot to PDK contact details.
+ * Maps a Shopware order address to PDK contact details.
  *
  * Shopware has one street field. For the countries where MyParcel needs a separate
  * house number (countriesWithSeparateAddressFields), StreetSplitter splits the
@@ -25,19 +26,18 @@ final class AddressMapper
 
     /**
      * Maps one address. A null address gives contact details with only the e-mail.
-     *
-     * @param  null|array<string, mixed> $address
+     * Use it for the shipping and the billing address of an order.
      */
-    public function map(?array $address, ?string $email): AddressMapResult
+    public function map(?OrderAddressEntity $address, ?string $email): AddressMapResult
     {
         if (null === $address) {
             return new AddressMapResult(array_filter(['email' => $email], static fn ($value) => null !== $value), false);
         }
 
-        $street     = trim((string) ($address['street'] ?? ''));
-        $line1      = trim((string) ($address['additionalAddressLine1'] ?? ''));
-        $line2      = trim((string) ($address['additionalAddressLine2'] ?? ''));
-        $cc         = strtoupper((string) ($address['countryIso'] ?? ''));
+        $street     = trim($address->getStreet());
+        $line1      = trim((string) $address->getAdditionalAddressLine1());
+        $line2      = trim((string) $address->getAdditionalAddressLine2());
+        $cc         = strtoupper((string) $address->getCountry()?->getIso());
         $extraLines = [$line1, $line2];
         $streetPart = ['street' => $street, 'number' => null, 'numberSuffix' => null, 'boxNumber' => null];
         $failed     = false;
@@ -71,13 +71,13 @@ final class AddressMapper
         return new AddressMapResult(
             array_merge($streetPart, [
                 'streetAdditionalInfo' => '' === $additionalInfo ? null : $additionalInfo,
-                'postalCode'           => $address['zipcode'] ?? null,
-                'city'                 => $address['city'] ?? null,
+                'postalCode'           => $address->getZipcode(),
+                'city'                 => $address->getCity(),
                 'cc'                   => '' === $cc ? null : $cc,
-                'region'               => $address['stateName'] ?? null,
-                'person'               => trim(($address['firstName'] ?? '') . ' ' . ($address['lastName'] ?? '')),
-                'company'              => $address['company'] ?? null,
-                'phone'                => $address['phoneNumber'] ?? null,
+                'region'               => $address->getCountryState()?->getName(),
+                'person'               => trim($address->getFirstName() . ' ' . $address->getLastName()),
+                'company'              => $address->getCompany(),
+                'phone'                => $address->getPhoneNumber(),
                 'email'                => $email,
             ]),
             $failed

@@ -32,13 +32,8 @@
             <argument type="service" id="product.repository"/>
         </service>
 
-        <service id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage">
-            <argument type="service" id="order.repository"/>
-            <argument type="service" id="myparcel_order_data.repository"/>
-            <argument type="service" id="myparcel_order_shipment.repository"/>
+        <service id="MyParcel\Shopware\Pdk\Currency\EuroCurrency">
             <argument type="service" id="currency.repository"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
-            <argument type="service" id="monolog.logger.myparcel"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter">
@@ -59,8 +54,9 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage"/>
+            <argument type="service" id="order.repository"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
             <argument>%myparcel.plugin_version%</argument>
@@ -106,7 +102,6 @@
 
         <service id="MyParcel\Shopware\Command\OrderShowCommand">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage"/>
             <argument type="service" id="order.repository"/>
             <tag name="console.command"/>
         </service>

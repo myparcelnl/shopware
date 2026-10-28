@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Tests\Support;
 
+use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\PdkInitializer;
@@ -21,8 +22,9 @@ final class HttpBridgeFactory
             new InMemoryConfigStorage(),
             new FixedLocaleResolver(null),
             new FixedUrlResolver([]),
-            new InMemoryOrderStorage(),
+            FakeEntityRepository::with(),
             new InMemoryProductStorage(),
+            new EuroCurrency(FakeEntityRepository::with()),
             new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
             new RecordingOrderStateTransitioner(),
             '0.0.0-test',

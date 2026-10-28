@@ -10,11 +10,11 @@ use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
 use MyParcel\Shopware\Pdk\Audit\Repository\NoopAuditRepository;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
+use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
-use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
@@ -50,6 +50,8 @@ use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
 use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
  * Hands Shopware-owned services to the PDK.
@@ -119,10 +121,20 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
 
     /**
      * @internal Only the PDK container calls this.
+     *
+     * @return EntityRepository<OrderCollection>
      */
-    public static function getOrderStorage(): OrderStorageInterface
+    public static function getOrderRepository(): EntityRepository
     {
-        return self::getShopwareServices()->orderStorage;
+        return self::getShopwareServices()->orderRepository;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getEuroCurrency(): EuroCurrency
+    {
+        return self::getShopwareServices()->euroCurrency;
     }
 
     /**
@@ -199,13 +211,17 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
-            OrderStorageInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStorage']),
+            EuroCurrency::class                         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getEuroCurrency']),
             ProductStorageInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductStorage']),
             OrderDataWriter::class                      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderDataWriter']),
             OrderStateTransitionerInterface::class      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStateTransitioner']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
-            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),
-            PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class),
+            // EntityRepository is one class for every entity, so php-di cannot pick
+            // the right one by type: name it per constructor parameter.
+            PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class)
+                ->constructorParameter('orderRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderRepository'])),
+            PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class)
+                ->constructorParameter('orderRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderRepository'])),
             PdkProductRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkProductRepository::class),
             PdkAuditRepositoryInterface::class          => \_MyParcel\DI\autowire(NoopAuditRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
