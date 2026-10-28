@@ -6,6 +6,7 @@ namespace MyParcel\Shopware\Pdk\Order\Repository;
 
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Mapper\OrderNotesBuilder;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcelNL\Pdk\App\Order\Collection\PdkOrderNoteCollection;
 use MyParcelNL\Pdk\App\Order\Model\PdkOrder;
 use MyParcelNL\Pdk\App\Order\Model\PdkOrderNote;
@@ -22,8 +23,11 @@ final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
 {
     public const CUSTOMER_NOTE_IDENTIFIER = OrderNotesBuilder::CUSTOMER_NOTE_IDENTIFIER;
 
-    public function __construct(StorageInterface $storage, private readonly OrderStorageInterface $orderStorage)
-    {
+    public function __construct(
+        StorageInterface $storage,
+        private readonly OrderStorageInterface $orderStorage,
+        private readonly OrderDataWriter $orderDataWriter
+    ) {
         parent::__construct($storage);
     }
 
@@ -80,6 +84,6 @@ final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
             $notes[] = $note->toStorableArray();
         }
 
-        $this->orderStorage->saveNotes($orderId, array_values($notes));
+        $this->orderDataWriter->saveNotes($orderId, array_values($notes));
     }
 }

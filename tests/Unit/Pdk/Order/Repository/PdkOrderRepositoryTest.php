@@ -8,9 +8,12 @@ use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
 use MyParcel\Shopware\Pdk\Order\Mapper\StreetSplitter;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
+use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
 use MyParcel\Shopware\Tests\Support\Fixtures;
 use MyParcel\Shopware\Tests\Support\InMemoryOrderStorage;
+use MyParcel\Shopware\Tests\Support\RecordingConnection;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
 use MyParcelNL\Pdk\Base\Exception\ModelNotFoundException;
@@ -24,14 +27,21 @@ const NL_ORDER_ID = '0190a1b2c3d4e5f60718293a4b5c6d01';
 
 beforeEach(fn () => TestPdk::boot());
 
-function orderRepository(InMemoryOrderStorage $storage): PdkOrderRepository
-{
+/**
+ * A repository on this storage. The writes go to $orderData and $shipments.
+ */
+function orderRepository(
+    InMemoryOrderStorage $storage,
+    ?FakeEntityRepository $orderData = null,
+    ?FakeEntityRepository $shipments = null
+): PdkOrderRepository {
     $currency = new CurrencyService();
 
     return new PdkOrderRepository(
         new MemoryCacheStorage(),
         $storage,
-        new PdkOrderMapper(new AddressMapper(new StreetSplitter()), new MoneyConverter($currency), new PdkProductMapper($currency, new WeightService()))
+        new PdkOrderMapper(new AddressMapper(new StreetSplitter()), new MoneyConverter($currency), new PdkProductMapper($currency, new WeightService())),
+        new OrderDataWriter($orderData ?? FakeEntityRepository::with(), $shipments ?? FakeEntityRepository::with(), new RecordingConnection())
     );
 }
 
@@ -82,23 +92,25 @@ it('finds an order by its api identifier', function () {
         ->and(orderRepository($storage)->getByApiIdentifier('unknown'))->toBeNull();
 });
 
-it('stores the order data and the shipments as a list', function () {
+it('stores the order data and the shipments', function () {
+    $orderData  = FakeEntityRepository::with();
+    $shipments  = FakeEntityRepository::with();
     $storage    = storageWithNlOrder();
-    $repository = orderRepository($storage);
+    $repository = orderRepository($storage, $orderData, $shipments);
     $order      = $repository->find(NL_ORDER_ID);
 
     $order->exported = false;
     $repository->update($order);
 
-    expect($storage->orderData[NL_ORDER_ID])->toMatchArray(['apiIdentifier' => 'api-uuid-0001', 'exported' => false])
-        ->and(array_is_list($storage->shipments[NL_ORDER_ID]))->toBeTrue()
-        ->and(array_column($storage->shipments[NL_ORDER_ID], 'id'))->toBe([101]);
+    expect($orderData->upserts[0]['data'])->toMatchArray(['apiIdentifier' => 'api-uuid-0001', 'exported' => false])
+        ->and(array_column(array_column($shipments->upserts, 'data'), 'id'))->toBe([101]);
 });
 
 it('merges stored shipments with the incoming ones by id and keeps new ones without an id', function () {
+    $shipments                       = FakeEntityRepository::with();
     $storage                         = storageWithNlOrder();
     $storage->shipments[NL_ORDER_ID] = [['id' => 101, 'carrier' => 'POSTNL'], ['id' => 102, 'carrier' => 'POSTNL']];
-    $repository                      = orderRepository($storage);
+    $repository                      = orderRepository($storage, null, $shipments);
     $order                           = $repository->find(NL_ORDER_ID);
 
     $order->shipments = new ShipmentCollection([
@@ -107,7 +119,7 @@ it('merges stored shipments with the incoming ones by id and keeps new ones with
     ]);
     $repository->update($order);
 
-    $stored = $storage->shipments[NL_ORDER_ID];
+    $stored = array_column($shipments->upserts, 'data');
 
     // toStorableArray() skips null values, so the shipment without an id has no id key.
     expect($stored)->toHaveCount(3)
@@ -129,18 +141,25 @@ it('returns the updated order from the cache afterwards', function () {
 });
 
 it('keeps the api identifiers that the pdk sets on the order notes when it stores them', function () {
-    $storedNote                                  = ['externalIdentifier' => 'n1', 'orderIdentifier' => NL_ORDER_ID, 'author' => 'webshop', 'note' => 'Ingepakt'];
-    $storage                                     = storageWithNlOrder();
-    $storage->snapshots[NL_ORDER_ID]['notes']    = [$storedNote];
-    $storage->notes[NL_ORDER_ID]                 = [$storedNote];
-    $storage->customerComments[NL_ORDER_ID]      = 'Graag bij de buren afgeven';
-    $noteRepository                              = new PdkOrderNoteRepository(new MemoryCacheStorage(), $storage);
-    $order                                       = orderRepository($storage)->find(NL_ORDER_ID);
+    $storedNote                               = ['externalIdentifier' => 'n1', 'orderIdentifier' => NL_ORDER_ID, 'author' => 'webshop', 'note' => 'Ingepakt'];
+    $orderData                                = FakeEntityRepository::with();
+    $storage                                  = storageWithNlOrder();
+    $storage->snapshots[NL_ORDER_ID]['notes'] = [$storedNote];
+    $storage->notes[NL_ORDER_ID]              = [$storedNote];
+    $storage->customerComments[NL_ORDER_ID]   = 'Graag bij de buren afgeven';
+    $noteRepository                           = new PdkOrderNoteRepository(
+        new MemoryCacheStorage(),
+        $storage,
+        new OrderDataWriter($orderData, FakeEntityRepository::with(), new RecordingConnection())
+    );
+    $order                                    = orderRepository($storage)->find(NL_ORDER_ID);
 
     // What PostOrderNotesAction does after it posted the notes to the API.
     $order->notes->addApiIdentifiers(new OrderNoteCollection([['uuid' => 'api-note-0'], ['uuid' => 'api-note-1']]));
     $noteRepository->updateMany($order->notes);
 
-    expect($storage->notes[NL_ORDER_ID])->toHaveCount(1)
-        ->and($storage->notes[NL_ORDER_ID][0])->toMatchArray(['externalIdentifier' => 'n1', 'apiIdentifier' => 'api-note-1']);
+    $saved = $orderData->upserts[0]['notes'];
+
+    expect($saved)->toHaveCount(1)
+        ->and($saved[0])->toMatchArray(['externalIdentifier' => 'n1', 'apiIdentifier' => 'api-note-1']);
 });

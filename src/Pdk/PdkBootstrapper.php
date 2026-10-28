@@ -17,6 +17,7 @@ use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
@@ -135,6 +136,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
+    public static function getOrderDataWriter(): OrderDataWriter
+    {
+        return self::getShopwareServices()->orderDataWriter;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
     public static function getOrderStateTransitioner(): OrderStateTransitionerInterface
     {
         return self::getShopwareServices()->orderStateTransitioner;
@@ -192,6 +201,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             UrlResolverInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getUrlResolver']),
             OrderStorageInterface::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStorage']),
             ProductStorageInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductStorage']),
+            OrderDataWriter::class                      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderDataWriter']),
             OrderStateTransitionerInterface::class      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStateTransitioner']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class),

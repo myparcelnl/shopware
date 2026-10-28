@@ -6,6 +6,7 @@ namespace MyParcel\Shopware\Pdk\Order\Repository;
 
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcelNL\Pdk\App\Order\Collection\PdkOrderCollection;
 use MyParcelNL\Pdk\App\Order\Model\PdkOrder;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
@@ -26,7 +27,8 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     public function __construct(
         StorageInterface $storage,
         private readonly OrderStorageInterface $orderStorage,
-        private readonly PdkOrderMapper $mapper
+        private readonly PdkOrderMapper $mapper,
+        private readonly OrderDataWriter $orderDataWriter
     ) {
         parent::__construct($storage);
     }
@@ -124,8 +126,8 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
             $order->shipments
         );
 
-        $this->orderStorage->saveOrderData($orderId, $order->toStorableArray());
-        $this->orderStorage->saveShipments($orderId, $order->shipments->toStorableArray());
+        $this->orderDataWriter->saveOrderData($orderId, $order->toStorableArray());
+        $this->orderDataWriter->saveShipments($orderId, $order->shipments);
 
         return $this->save($orderId, $order);
     }
@@ -133,6 +135,8 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     /**
      * A shipment without an id cannot be matched. The incoming one is the current
      * one, so stored shipments without an id are dropped and incoming ones kept.
+     * Incoming shipments that the PDK marked deleted stay in the list, so
+     * OrderDataWriter deletes their rows.
      */
     private function mergeShipments(ShipmentCollection $stored, ShipmentCollection $incoming): ShipmentCollection
     {

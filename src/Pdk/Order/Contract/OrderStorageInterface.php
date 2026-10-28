@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Order\Contract;
 
 /**
- * Reads Shopware orders as plain-array snapshots and stores the PDK's order data,
+ * Reads Shopware orders as plain-array snapshots, with the PDK's order data,
  * notes and shipments. A seam of our own: the unit tests run without Shopware, and
  * the PDK container reaches the Shopware implementation through PdkBootstrapper.
  */
@@ -37,30 +37,12 @@ interface OrderStorageInterface
     public function findIdByApiIdentifier(string $apiIdentifier): ?string;
 
     /**
-     * Replaces the stored order data of the order and stores its apiIdentifier for
-     * lookup by findIdByApiIdentifier(). Creates the row when there is none. Use it
-     * after the PDK changed an order.
-     *
-     * @param  array<string, mixed> $data PdkOrder::toStorableArray()
-     */
-    public function saveOrderData(string $orderId, array $data): void;
-
-    /**
      * Returns the stored shipments of the order. Use it to merge new shipments into
-     * the stored ones before saveShipments().
+     * the stored ones before OrderDataWriter::saveShipments().
      *
      * @return list<array<string, mixed>> Shipment::toStorableArray() per shipment, in stored order
      */
     public function getShipments(string $orderId): array;
-
-    /**
-     * Replaces all stored shipments of the order with this list. Use it after merging
-     * the stored shipments with the PDK's changed ones; deleted shipments are already
-     * left out of the list.
-     *
-     * @param  list<array<string, mixed>> $shipments
-     */
-    public function saveShipments(string $orderId, array $shipments): void;
 
     /**
      * Returns the stored PDK notes of the order, and the customer comment of the
@@ -70,12 +52,4 @@ interface OrderStorageInterface
      * @return array{notes: list<array<string, mixed>>, customerComment: ?string}
      */
     public function getNotes(string $orderId): array;
-
-    /**
-     * Replaces the stored notes list of the order. Use it after the PDK added,
-     * changed or removed a note.
-     *
-     * @param  list<array<string, mixed>> $notes
-     */
-    public function saveNotes(string $orderId, array $notes): void;
 }

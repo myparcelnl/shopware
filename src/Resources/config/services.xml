@@ -39,6 +39,11 @@
             <argument type="service" id="currency.repository"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
             <argument type="service" id="monolog.logger.myparcel"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter">
+            <argument type="service" id="myparcel_order_data.repository"/>
+            <argument type="service" id="myparcel_order_shipment.repository"/>
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
@@ -56,6 +61,7 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\Storage\ShopwareOrderStorage"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Storage\ShopwareProductStorage"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Tests\Support;
 
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 
 /**
@@ -22,6 +23,7 @@ final class HttpBridgeFactory
             new FixedUrlResolver([]),
             new InMemoryOrderStorage(),
             new InMemoryProductStorage(),
+            new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
             new RecordingOrderStateTransitioner(),
             '0.0.0-test',
             'https://shop.test',

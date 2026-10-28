@@ -7,16 +7,13 @@ namespace MyParcel\Shopware\Tests\Support;
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStorageInterface;
 
 /**
- * Keeps snapshots and stored PDK data in arrays, so a test can see what a
- * repository wrote and read it back.
+ * Keeps snapshots and stored PDK data in arrays. The repositories write through
+ * OrderDataWriter, so a test reads the writes from its fake repositories.
  */
 final class InMemoryOrderStorage implements OrderStorageInterface
 {
     /** @var array<string, array<string, mixed>> */
     public array $snapshots = [];
-
-    /** @var array<string, array<string, mixed>> */
-    public array $orderData = [];
 
     /** @var array<string, list<array<string, mixed>>> */
     public array $shipments = [];
@@ -49,32 +46,13 @@ final class InMemoryOrderStorage implements OrderStorageInterface
         return $this->apiIdentifiers[$apiIdentifier] ?? null;
     }
 
-    public function saveOrderData(string $orderId, array $data): void
-    {
-        $this->orderData[$orderId] = $data;
-
-        if (isset($data['apiIdentifier'])) {
-            $this->apiIdentifiers[$data['apiIdentifier']] = $orderId;
-        }
-    }
-
     public function getShipments(string $orderId): array
     {
         return $this->shipments[$orderId] ?? [];
     }
 
-    public function saveShipments(string $orderId, array $shipments): void
-    {
-        $this->shipments[$orderId] = $shipments;
-    }
-
     public function getNotes(string $orderId): array
     {
         return ['notes' => $this->notes[$orderId] ?? [], 'customerComment' => $this->customerComments[$orderId] ?? null];
-    }
-
-    public function saveNotes(string $orderId, array $notes): void
-    {
-        $this->notes[$orderId] = $notes;
     }
 }

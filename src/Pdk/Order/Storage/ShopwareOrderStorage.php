@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order\Storage;
 
-use Doctrine\DBAL\Connection;
 use MyParcel\Shopware\Entity\OrderData\OrderDataEntity;
 use MyParcel\Shopware\Entity\OrderExtension;
 use MyParcel\Shopware\Entity\OrderShipment\OrderShipmentCollection;
@@ -25,7 +24,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
 
 /**
- * Reads orders with the DAL and writes the PDK's data to the plugin tables.
+ * Reads orders with the DAL, with the PDK's data from the plugin tables.
  *
  * Everything runs in the default context: the system scope in the default language.
  * The PDK endpoints already check the myparcel:access privilege.
@@ -59,8 +58,7 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         private readonly EntityRepository $orderShipmentRepository,
         private readonly EntityRepository $currencyRepository,
         private readonly ProductStorageInterface $productStorage,
-        private readonly LoggerInterface $logger,
-        private readonly Connection $connection
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -121,17 +119,6 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         return $orderData?->getOrderId();
     }
 
-    public function saveOrderData(string $orderId, array $data): void
-    {
-        $this->orderDataRepository->upsert([[
-            'id'             => self::orderDataId($orderId),
-            'orderId'        => $orderId,
-            'orderVersionId' => Defaults::LIVE_VERSION,
-            'apiIdentifier'  => $data['apiIdentifier'] ?? null,
-            'data'           => $data,
-        ]], Context::createDefaultContext());
-    }
-
     public function getShipments(string $orderId): array
     {
         $criteria = (new Criteria())
@@ -142,37 +129,6 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         $shipments = $this->orderShipmentRepository->search($criteria, Context::createDefaultContext())->getEntities();
 
         return array_values(array_map(static fn ($shipment) => $shipment->getData(), $shipments->getElements()));
-    }
-
-    public function saveShipments(string $orderId, array $shipments): void
-    {
-        $context = Context::createDefaultContext();
-        $rows    = [];
-
-        foreach (array_values($shipments) as $position => $shipment) {
-            $rows[] = [
-                'id'             => Uuid::randomHex(),
-                'orderId'        => $orderId,
-                'orderVersionId' => Defaults::LIVE_VERSION,
-                'position'       => $position,
-                'data'           => $shipment,
-            ];
-        }
-
-        // One transaction: a failed create must not leave the order without its stored shipments.
-        $this->connection->transactional(function () use ($orderId, $rows, $context): void {
-            $existing = $this->orderShipmentRepository
-                ->searchIds((new Criteria())->addFilter(new EqualsFilter('orderId', $orderId)), $context)
-                ->getIds();
-
-            if ([] !== $existing) {
-                $this->orderShipmentRepository->delete(array_map(static fn ($id) => ['id' => $id], array_values($existing)), $context);
-            }
-
-            if ([] !== $rows) {
-                $this->orderShipmentRepository->create($rows, $context);
-            }
-        });
     }
 
     public function getNotes(string $orderId): array
@@ -190,25 +146,6 @@ final class ShopwareOrderStorage implements OrderStorageInterface
         $orderData = $order?->getExtension(OrderExtension::ORDER_DATA);
 
         return ['notes' => $orderData?->getNotes() ?? [], 'customerComment' => $order?->getCustomerComment()];
-    }
-
-    public function saveNotes(string $orderId, array $notes): void
-    {
-        $this->orderDataRepository->upsert([[
-            'id'             => self::orderDataId($orderId),
-            'orderId'        => $orderId,
-            'orderVersionId' => Defaults::LIVE_VERSION,
-            'notes'          => array_values($notes),
-        ]], Context::createDefaultContext());
-    }
-
-    /**
-     * One row per order: a deterministic id makes every write an upsert without a
-     * lookup first.
-     */
-    private static function orderDataId(string $orderId): string
-    {
-        return Uuid::fromStringToHex('myparcel_order_data.' . $orderId);
     }
 
     /**
