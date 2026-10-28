@@ -17,8 +17,9 @@
     <include>
       <directory suffix=".php">./src</directory>
     </include>
-    <!-- processUncoveredFiles loads every file, and this one extends
-         Shopware's Plugin class, which the test vendor does not have. -->
+    <!-- processUncoveredFiles loads every file. tests/Pest.php loads the
+         Shopware classes from .tmp/shopware, but the plugin class extends
+         Symfony's HttpKernel Bundle, which neither install gives the tests. -->
     <exclude>
       <file>./src/MyParcelShopware.php</file>
     </exclude>

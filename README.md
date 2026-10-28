@@ -139,6 +139,12 @@ mid-swap would write to the wrong tree.
 
 Arguments pass straight through, e.g. `composer test -- --filter=logger`.
 
+The mappers and repositories take Shopware entities, so the tests build real ones.
+The first run installs Shopware in `.tmp/shopware`, the same install that the
+static analysis uses, and `tests/Pest.php` loads the Shopware classes from there.
+`tests/Support/Entities.php` builds the entities with synthetic data, and
+`tests/Support/FakeEntityRepository.php` stands in for the DAL.
+
 ### Static analysis
 
 ```shell
@@ -154,14 +160,34 @@ analysing the plug-in.
 
 Shopware and the PDK cannot live in one composer install: the PDK caps
 `symfony/http-foundation` at 6, Shopware 6.7 needs 7.4. The first run installs
-Shopware on its own in `.tmp/shopware` and PHPStan itself in `.tmp/tools`. Later
-runs reuse both and finish in seconds. Each install carries a stamp of what it was
-built for, so bumping the Shopware constraint in `bin/analyse.sh`, bumping
-`phpstan/phpstan` in `require-dev` or switching PHP version rebuilds what that
-change affects instead of reusing the old install.
+Shopware on its own in `.tmp/shopware` (`bin/shopware-vendor.sh`) and PHPStan
+itself in `.tmp/tools`. Later runs reuse both and finish in seconds. Each install
+carries a stamp of what it was built for, so bumping the Shopware constraint in
+`bin/shopware-vendor.sh`, bumping `phpstan/phpstan` in `require-dev` or switching
+PHP version rebuilds what that change affects instead of reusing the old install.
 
 The baseline in `phpstan-baseline.php` is empty on purpose. Fix what PHPStan
 reports; do not add to it.
+
+### Migrations
+
+The plug-in has two kinds of migrations. Each kind has its own directory and its
+own runner, and each runner keeps its own list of the migrations that ran, so a
+migration must never be in both directories.
+
+| Directory           | Runner                                   | Use it for                                                                  |
+| ------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `src/Migration`     | Shopware, on plug-in install and update  | The plug-in's own tables: `myparcel_order_data`, `myparcel_order_shipment`  |
+| `src/Pdk/Migration` | The PDK installer (`migrationDirectory`) | Changes to the PDK's own data, such as stored settings                      |
+
+A Shopware migration is a `MigrationStep` class named `Migration<timestamp><Name>`.
+A PDK migration is a file named `YYYY_MM_DD_HHMMSS_<name>.php`; `PdkBootstrapper`
+points the PDK's `migrationDirectory` at `src/Pdk/Migration`. The plug-in does not
+run the PDK installer yet ([INT-2154](https://myparcelnl.atlassian.net/browse/INT-2154)),
+so the directory does not exist yet. Do not add a PDK migration before that ticket
+is done.
+
+The custom field set `myparcel_product` is neither: see "Product settings" below.
 
 ### Translations
 
@@ -204,6 +230,26 @@ the key.
 
 Settings and the account are stored installation-wide in `system_config`, under
 `MyParcelShopware.pdk.*`.
+
+## Inspecting orders
+
+`bin/console myparcel:order:show <orderNumber>` prints an order as the PDK sees it:
+the split address, the lines with weight in grams and the amounts in euro cents.
+The output contains personal data: do not paste it anywhere outside the
+development environment.
+
+## Product settings
+
+The MyParcel settings of a product are custom fields named `myparcel_*`, in the
+custom field set `myparcel_product`. `ProductCustomFieldSet` creates the set on
+install and brings it in line with the PDK's product settings on every plug-in
+update. Uninstalling without "keep user data" removes the set and the values of
+its fields from every product.
+
+The set has no relation to the product entity, so the fields do not show in the
+"Custom fields" card of the product page.
+[INT-1960](https://myparcelnl.atlassian.net/browse/INT-1960) adds a MyParcel tab to
+the product page for these settings.
 
 ## Routes
 
