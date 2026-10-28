@@ -101,3 +101,16 @@ it('replaces the rows of shipments without an id on each save', function () {
     expect(array_column($shipments->upserts, 'id'))->toBe([shipmentRowId(101), $newRowId(1)])
         ->and($shipments->deletes)->toBe([['id' => $newRowId(2)]]);
 });
+
+it('replaces the row of a shipment that got an id with the row of its id', function () {
+    $newRowId  = Uuid::fromStringToHex(Entities::ORDER_ID . '.new.0');
+    $shipments = FakeEntityRepository::with(
+        Entities::shipment(Entities::ORDER_ID, 0, ['id' => null, 'carrier' => 'POSTNL'], $newRowId)
+    );
+    $writer    = new OrderDataWriter(FakeEntityRepository::with(), $shipments, new RecordingConnection());
+
+    $writer->saveShipments(Entities::ORDER_ID, new ShipmentCollection([['id' => 105, 'carrier' => 'POSTNL']]));
+
+    expect($shipments->deletes)->toBe([['id' => $newRowId]])
+        ->and(array_column($shipments->upserts, 'id'))->toBe([shipmentRowId(105)]);
+});
