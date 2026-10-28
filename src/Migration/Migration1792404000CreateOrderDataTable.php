@@ -19,6 +19,10 @@ class Migration1792404000CreateOrderDataTable extends MigrationStep
         return 1792404000;
     }
 
+    /**
+     * Creates the table myparcel_order_data when it does not exist. Shopware runs it
+     * when the plugin is installed or updated.
+     */
     public function update(Connection $connection): void
     {
         if (TableHelper::tableExists($connection, 'myparcel_order_data')) {

@@ -190,7 +190,7 @@ final class ProductCustomFields
                     'type'   => 'select',
                     'config' => $base + ['componentName' => 'sw-single-select', 'customFieldType' => 'select', 'options' => self::packageTypeOptions()],
                 ],
-                default                 => [
+                default                  => [
                     'name'   => self::fieldName($key),
                     'type'   => 'select',
                     'config' => $base + ['componentName' => 'sw-single-select', 'customFieldType' => 'select', 'options' => self::triStateOptions()],
@@ -225,8 +225,8 @@ final class ProductCustomFields
             self::FIELD_TEXT, self::FIELD_PACKAGE_TYPE => (string) TriStateService::INHERIT === trim((string) $value)
                 ? TriStateService::INHERIT
                 : trim((string) $value),
-            self::FIELD_INT                           => is_numeric($value) ? (int) $value : TriStateService::INHERIT,
-            default                                  => is_numeric($value) && in_array((int) $value, [TriStateService::INHERIT, TriStateService::DISABLED, TriStateService::ENABLED], true)
+            self::FIELD_INT                            => is_numeric($value) ? (int) $value : TriStateService::INHERIT,
+            default                                    => is_numeric($value) && in_array((int) $value, [TriStateService::INHERIT, TriStateService::DISABLED, TriStateService::ENABLED], true)
                 ? (int) $value
                 : TriStateService::INHERIT,
         };
