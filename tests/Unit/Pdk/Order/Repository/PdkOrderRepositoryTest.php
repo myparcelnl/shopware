@@ -30,9 +30,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 beforeEach(fn () => TestPdk::boot());
 
-function euroCurrency(): EuroCurrency
+function euroCurrency(float $factor = 1.0): EuroCurrency
 {
-    return new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0)));
+    return new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', $factor)));
 }
 
 /**
@@ -41,18 +41,19 @@ function euroCurrency(): EuroCurrency
 function orderRepository(
     FakeEntityRepository $orders,
     ?FakeEntityRepository $orderData = null,
-    ?FakeEntityRepository $shipments = null
+    ?FakeEntityRepository $shipments = null,
+    float $euroFactor = 1.0
 ): PdkOrderRepository {
     $currency = new CurrencyService();
 
     return new PdkOrderRepository(
         new MemoryCacheStorage(),
         $orders,
-        euroCurrency(),
+        euroCurrency($euroFactor),
         new PdkProductRepository(
             new MemoryCacheStorage(),
             FakeEntityRepository::with(Entities::product(['customFields' => ['myparcel_package_type' => 'mailbox']])),
-            euroCurrency(),
+            euroCurrency($euroFactor),
             new PdkProductMapper($currency, new WeightService()),
             new ProductSettingsWriter(FakeEntityRepository::with())
         ),
@@ -83,6 +84,13 @@ it('reads the products of the order lines through the product repository', funct
     expect($line->product->sku)->toBe('SW-1')
         ->and($line->product->weight)->toBe(250)
         ->and($line->product->settings->packageType)->toBe('mailbox');
+});
+
+it('converts the amounts with the factor of the euro currency', function () {
+    $repository = orderRepository(FakeEntityRepository::with(Entities::order()), null, null, 0.9);
+
+    // 12.10 * 0.9 = 10.89 euro. A factor of 1.0 gives 1210.
+    expect($repository->find(Entities::ORDER_ID)->lines->first()->priceAfterVat)->toBe(1089);
 });
 
 it('returns null for an unknown or malformed id, and get throws', function () {

@@ -22,12 +22,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 
 beforeEach(fn () => TestPdk::boot());
 
-function productRepository(FakeEntityRepository $products, ?FakeEntityRepository $writes = null): PdkProductRepository
+function productRepository(FakeEntityRepository $products, ?FakeEntityRepository $writes = null, float $euroFactor = 1.0): PdkProductRepository
 {
     return new PdkProductRepository(
         new MemoryCacheStorage(),
         $products,
-        new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0))),
+        new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', $euroFactor))),
         new PdkProductMapper(new CurrencyService(), new WeightService()),
         new ProductSettingsWriter($writes ?? FakeEntityRepository::with())
     );
@@ -44,6 +44,13 @@ it('gets a product and its settings, and reads it once per request', function ()
     expect($repository->getProduct(Entities::PRODUCT_ID)->sku)->toBe('SW-1')
         ->and($repository->getProductSettings(Entities::PRODUCT_ID)->packageType)->toBe('mailbox')
         ->and($products->criteria)->toHaveCount(2);
+});
+
+it('converts the price with the factor of the euro currency', function () {
+    $products = FakeEntityRepository::with(Entities::product(['gross' => 10.00]));
+
+    // 10.00 * 0.9 = 9.00 euro. A factor of 1.0 gives 1000.
+    expect(productRepository($products, null, 0.9)->getProduct(Entities::PRODUCT_ID)->price->amount)->toBe(900);
 });
 
 it('reads the product data with inheritance and the settings without', function () {
