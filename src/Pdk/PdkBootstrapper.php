@@ -176,6 +176,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // cannot compile an interface without a concrete class.
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
+            // @TODO INT-1958: bind OrderStatusService instead of the placeholder, and let
+            // updateStatus() call OrderStateTransitionerInterface::transitionTo().
             OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderStatusService::class),
             ViewServiceInterface::class                 => \_MyParcel\DI\autowire(PlaceholderViewService::class),
 

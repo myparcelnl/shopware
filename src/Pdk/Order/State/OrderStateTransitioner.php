@@ -6,6 +6,7 @@ namespace MyParcel\Shopware\Pdk\Order\State;
 
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Order\OrderStates;
@@ -14,18 +15,25 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionCollection;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
 use Throwable;
 
 /**
- * Moves orders to a target state of order.state along the shortest transition
- * path. An order that cannot reach the target, or whose transition fails, is
- * logged and skipped; the other orders go on.
+ * Moves orders to a target state of order.state with one direct transition, the
+ * way WooCommerce sets an order status directly. It does not walk intermediate
+ * states: each of those would run its own flows and mails. An order without a
+ * direct transition to the target, or whose transition fails, is logged and
+ * skipped; the other orders go on.
  */
 final class OrderStateTransitioner implements OrderStateTransitionerInterface
 {
+    /**
+     * @param  EntityRepository<OrderCollection>                  $orderRepository
+     * @param  EntityRepository<StateMachineTransitionCollection> $transitionRepository
+     */
     public function __construct(
         private readonly EntityRepository $orderRepository,
         private readonly EntityRepository $transitionRepository,
@@ -34,6 +42,10 @@ final class OrderStateTransitioner implements OrderStateTransitionerInterface
     ) {
     }
 
+    /**
+     * Runs, for each order, the one transition from its current state to the
+     * target state. Use it when the PDK changes an order status.
+     */
     public function transitionTo(array $orderIds, string $technicalName): void
     {
         $ids = array_values(array_filter($orderIds, [Uuid::class, 'isValid']));
@@ -51,10 +63,15 @@ final class OrderStateTransitioner implements OrderStateTransitionerInterface
         /** @var OrderEntity $order */
         foreach ($orders as $order) {
             $current = $order->getStateMachineState()?->getTechnicalName();
-            $path    = null === $current ? null : ShortestTransitionPath::find($transitions, $current, $technicalName);
 
-            if (null === $path) {
-                $this->logger->warning('MyParcel: no transition path to the order state', [
+            if ($technicalName === $current) {
+                continue;
+            }
+
+            $action = $transitions[$current . '>' . $technicalName] ?? null;
+
+            if (null === $action) {
+                $this->logger->warning('MyParcel: no direct transition to the order state', [
                     'orderId' => $order->getId(),
                     'from'    => $current,
                     'to'      => $technicalName,
@@ -63,27 +80,25 @@ final class OrderStateTransitioner implements OrderStateTransitionerInterface
                 continue;
             }
 
-            foreach ($path as $action) {
-                try {
-                    $this->stateMachineRegistry->transition(
-                        new Transition(OrderDefinition::ENTITY_NAME, $order->getId(), $action, 'stateId'),
-                        $context
-                    );
-                } catch (Throwable $exception) {
-                    $this->logger->error('MyParcel: an order state transition failed', [
-                        'orderId'   => $order->getId(),
-                        'action'    => $action,
-                        'exception' => $exception->getMessage(),
-                    ]);
-
-                    continue 2;
-                }
+            try {
+                $this->stateMachineRegistry->transition(
+                    new Transition(OrderDefinition::ENTITY_NAME, $order->getId(), $action, 'stateId'),
+                    $context
+                );
+            } catch (Throwable $exception) {
+                $this->logger->error('MyParcel: an order state transition failed', [
+                    'orderId'   => $order->getId(),
+                    'action'    => $action,
+                    'exception' => $exception->getMessage(),
+                ]);
             }
         }
     }
 
     /**
-     * @return list<array{action: string, from: string, to: string}>
+     * The action of every transition of order.state, keyed by "from>to".
+     *
+     * @return array<string, string>
      */
     private function loadTransitions(Context $context): array
     {
@@ -100,7 +115,7 @@ final class OrderStateTransitioner implements OrderStateTransitionerInterface
             $to   = $transition->getToStateMachineState()?->getTechnicalName();
 
             if (null !== $from && null !== $to) {
-                $transitions[] = ['action' => $transition->getActionName(), 'from' => $from, 'to' => $to];
+                $transitions[$from . '>' . $to] = $transition->getActionName();
             }
         }
 
