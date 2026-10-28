@@ -8,10 +8,11 @@ use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
-use MyParcel\Shopware\Pdk\Product\Contract\ProductStorageInterface;
+use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
@@ -21,16 +22,18 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 final class ShopwareServices
 {
     /**
-     * @param  EntityRepository<OrderCollection> $orderRepository
+     * @param  EntityRepository<OrderCollection>   $orderRepository
+     * @param  EntityRepository<ProductCollection> $productRepository
      */
     public function __construct(
         public readonly ConfigStorageInterface $configStorage,
         public readonly LocaleResolverInterface $localeResolver,
         public readonly UrlResolverInterface $urlResolver,
         public readonly EntityRepository $orderRepository,
-        public readonly ProductStorageInterface $productStorage,
+        public readonly EntityRepository $productRepository,
         public readonly EuroCurrency $euroCurrency,
         public readonly OrderDataWriter $orderDataWriter,
+        public readonly ProductSettingsWriter $productSettingsWriter,
         public readonly OrderStateTransitionerInterface $orderStateTransitioner
     ) {
     }

@@ -12,9 +12,9 @@ use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
+use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
-use MyParcel\Shopware\Tests\Support\InMemoryProductStorage;
 use MyParcel\Shopware\Tests\Support\RecordingConnection;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
@@ -43,20 +43,19 @@ function orderRepository(
     ?FakeEntityRepository $orderData = null,
     ?FakeEntityRepository $shipments = null
 ): PdkOrderRepository {
-    $currency       = new CurrencyService();
-    $productStorage = new InMemoryProductStorage();
-
-    $productStorage->snapshots[Entities::PRODUCT_ID] = [
-        'id' => Entities::PRODUCT_ID, 'parentId' => null, 'productNumber' => 'SW-1', 'ean' => null, 'name' => 'Testproduct',
-        'priceGross' => 12.10, 'weight' => 0.25, 'width' => null, 'height' => null, 'length' => null,
-        'type' => 'physical', 'customFields' => ['myparcel_package_type' => 'mailbox'], 'parent' => null,
-    ];
+    $currency = new CurrencyService();
 
     return new PdkOrderRepository(
         new MemoryCacheStorage(),
         $orders,
         euroCurrency(),
-        new PdkProductRepository(new MemoryCacheStorage(), $productStorage, new PdkProductMapper($currency, new WeightService())),
+        new PdkProductRepository(
+            new MemoryCacheStorage(),
+            FakeEntityRepository::with(Entities::product(['customFields' => ['myparcel_package_type' => 'mailbox']])),
+            euroCurrency(),
+            new PdkProductMapper($currency, new WeightService()),
+            new ProductSettingsWriter(FakeEntityRepository::with())
+        ),
         new PdkOrderMapper(new AddressMapper(new StreetSplitter()), new MoneyConverter($currency)),
         new OrderDataWriter($orderData ?? FakeEntityRepository::with(), $shipments ?? FakeEntityRepository::with(), new RecordingConnection())
     );

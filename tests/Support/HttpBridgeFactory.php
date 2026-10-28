@@ -8,6 +8,7 @@ use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\PdkInitializer;
+use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 
 /**
  * A bridge whose initializer is never booted: the tests call the conversion
@@ -23,9 +24,10 @@ final class HttpBridgeFactory
             new FixedLocaleResolver(null),
             new FixedUrlResolver([]),
             FakeEntityRepository::with(),
-            new InMemoryProductStorage(),
+            FakeEntityRepository::with(),
             new EuroCurrency(FakeEntityRepository::with()),
             new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
+            new ProductSettingsWriter(FakeEntityRepository::with()),
             new RecordingOrderStateTransitioner(),
             '0.0.0-test',
             'https://shop.test',
