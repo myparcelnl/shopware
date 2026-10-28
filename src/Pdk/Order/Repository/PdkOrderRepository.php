@@ -254,7 +254,11 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
      * A shipment without an id cannot be matched. The incoming one is the current
      * one, so stored shipments without an id are dropped and incoming ones kept.
      * Incoming shipments that the PDK marked deleted stay in the list, so
-     * OrderDataWriter deletes their rows.
+     * OrderDataWriter deletes their rows. An incoming copy wins over the stored copy
+     * by id, so a request with an older copy of a shipment overwrites what another
+     * request (for example a shipment webhook) stored in the meantime.
+     *
+     * @TODO INT-1962: keep the stored copy of a shipment when it is newer than the incoming one, so shipment webhooks do not lose updates.
      */
     private function mergeShipments(ShipmentCollection $stored, ShipmentCollection $incoming): ShipmentCollection
     {
