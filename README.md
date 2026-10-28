@@ -139,6 +139,12 @@ mid-swap would write to the wrong tree.
 
 Arguments pass straight through, e.g. `composer test -- --filter=logger`.
 
+The mappers and repositories take Shopware entities, so the tests build real ones.
+The first run installs Shopware in `.tmp/shopware`, the same install that the
+static analysis uses, and `tests/Pest.php` loads the Shopware classes from there.
+`tests/Support/Entities.php` builds the entities with synthetic data, and
+`tests/Support/FakeEntityRepository.php` stands in for the DAL.
+
 ### Static analysis
 
 ```shell
@@ -154,11 +160,11 @@ analysing the plug-in.
 
 Shopware and the PDK cannot live in one composer install: the PDK caps
 `symfony/http-foundation` at 6, Shopware 6.7 needs 7.4. The first run installs
-Shopware on its own in `.tmp/shopware` and PHPStan itself in `.tmp/tools`. Later
-runs reuse both and finish in seconds. Each install carries a stamp of what it was
-built for, so bumping the Shopware constraint in `bin/analyse.sh`, bumping
-`phpstan/phpstan` in `require-dev` or switching PHP version rebuilds what that
-change affects instead of reusing the old install.
+Shopware on its own in `.tmp/shopware` (`bin/shopware-vendor.sh`) and PHPStan
+itself in `.tmp/tools`. Later runs reuse both and finish in seconds. Each install
+carries a stamp of what it was built for, so bumping the Shopware constraint in
+`bin/shopware-vendor.sh`, bumping `phpstan/phpstan` in `require-dev` or switching
+PHP version rebuilds what that change affects instead of reusing the old install.
 
 The baseline in `phpstan-baseline.php` is empty on purpose. Fix what PHPStan
 reports; do not add to it.
