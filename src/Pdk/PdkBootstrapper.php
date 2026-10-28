@@ -171,6 +171,12 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // keep one prefix only.
             'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
 
+            // The PDK's own migrations of plugin data go here, apart from the
+            // Shopware migrations in src/Migration (see "Migrations" in README.md).
+            // @TODO INT-2154: run the PDK installer from the plugin lifecycle, so the
+            // migrations in this directory run.
+            'migrationDirectory'                        => \_MyParcel\DI\value(rtrim($path, '/') . '/src/Pdk/Migration'),
+
             // Placeholders for the contracts that the adapter layer of epic
             // INT-1748 adds. Production mode compiles the container, and php-di
             // cannot compile an interface without a concrete class.

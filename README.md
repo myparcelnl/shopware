@@ -169,6 +169,26 @@ PHP version rebuilds what that change affects instead of reusing the old install
 The baseline in `phpstan-baseline.php` is empty on purpose. Fix what PHPStan
 reports; do not add to it.
 
+### Migrations
+
+The plug-in has two kinds of migrations. Each kind has its own directory and its
+own runner, and each runner keeps its own list of the migrations that ran, so a
+migration must never be in both directories.
+
+| Directory           | Runner                                   | Use it for                                                                  |
+| ------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `src/Migration`     | Shopware, on plug-in install and update  | The plug-in's own tables: `myparcel_order_data`, `myparcel_order_shipment`  |
+| `src/Pdk/Migration` | The PDK installer (`migrationDirectory`) | Changes to the PDK's own data, such as stored settings                      |
+
+A Shopware migration is a `MigrationStep` class named `Migration<timestamp><Name>`.
+A PDK migration is a file named `YYYY_MM_DD_HHMMSS_<name>.php`; `PdkBootstrapper`
+points the PDK's `migrationDirectory` at `src/Pdk/Migration`. The plug-in does not
+run the PDK installer yet ([INT-2154](https://myparcelnl.atlassian.net/browse/INT-2154)),
+so the directory does not exist yet. Do not add a PDK migration before that ticket
+is done.
+
+The custom field set `myparcel_product` is neither: see "Product settings" below.
+
 ### Translations
 
 The MyParcel texts come from the shared PDK translations sheet. They are built
