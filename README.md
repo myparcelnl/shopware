@@ -234,7 +234,9 @@ overrides:
 Open Settings → Extensions → MyParcel in the admin, or "Open extension" in the
 context menu of the plug-in in the extension list, and enter the API key there. A user needs the
 "Use MyParcel" permission (Settings → Users & permissions → Roles → Detailed
-privileges); an admin user has it.
+privileges); an admin user has it. Through MyParcel the user reads orders and
+products and changes product settings, so the permission also gives read access
+to orders and products, and write access to products.
 
 The key can also be set from the console. It is validated when it is saved:
 
