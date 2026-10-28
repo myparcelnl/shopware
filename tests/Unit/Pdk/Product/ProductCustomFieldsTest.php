@@ -109,3 +109,24 @@ it('reads a stored inherit value of a text or package type field as inherit', fu
         ->and($settings->customsCode)->toBe(TriStateService::INHERIT)
         ->and($settings->countryOfOrigin)->toBe(TriStateService::INHERIT);
 })->with([-1, '-1']);
+
+it('gives every setting the field of its pdk cast', function () {
+    // The PDK keeps the casts protected; reading them here makes this test fail
+    // when the copy in ProductCustomFields::CASTS no longer matches the PDK.
+    $casts       = (new ReflectionMethod(ProductSettings::class, 'getCasts'))->invoke(new ProductSettings());
+    $definitions = array_column(ProductCustomFields::fieldDefinitions(), null, 'name');
+
+    foreach (ProductCustomFields::keys() as $key) {
+        $definition = $definitions[ProductCustomFields::fieldName($key)];
+        $options    = array_column($definition['config']['options'] ?? [], 'value');
+
+        $expected = match (true) {
+            ProductSettings::PACKAGE_TYPE === $key          => ['select', in_array('package', $options, true)],
+            'int' === $casts[$key]                          => ['int', [] === $options],
+            TriStateService::TYPE_COERCED === $casts[$key] => ['text', [] === $options],
+            TriStateService::TYPE_STRICT === $casts[$key]  => ['select', [-1, 0, 1] === $options],
+        };
+
+        expect([$definition['type'], true])->toBe($expected, $key);
+    }
+});

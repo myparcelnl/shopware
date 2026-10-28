@@ -21,24 +21,36 @@ final class ProductCustomFields
     public const SET_NAME = 'myparcel_product';
     public const PREFIX   = 'myparcel_';
 
-    private const TYPE_TRI_STATE    = 'triState';
-    private const TYPE_INT          = 'int';
-    private const TYPE_TEXT         = 'text';
-    private const TYPE_PACKAGE_TYPE = 'packageType';
+    private const FIELD_TRI_STATE    = 'triState';
+    private const FIELD_INT          = 'int';
+    private const FIELD_TEXT         = 'text';
+    private const FIELD_PACKAGE_TYPE = 'packageType';
 
     private const INHERIT_OPTION = ['label' => ['en-GB' => 'Inherit', 'de-DE' => 'Übernehmen', 'nl-NL' => 'Overnemen'], 'value' => TriStateService::INHERIT];
 
     /**
-     * Settings that are not a plain tri-state. Every other key, including the
-     * dynamic export* options, is one.
+     * The field type for each cast type of ProductSettings::$casts.
      */
-    private const TYPES = [
-        ProductSettings::COUNTRY_OF_ORIGIN    => self::TYPE_TEXT,
-        ProductSettings::CUSTOMS_CODE         => self::TYPE_TEXT,
-        ProductSettings::DROP_OFF_DELAY       => self::TYPE_INT,
-        ProductSettings::FIT_IN_DIGITAL_STAMP => self::TYPE_INT,
-        ProductSettings::FIT_IN_MAILBOX       => self::TYPE_INT,
-        ProductSettings::PACKAGE_TYPE         => self::TYPE_PACKAGE_TYPE,
+    private const FIELD_TYPE_BY_CAST = [
+        'int'                         => self::FIELD_INT,
+        TriStateService::TYPE_STRICT  => self::FIELD_TRI_STATE,
+        TriStateService::TYPE_COERCED => self::FIELD_TEXT,
+    ];
+
+    /**
+     * A copy of the casts in ProductSettings::$casts that are not
+     * TriStateService::TYPE_STRICT. Every other key, the dynamic export* options
+     * included, is TYPE_STRICT. The PDK keeps the casts protected, so the plugin
+     * cannot read them. ProductCustomFieldsTest reads them with reflection and
+     * fails when this copy differs from the PDK.
+     */
+    private const CASTS = [
+        ProductSettings::COUNTRY_OF_ORIGIN    => TriStateService::TYPE_COERCED,
+        ProductSettings::CUSTOMS_CODE         => TriStateService::TYPE_COERCED,
+        ProductSettings::DROP_OFF_DELAY       => 'int',
+        ProductSettings::FIT_IN_DIGITAL_STAMP => 'int',
+        ProductSettings::FIT_IN_MAILBOX       => 'int',
+        ProductSettings::PACKAGE_TYPE         => TriStateService::TYPE_COERCED,
     ];
 
     /**
@@ -73,7 +85,7 @@ final class ProductCustomFields
         $values = [];
 
         foreach (self::keys() as $key) {
-            $values[$key] = self::fromField(self::type($key), $customFields[self::fieldName($key)] ?? null);
+            $values[$key] = self::castFieldValue(self::getFieldType($key), $customFields[self::fieldName($key)] ?? null);
         }
 
         return new ProductSettings($values);
@@ -94,7 +106,7 @@ final class ProductCustomFields
 
             $fields[self::fieldName($key)] = match (true) {
                 null === $value, TriStateService::INHERIT === $value, (string) TriStateService::INHERIT === $value => null,
-                in_array(self::type($key), [self::TYPE_TEXT, self::TYPE_PACKAGE_TYPE], true) => (string) $value,
+                in_array(self::getFieldType($key), [self::FIELD_TEXT, self::FIELD_PACKAGE_TYPE], true) => (string) $value,
                 default => (int) $value,
             };
         }
@@ -103,8 +115,8 @@ final class ProductCustomFields
     }
 
     /**
-     * Keeps only the keys of this set, so other plugins' custom fields stay out of
-     * snapshots and writes.
+     * Keeps only the keys of this set, so the custom fields of other plugins stay out
+     * of the product settings and of the writes.
      *
      * @param  null|array<string, mixed> $customFields
      *
@@ -122,12 +134,14 @@ final class ProductCustomFields
     /**
      * The custom field set payload for ProductCustomFieldSet, without ids.
      *
-     * The set has no relation to an entity on purpose. With a relation to product,
-     * Shopware shows the fields in the "Custom fields" card of the product page. That
-     * card is a second editor next to the MyParcel tab, and its Save sends an old copy
-     * of the custom fields that overwrites what the MyParcel tab stored. Shopware
-     * still stores and types the values, because it reads the type of a custom field
-     * from its name, not from the relation.
+     * The set has no relation to an entity, so Shopware does not show its fields in
+     * the "Custom fields" card of the product page. That is all the missing relation
+     * does. The product page still loads every custom field of the product, and
+     * when any custom field changes, the admin sends the whole customFields object
+     * on save, with the MyParcel values in it. So a save of the product page can
+     * write old MyParcel values back; INT-1960 decides how the MyParcel tab
+     * prevents that. Shopware stores and types the values without the relation,
+     * because it reads the type of a custom field from its name.
      *
      * @return array{name: string, active: bool, config: array<string, mixed>, customFields: list<array{name: string, type: string, config: array<string, mixed>}>}
      */
@@ -160,18 +174,18 @@ final class ProductCustomFields
             $label = ['en-GB' => 'MyParcel: ' . $key];
             $base  = ['label' => $label, 'customFieldPosition' => $position + 1];
 
-            $definitions[] = match (self::type($key)) {
-                self::TYPE_TEXT         => [
+            $definitions[] = match (self::getFieldType($key)) {
+                self::FIELD_TEXT         => [
                     'name'   => self::fieldName($key),
                     'type'   => 'text',
                     'config' => $base + ['componentName' => 'sw-field', 'type' => 'text', 'customFieldType' => 'text'],
                 ],
-                self::TYPE_INT          => [
+                self::FIELD_INT          => [
                     'name'   => self::fieldName($key),
                     'type'   => 'int',
                     'config' => $base + ['componentName' => 'sw-field', 'type' => 'number', 'numberType' => 'int', 'customFieldType' => 'number'],
                 ],
-                self::TYPE_PACKAGE_TYPE => [
+                self::FIELD_PACKAGE_TYPE => [
                     'name'   => self::fieldName($key),
                     'type'   => 'select',
                     'config' => $base + ['componentName' => 'sw-single-select', 'customFieldType' => 'select', 'options' => self::packageTypeOptions()],
@@ -187,22 +201,31 @@ final class ProductCustomFields
         return $definitions;
     }
 
-    private static function type(string $key): string
+    /**
+     * The field type of a setting, from its PDK cast. The package type is a coerced
+     * tri-state like the text fields, but it has a fixed list of values, so it gets
+     * a select.
+     */
+    private static function getFieldType(string $key): string
     {
-        return self::TYPES[$key] ?? self::TYPE_TRI_STATE;
+        if (ProductSettings::PACKAGE_TYPE === $key) {
+            return self::FIELD_PACKAGE_TYPE;
+        }
+
+        return self::FIELD_TYPE_BY_CAST[self::CASTS[$key] ?? TriStateService::TYPE_STRICT];
     }
 
-    private static function fromField(string $type, mixed $value): int|string
+    private static function castFieldValue(string $type, mixed $value): int|string
     {
         if (null === $value || '' === (is_string($value) ? trim($value) : $value)) {
             return TriStateService::INHERIT;
         }
 
         return match ($type) {
-            self::TYPE_TEXT, self::TYPE_PACKAGE_TYPE => (string) TriStateService::INHERIT === trim((string) $value)
+            self::FIELD_TEXT, self::FIELD_PACKAGE_TYPE => (string) TriStateService::INHERIT === trim((string) $value)
                 ? TriStateService::INHERIT
                 : trim((string) $value),
-            self::TYPE_INT                           => is_numeric($value) ? (int) $value : TriStateService::INHERIT,
+            self::FIELD_INT                           => is_numeric($value) ? (int) $value : TriStateService::INHERIT,
             default                                  => is_numeric($value) && in_array((int) $value, [TriStateService::INHERIT, TriStateService::DISABLED, TriStateService::ENABLED], true)
                 ? (int) $value
                 : TriStateService::INHERIT,
