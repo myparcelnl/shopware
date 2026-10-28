@@ -46,7 +46,6 @@ class OrderShipmentDefinition extends EntityDefinition
             (new IdField('id', 'id'))->addFlags(new PrimaryKey(), new Required(), new ApiAware(AdminApiSource::class)),
             (new FkField('order_id', 'orderId', OrderDefinition::class))->addFlags(new Required(), new ApiAware(AdminApiSource::class)),
             (new ReferenceVersionField(OrderDefinition::class, 'order_version_id'))->addFlags(new Required(), new ApiAware(AdminApiSource::class)),
-            (new IntField('shipment_id', 'shipmentId'))->addFlags(new ApiAware(AdminApiSource::class)),
             (new IntField('position', 'position'))->addFlags(new Required(), new ApiAware(AdminApiSource::class)),
             (new JsonField('data', 'data'))->addFlags(new Required(), new ApiAware(AdminApiSource::class)),
             new ManyToOneAssociationField('order', 'order_id', OrderDefinition::class, 'id', false),

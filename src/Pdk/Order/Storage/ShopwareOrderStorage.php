@@ -154,7 +154,6 @@ final class ShopwareOrderStorage implements OrderStorageInterface
                 'id'             => Uuid::randomHex(),
                 'orderId'        => $orderId,
                 'orderVersionId' => Defaults::LIVE_VERSION,
-                'shipmentId'     => isset($shipment['id']) ? (int) $shipment['id'] : null,
                 'position'       => $position,
                 'data'           => $shipment,
             ];

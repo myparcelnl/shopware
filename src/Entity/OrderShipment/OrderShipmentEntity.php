@@ -16,8 +16,6 @@ class OrderShipmentEntity extends Entity
 
     protected string $orderVersionId;
 
-    protected ?int $shipmentId = null;
-
     protected int $position = 0;
 
     /** @var array<string, mixed> */
@@ -33,11 +31,6 @@ class OrderShipmentEntity extends Entity
     public function getOrderVersionId(): string
     {
         return $this->orderVersionId;
-    }
-
-    public function getShipmentId(): ?int
-    {
-        return $this->shipmentId;
     }
 
     public function getPosition(): int
