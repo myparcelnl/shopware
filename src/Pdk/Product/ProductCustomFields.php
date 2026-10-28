@@ -11,8 +11,8 @@ use MyParcelNL\Sdk\Services\Mapping\ApiMapperService;
 
 /**
  * The mapping between PDK product settings and the product custom fields of the
- * set "myparcel_product". The installer and the product mapper both use it, so the
- * field names and value types are defined once.
+ * set "myparcel_product". ProductCustomFieldSet and the product mapper both use it,
+ * so the field names and value types are defined once.
  *
  * Needs a booted PDK: the export* keys come from the PDK's order option definitions.
  */
@@ -120,7 +120,7 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field set payload for the installer, without ids.
+     * The custom field set payload for ProductCustomFieldSet, without ids.
      *
      * The set has no relation to an entity on purpose. With a relation to product,
      * Shopware shows the fields in the "Custom fields" card of the product page. That
@@ -148,7 +148,7 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field payloads for the installer, without ids.
+     * The custom field payloads for ProductCustomFieldSet, without ids.
      *
      * @return list<array{name: string, type: string, config: array<string, mixed>}>
      */

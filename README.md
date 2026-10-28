@@ -219,6 +219,19 @@ Add `--snapshot` to print the raw data that the plugin reads from Shopware. The 
 test fixtures in `tests/Fixtures/Snapshot` are made this way. Replace all personal
 data with synthetic values before you commit a fixture.
 
+## Product settings
+
+The MyParcel settings of a product are custom fields named `myparcel_*`, in the
+custom field set `myparcel_product`. `ProductCustomFieldSet` creates the set on
+install and brings it in line with the PDK's product settings on every plug-in
+update. Uninstalling without "keep user data" removes the set and the values of
+its fields from every product.
+
+The set has no relation to the product entity, so the fields do not show in the
+"Custom fields" card of the product page.
+[INT-1960](https://myparcelnl.atlassian.net/browse/INT-1960) adds a MyParcel tab to
+the product page for these settings.
+
 ## Routes
 
 The plug-in sends three kinds of requests to the PDK:
