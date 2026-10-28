@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order\Mapper;
 
-use ErrorException;
 use MyParcelNL\Pdk\Facade\Pdk;
-use MyParcelNL\Sdk\Helper\SplitStreet;
-use Throwable;
 
 /**
  * Maps a Shopware order address snapshot to PDK contact details.
  *
  * Shopware has one street field. For the countries where MyParcel needs a separate
- * house number (countriesWithSeparateAddressFields), the street is split with the
- * SDK. Some merchants use additionalAddressLine1 as the house number field, so when
- * the street alone has no number, the mapper tries street plus that line, and keeps
- * that split only when the street part stays the same as the street field. There is
- * no configurable template: the old plugin's template was a constant source of
- * support tickets.
+ * house number (countriesWithSeparateAddressFields), StreetSplitter splits the
+ * street. Some merchants use additionalAddressLine1 as the house number field, so
+ * when the street alone has no number, the mapper tries street plus that line, and
+ * keeps that split only when the street part stays the same as the street field.
+ * There is no configurable template: the old plugin's template was a constant
+ * source of support tickets.
  */
 final class AddressMapper
 {
+    public function __construct(private readonly StreetSplitter $streetSplitter)
+    {
+    }
+
     /**
      * Maps one address. A null address gives contact details with only the e-mail.
      *
@@ -42,10 +43,10 @@ final class AddressMapper
         $failed     = false;
 
         if (in_array($cc, Pdk::get('countriesWithSeparateAddressFields'), true)) {
-            $split = $this->split($street, $cc);
+            $split = $this->streetSplitter->split($street, $cc);
 
             if (null === $split && '' !== $line1) {
-                $split = $this->split($street . ' ' . $line1, $cc);
+                $split = $this->streetSplitter->split($street . ' ' . $line1, $cc);
 
                 // Accept the split only when line 1 holds just the house number. Line 1
                 // "Appartement 3" would otherwise give street "Teststraat Appartement".
@@ -81,38 +82,5 @@ final class AddressMapper
             ]),
             $failed
         );
-    }
-
-    /**
-     * SplitStreet raises PHP warnings (undefined array keys) before it throws on a
-     * Belgian street it cannot match. Turn those into an exception, so a failed split
-     * is one code path in debug and production mode alike.
-     *
-     * @return null|array{street: string, number: string, numberSuffix: ?string, boxNumber: ?string}
-     */
-    private function split(string $street, string $cc): ?array
-    {
-        set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
-            throw new ErrorException($message, 0, $severity, $file, $line);
-        });
-
-        try {
-            $fullStreet = SplitStreet::splitStreet($street, $cc, $cc);
-        } catch (Throwable) {
-            return null;
-        } finally {
-            restore_error_handler();
-        }
-
-        if (null === $fullStreet->getNumber()) {
-            return null;
-        }
-
-        return [
-            'street'       => $fullStreet->getStreet(),
-            'number'       => (string) $fullStreet->getNumber(),
-            'numberSuffix' => $fullStreet->getNumberSuffix() ?: null,
-            'boxNumber'    => $fullStreet->getBoxNumber() ?: null,
-        ];
     }
 }

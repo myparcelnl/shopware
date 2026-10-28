@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
+use MyParcel\Shopware\Pdk\Order\Mapper\StreetSplitter;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 
 beforeEach(fn () => TestPdk::boot());
@@ -43,7 +44,7 @@ it('splits street, number, suffix and box number', function (
     ?string $box,
     ?string $info
 ) {
-    $result = (new AddressMapper())->map(address($overrides), null);
+    $result = (new AddressMapper(new StreetSplitter()))->map(address($overrides), null);
 
     expect($result->splitFailed)->toBeFalse()
         ->and($result->contactDetails)->toMatchArray([
@@ -56,7 +57,7 @@ it('splits street, number, suffix and box number', function (
 })->with('splits');
 
 it('sends the street unsplit and reports it when no number is found', function () {
-    $result = (new AddressMapper())->map(address(['street' => 'Teststraat']), null);
+    $result = (new AddressMapper(new StreetSplitter()))->map(address(['street' => 'Teststraat']), null);
 
     expect($result->splitFailed)->toBeTrue()
         ->and($result->contactDetails['street'])->toBe('Teststraat')
@@ -70,7 +71,7 @@ dataset('line 1 without house number', [
 ]);
 
 it('does not take a number from line 1 that is not a house number', function (string $street, string $cc, string $line1) {
-    $result = (new AddressMapper())->map(address([
+    $result = (new AddressMapper(new StreetSplitter()))->map(address([
         'street'                 => $street,
         'additionalAddressLine1' => $line1,
         'countryIso'             => $cc,
@@ -85,14 +86,14 @@ it('does not take a number from line 1 that is not a house number', function (st
 })->with('line 1 without house number');
 
 it('fails a belgian split cleanly, without php warnings', function () {
-    $result = (new AddressMapper())->map(address(['street' => 'Kerkstraat', 'countryIso' => 'BE']), null);
+    $result = (new AddressMapper(new StreetSplitter()))->map(address(['street' => 'Kerkstraat', 'countryIso' => 'BE']), null);
 
     expect($result->splitFailed)->toBeTrue()
         ->and($result->contactDetails['street'])->toBe('Kerkstraat');
 });
 
 it('does not split outside the countries with separate address fields', function () {
-    $result = (new AddressMapper())->map(address(['street' => 'Hauptstraße 5', 'countryIso' => 'DE', 'additionalAddressLine1' => 'Hinterhaus']), null);
+    $result = (new AddressMapper(new StreetSplitter()))->map(address(['street' => 'Hauptstraße 5', 'countryIso' => 'DE', 'additionalAddressLine1' => 'Hinterhaus']), null);
 
     expect($result->splitFailed)->toBeFalse()
         ->and($result->contactDetails)->toMatchArray([
@@ -104,7 +105,7 @@ it('does not split outside the countries with separate address fields', function
 });
 
 it('maps the contact fields', function () {
-    $result = (new AddressMapper())->map(address(['company' => 'Test BV', 'stateName' => 'Noord-Holland']), 'test@example.test');
+    $result = (new AddressMapper(new StreetSplitter()))->map(address(['company' => 'Test BV', 'stateName' => 'Noord-Holland']), 'test@example.test');
 
     expect($result->contactDetails)->toMatchArray([
         'person'     => 'Jan Test',
@@ -119,7 +120,7 @@ it('maps the contact fields', function () {
 });
 
 it('gives empty contact details for a missing address', function () {
-    $result = (new AddressMapper())->map(null, 'test@example.test');
+    $result = (new AddressMapper(new StreetSplitter()))->map(null, 'test@example.test');
 
     expect($result->splitFailed)->toBeFalse()
         ->and($result->contactDetails)->toBe(['email' => 'test@example.test']);

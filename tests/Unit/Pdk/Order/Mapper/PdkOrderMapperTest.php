@@ -5,6 +5,7 @@ declare(strict_types=1);
 use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
 use MyParcel\Shopware\Pdk\Order\Mapper\MoneyConverter;
 use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
+use MyParcel\Shopware\Pdk\Order\Mapper\StreetSplitter;
 use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
 use MyParcel\Shopware\Tests\Support\Fixtures;
 use MyParcel\Shopware\Tests\Support\TestPdk;
@@ -18,7 +19,7 @@ function orderMapper(): PdkOrderMapper
     $currency = new CurrencyService();
 
     return new PdkOrderMapper(
-        new AddressMapper(),
+        new AddressMapper(new StreetSplitter()),
         new MoneyConverter($currency),
         new PdkProductMapper($currency, new WeightService())
     );
