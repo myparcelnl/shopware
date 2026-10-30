@@ -9,6 +9,9 @@ use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcelNL\Pdk\Facade\Frontend;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * Renders an admin screen with the PDK for the view route of the admin API.
+ */
 final class AdminViewRenderer implements AdminViewRendererInterface
 {
     public function __construct(

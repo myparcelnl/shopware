@@ -44,7 +44,8 @@ export type RequestHeadersProvider = () => Record<string, string> | Promise<Reco
 const FADE = 'mypa-fade';
 
 /**
- * preset-default renders plain HTML. The utilities are the WooCommerce set,
+ * Create the PDK admin configuration with the components of preset-default and
+ * the request headers of the Shopware admin. preset-default renders plain HTML. The utilities are the WooCommerce set,
  * prefixed and scoped to .myparcel-pdk by Tailwind.
  */
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({

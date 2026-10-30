@@ -42,8 +42,9 @@ function createStylesheet(url) {
 }
 
 /**
- * Called for every request, so the token is always the current one: the login
- * service refreshes it in the background.
+ * Get the headers that the PDK sends with each request: the admin token and the
+ * content language. It is called for every request, so the token is always the
+ * current one: the login service refreshes it in the background.
  */
 export function getRequestHeaders() {
     return {

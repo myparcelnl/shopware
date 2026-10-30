@@ -14,7 +14,8 @@ use RuntimeException;
 final class EmptyAdminViewException extends RuntimeException
 {
     /**
-     * Use when the PDK rendered no markup for the view or for its bootstrap container.
+     * Create the exception for a screen whose component or bootstrap container
+     * the PDK rendered empty.
      */
     public static function forView(AdminScreen $view): self
     {
