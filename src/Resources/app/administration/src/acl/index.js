@@ -1,7 +1,9 @@
 /**
  * One permission for all of MyParcel. The admin routes check the privilege
- * myparcel:access. Through those routes the PDK reads orders and products and
- * writes product settings, so the role carries those rights too.
+ * myparcel:access. The order settings list the order states, so the role can
+ * read them.
+ *
+ * @TODO INT-1959: add the order and product rights together with the order and product repositories.
  */
 Shopware.Service('privileges').addPrivilegeMappingEntry({
     category: 'additional_permissions',
@@ -11,15 +13,7 @@ Shopware.Service('privileges').addPrivilegeMappingEntry({
         access: {
             privileges: [
                 'myparcel:access',
-                'order:read',
-                'order_line_item:read',
-                'order_address:read',
-                'order_delivery:read',
-                'order_customer:read',
-                'currency:read',
                 'state_machine_state:read',
-                'product:read',
-                'product:update',
             ],
             dependencies: [],
         },
