@@ -2,15 +2,12 @@
 
 declare(strict_types=1);
 
-use MyParcel\Shopware\Admin\AdminAssets;
 use MyParcel\Shopware\Controller\AdminViewController;
 use MyParcel\Shopware\Pdk\View\AdminScreen;
+use MyParcel\Shopware\Tests\Support\AdminAssetsFactory;
 use MyParcel\Shopware\Tests\Support\FixedAdminViewRenderer;
 use MyParcel\Shopware\Tests\Support\HttpBridgeFactory;
 use MyParcel\Shopware\Tests\Support\RecordingLogger;
-use Symfony\Component\Asset\Packages;
-use Symfony\Component\Asset\UrlPackage;
-use Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy;
 use Symfony\Component\HttpFoundation\Request;
 
 function viewController(FixedAdminViewRenderer $renderer, RecordingLogger $logger = new RecordingLogger()): AdminViewController
@@ -18,9 +15,7 @@ function viewController(FixedAdminViewRenderer $renderer, RecordingLogger $logge
     return new AdminViewController(
         HttpBridgeFactory::create($logger),
         $renderer,
-        new AdminAssets(new Packages(null, [
-            '@MyParcelShopware' => new UrlPackage('https://shop.test/bundles/myparcelshopware', new StaticVersionStrategy('1')),
-        ]))
+        AdminAssetsFactory::create()
     );
 }
 
