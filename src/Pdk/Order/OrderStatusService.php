@@ -19,8 +19,9 @@ use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachine
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * The order settings show these states in three dropdowns. StateMachineRegistry
- * is not used: it caches per state machine, not per language.
+ * The order settings use these states as the options of their status selects.
+ * StateMachineRegistry is not used: it caches per state machine, not per
+ * language.
  *
  * @TODO INT-2151: cover this class with an integration test in a Shopware installation.
  */
