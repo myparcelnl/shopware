@@ -1,0 +1,21 @@
+{% block myparcel_settings_index %}
+<sw-page class="myparcel-settings-index">
+    {% block myparcel_settings_index_smart_bar_header %}
+    <template #smart-bar-header>
+        <h2>{{ $tc('myparcel-settings.general.title') }}</h2>
+    </template>
+    {% endblock %}
+
+    {% block myparcel_settings_index_content %}
+    <template #content>
+        <sw-card-view>
+            <sw-loader v-if="isLoading" />
+            <div
+                ref="pdkRoot"
+                class="myparcel-pdk"
+            ></div>
+        </sw-card-view>
+    </template>
+    {% endblock %}
+</sw-page>
+{% endblock %}
