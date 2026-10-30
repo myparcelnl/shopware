@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Language;
 
-use MyParcel\Shopware\Pdk\Http\RequestContext;
+use MyParcel\Shopware\Http\ContextObject;
 use Shopware\Core\Framework\App\AppLocaleProvider;
 use Shopware\Core\Framework\DataAbstractionLayer\Exception\EntityNotFoundException;
 use Shopware\Core\System\Locale\LocaleException;
@@ -32,7 +32,7 @@ final class ShopwareLocaleResolver implements LocaleResolverInterface
      */
     public function getLocale(): ?string
     {
-        $context = RequestContext::fromRequestStack($this->requestStack);
+        $context = ContextObject::fromMainRequest($this->requestStack);
 
         if (null === $context) {
             return null;

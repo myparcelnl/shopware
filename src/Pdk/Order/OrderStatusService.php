@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order;
 
-use MyParcel\Shopware\Pdk\Http\RequestContext;
+use MyParcel\Shopware\Http\ContextObject;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Placeholder\NotImplementedException;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
@@ -79,7 +79,7 @@ final class OrderStatusService implements OrderStatusServiceInterface
      */
     private function createContext(): Context
     {
-        $context = RequestContext::fromRequestStack($this->requestStack);
+        $context = ContextObject::fromMainRequest($this->requestStack);
 
         if (null === $context) {
             return Context::createCLIContext();
