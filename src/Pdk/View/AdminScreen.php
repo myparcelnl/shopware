@@ -17,7 +17,7 @@ enum AdminScreen: string
     /**
      * The request attribute that holds the screen while the PDK renders it.
      */
-    public const REQUEST_ATTRIBUTE = 'myparcel_view';
+    public const REQUEST_ATTRIBUTE = 'myparcel_admin_screen';
 
     case PluginSettings = 'pluginSettings';
 }

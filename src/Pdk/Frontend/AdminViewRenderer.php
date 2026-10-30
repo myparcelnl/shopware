@@ -23,22 +23,22 @@ final class AdminViewRenderer implements AdminViewRendererInterface
     }
 
     /**
-     * Render the view with the bootstrap container, the notifications and the
-     * modals. Puts the view on the main request first: ViewService reads it
+     * Render the screen with the bootstrap container, the notifications and the
+     * modals. Puts the screen on the main request first: ViewService reads it
      * there to decide what the PDK renders.
      */
-    public function render(AdminScreen $view): string
+    public function render(AdminScreen $screen): string
     {
-        $this->requestStack->getMainRequest()?->attributes->set(AdminScreen::REQUEST_ATTRIBUTE, $view);
+        $this->requestStack->getMainRequest()?->attributes->set(AdminScreen::REQUEST_ATTRIBUTE, $screen);
 
         $this->pdkInitializer->boot();
 
         return AdminViewMarkup::compose(
-            $view,
+            $screen,
             Frontend::renderInitScript(),
             Frontend::renderNotifications(),
             Frontend::renderModals(),
-            match ($view) {
+            match ($screen) {
                 AdminScreen::PluginSettings => Frontend::renderPluginSettings(),
             }
         );

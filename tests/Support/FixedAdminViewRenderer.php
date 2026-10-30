@@ -19,13 +19,13 @@ final class FixedAdminViewRenderer implements AdminViewRendererInterface
     {
     }
 
-    public function render(AdminScreen $view): string
+    public function render(AdminScreen $screen): string
     {
         if (null !== $this->error) {
             throw $this->error;
         }
 
-        $this->rendered[] = $view;
+        $this->rendered[] = $screen;
 
         return $this->html;
     }

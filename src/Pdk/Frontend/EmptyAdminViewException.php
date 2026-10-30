@@ -17,8 +17,8 @@ final class EmptyAdminViewException extends RuntimeException
      * Create the exception for a screen whose component or bootstrap container
      * the PDK rendered empty.
      */
-    public static function forView(AdminScreen $view): self
+    public static function forView(AdminScreen $screen): self
     {
-        return new self(sprintf('The PDK rendered no markup for the admin view "%s". The MyParcel log has the cause.', $view->value));
+        return new self(sprintf('The PDK rendered no markup for the admin screen "%s". The MyParcel log has the cause.', $screen->value));
     }
 }

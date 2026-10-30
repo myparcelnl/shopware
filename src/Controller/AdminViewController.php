@@ -28,8 +28,8 @@ final class AdminViewController
     }
 
     /**
-     * Renders one PDK admin view for the admin module. Answers 400 for an
-     * unknown view, without booting the PDK.
+     * Renders one PDK admin screen for the admin module. Answers 400 for an
+     * unknown `view` parameter, without booting the PDK.
      */
     #[Route(
         path: '/api/_action/myparcel/view',
@@ -39,15 +39,15 @@ final class AdminViewController
     )]
     public function view(Request $request): Response
     {
-        $value = $request->query->all()['view'] ?? null;
-        $view  = is_string($value) ? AdminScreen::tryFrom($value) : null;
+        $value  = $request->query->all()['view'] ?? null;
+        $screen = is_string($value) ? AdminScreen::tryFrom($value) : null;
 
-        if (null === $view) {
+        if (null === $screen) {
             return new JsonResponse(['message' => 'Unknown MyParcel admin view.'], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->bridge->run(fn (): Response => new JsonResponse([
-            'html'    => $this->renderer->render($view),
+            'html'    => $this->renderer->render($screen),
             'scripts' => $this->assets->getScripts(),
             'styles'  => $this->assets->getStyles(),
         ]));

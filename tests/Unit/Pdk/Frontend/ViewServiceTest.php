@@ -8,13 +8,13 @@ use MyParcelNL\Pdk\Frontend\Service\AbstractViewService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-function viewService(?AdminScreen $view): ViewService
+function viewService(?AdminScreen $screen): ViewService
 {
     $requestStack = new RequestStack();
     $request      = new Request();
 
-    if (null !== $view) {
-        $request->attributes->set(AdminScreen::REQUEST_ATTRIBUTE, $view);
+    if (null !== $screen) {
+        $request->attributes->set(AdminScreen::REQUEST_ATTRIBUTE, $screen);
     }
 
     $requestStack->push($request);

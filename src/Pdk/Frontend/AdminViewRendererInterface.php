@@ -13,8 +13,9 @@ use MyParcel\Shopware\Pdk\View\AdminScreen;
 interface AdminViewRendererInterface
 {
     /**
-     * Render the HTML that the admin app needs to show the view: the bootstrap
-     * container, the notifications, the modals and the view itself.
+     * Render the HTML that the admin app needs to show the screen: the
+     * bootstrap container, the notifications, the modals and the component of
+     * the screen.
      */
-    public function render(AdminScreen $view): string;
+    public function render(AdminScreen $screen): string;
 }

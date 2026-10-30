@@ -22,14 +22,14 @@ final class AdminViewMarkup
      * @throws EmptyAdminViewException
      */
     public static function compose(
-        AdminScreen $view,
+        AdminScreen $screen,
         string $initScript,
         string $notifications,
         string $modals,
         string $component
     ): string {
         if ('' === $initScript || '' === $component) {
-            throw EmptyAdminViewException::forView($view);
+            throw EmptyAdminViewException::forView($screen);
         }
 
         return $initScript . $notifications . $modals . $component;

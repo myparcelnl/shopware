@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Tells the PDK which screen it renders for. The Shopware admin is a
  * single-page app, so no PHP page tells the PDK where it is: AdminViewRenderer
- * puts the view on the request instead. Only the plugin settings exist so far.
+ * puts the screen on the request instead. Only the plugin settings exist so far.
  *
  * @TODO INT-1960: recognise the order list, the order detail and the product page.
  * @TODO INT-1961: recognise the checkout.
