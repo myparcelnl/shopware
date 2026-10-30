@@ -8,6 +8,9 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\PlatformRequest;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * @TODO INT-2151: cover this class with an integration test in a Shopware installation.
+ */
 final class RequestContext
 {
     /**

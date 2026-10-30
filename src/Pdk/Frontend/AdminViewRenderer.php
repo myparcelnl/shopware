@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Renders an admin screen with the PDK for the view route of the admin API.
+ *
+ * @TODO INT-2151: cover this class with an integration test in a Shopware installation.
  */
 final class AdminViewRenderer implements AdminViewRendererInterface
 {

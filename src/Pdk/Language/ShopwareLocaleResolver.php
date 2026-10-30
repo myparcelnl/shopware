@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * Reads the language from the Shopware context of the main request: the
  * language of the admin user in the admin API, the sales channel language in
  * the storefront.
+ *
+ * @TODO INT-2151: cover this class with an integration test in a Shopware installation.
  */
 final class ShopwareLocaleResolver implements LocaleResolverInterface
 {
