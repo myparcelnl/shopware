@@ -45,7 +45,9 @@ const FADE = 'mypa-fade';
 
 /**
  * Create the PDK admin configuration with the components of preset-default and
- * the request headers of the Shopware admin. preset-default renders plain HTML. The utilities are the WooCommerce set,
+ * the request headers of the Shopware admin.
+ *
+ * The components render plain HTML. The utilities are the WooCommerce set,
  * prefixed and scoped to .myparcel-pdk by Tailwind.
  */
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({
