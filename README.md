@@ -231,13 +231,6 @@ the key.
 Settings and the account are stored installation-wide in `system_config`, under
 `MyParcelShopware.pdk.*`.
 
-## Inspecting orders
-
-`bin/console myparcel:order:show <orderNumber>` prints an order as the PDK sees it:
-the split address, the lines with weight in grams and the amounts in euro cents.
-The output contains personal data: do not paste it anywhere outside the
-development environment.
-
 ## Product settings
 
 The MyParcel settings of a product are custom fields named `myparcel_*`, in the
