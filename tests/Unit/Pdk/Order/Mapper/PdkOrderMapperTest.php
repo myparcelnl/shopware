@@ -216,6 +216,15 @@ it('uses the delivery with the highest shipping costs when there is no primary d
         ->and($order->shipmentPriceAfterVat)->toBe(605);
 });
 
+it('compares the unit price of the shipping costs, like the backfill of Shopware 6.8', function () {
+    $highUnit  = Entities::delivery(Entities::address(['street' => 'Eenheidstraat 1']), Entities::price(5.00));
+    $highTotal = Entities::delivery(Entities::address(['street' => 'Totaalstraat 2']), Entities::price(3.00, 2));
+
+    $order = mapOrder(Entities::order(['primaryDelivery' => null, 'deliveries' => [$highTotal, $highUnit]]));
+
+    expect($order->shippingAddress->street)->toBe('Eenheidstraat');
+});
+
 it('logs a failed split with the order id only', function () {
     mapOrder(Entities::order(['primaryDelivery' => Entities::delivery(Entities::address(['street' => 'Teststraat']), Entities::price(4.95))]));
 

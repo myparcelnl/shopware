@@ -122,8 +122,8 @@ final class PdkOrderMapper
                 continue;
             }
 
-            $cost       = $delivery->getShippingCosts()->getTotalPrice();
-            $chosenCost = $chosen->getShippingCosts()->getTotalPrice();
+            $cost       = $delivery->getShippingCosts()->getUnitPrice();
+            $chosenCost = $chosen->getShippingCosts()->getUnitPrice();
 
             if ($cost > $chosenCost || ($cost === $chosenCost && strcmp($delivery->getId(), $chosen->getId()) < 0)) {
                 $chosen = $delivery;
