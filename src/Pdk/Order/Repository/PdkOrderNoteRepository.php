@@ -30,8 +30,6 @@ use Shopware\Core\Framework\Uuid\Uuid;
  */
 final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
 {
-    public const CUSTOMER_NOTE_IDENTIFIER = OrderNotesBuilder::CUSTOMER_NOTE_IDENTIFIER;
-
     /**
      * $storage is the PDK's in-request cache, not a Shopware store.
      *
@@ -73,7 +71,7 @@ final class PdkOrderNoteRepository extends AbstractPdkOrderNoteRepository
      */
     public function update(PdkOrderNote $note): void
     {
-        if (self::CUSTOMER_NOTE_IDENTIFIER === $note->externalIdentifier) {
+        if (OrderNotesBuilder::CUSTOMER_NOTE_IDENTIFIER === $note->externalIdentifier) {
             return;
         }
 
