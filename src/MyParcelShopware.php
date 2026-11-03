@@ -66,22 +66,25 @@ class MyParcelShopware extends Plugin
             return;
         }
 
+        $connection = $this->container->get(Connection::class);
+
+        $this->createProductCustomFieldSet()->remove($uninstallContext->getContext());
+
+        $connection->executeStatement('DROP TABLE IF EXISTS `myparcel_order_shipment`, `myparcel_order_data`');
+
+        // The settings go last: when a step above fails, the API key and the
+        // settings stay, and a second uninstall cleans up.
+        //
         // system_config keeps only what config.xml declares under
         // MyParcelShopware.config.*; the PDK's own keys, the API key among them,
         // are ours to remove. The raw DELETE bypasses SystemConfigService, so its
-        // cache tag is not invalidated by it and we do that ourselves below.
-        $connection = $this->container->get(Connection::class);
+        // cache tag is not invalidated by it and we do that ourselves.
         $connection->executeStatement(
             'DELETE FROM system_config WHERE configuration_key LIKE :prefix',
             ['prefix' => SystemConfigStorage::KEY_PREFIX . '%']
         );
 
         $this->container->get(CacheInvalidator::class)->invalidate([CachedSystemConfigLoader::CACHE_TAG], true);
-
-        $this->bootPdkForLifecycle($this->readVersion());
-        $this->createProductCustomFieldSet()->remove($uninstallContext->getContext());
-
-        $connection->executeStatement('DROP TABLE IF EXISTS `myparcel_order_shipment`, `myparcel_order_data`');
     }
 
     /**
