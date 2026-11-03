@@ -23,16 +23,15 @@ final class ProductSettingsWriter
     }
 
     /**
-     * Writes only the given myparcel_* custom fields; the DAL merges them into the
-     * custom fields of the product, so the others stay. Use it when the PDK saves
-     * product settings.
+     * Writes the given custom fields; the DAL merges them into the custom fields of
+     * the product, so the others stay. Use it when the PDK saves product settings.
      *
      * @param  array<string, null|int|string> $customFields ProductCustomFields::toCustomFields()
      */
     public function save(string $productId, array $customFields): void
     {
         $this->productRepository->update(
-            [['id' => $productId, 'customFields' => ProductCustomFields::onlyOwnKeys($customFields)]],
+            [['id' => $productId, 'customFields' => $customFields]],
             Context::createDefaultContext()
         );
     }
