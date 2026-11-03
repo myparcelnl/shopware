@@ -28,7 +28,6 @@ final class HttpBridgeFactory
             new EuroCurrency(FakeEntityRepository::with()),
             new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
             new ProductSettingsWriter(FakeEntityRepository::with()),
-            new RecordingOrderStateTransitioner(),
             '0.0.0-test',
             'https://shop.test',
             true

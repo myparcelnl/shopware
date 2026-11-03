@@ -7,7 +7,6 @@ namespace MyParcel\Shopware\Pdk;
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
-use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
@@ -46,7 +45,6 @@ final class PdkInitializer
         private readonly EuroCurrency $euroCurrency,
         private readonly OrderDataWriter $orderDataWriter,
         private readonly ProductSettingsWriter $productSettingsWriter,
-        private readonly OrderStateTransitionerInterface $orderStateTransitioner,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -67,8 +65,7 @@ final class PdkInitializer
             $this->productRepository,
             $this->euroCurrency,
             $this->orderDataWriter,
-            $this->productSettingsWriter,
-            $this->orderStateTransitioner
+            $this->productSettingsWriter
         ));
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

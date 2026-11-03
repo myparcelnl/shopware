@@ -14,7 +14,6 @@ use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
-use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
@@ -165,14 +164,6 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     }
 
     /**
-     * @internal Only the PDK container calls this.
-     */
-    public static function getOrderStateTransitioner(): OrderStateTransitionerInterface
-    {
-        return self::getShopwareServices()->orderStateTransitioner;
-    }
-
-    /**
      * These definitions are merged last, so they win over config/pdk.php.
      *
      * @return array<string, mixed>
@@ -225,7 +216,6 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             EuroCurrency::class                         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getEuroCurrency']),
             OrderDataWriter::class                      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderDataWriter']),
             ProductSettingsWriter::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductSettingsWriter']),
-            OrderStateTransitionerInterface::class      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStateTransitioner']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             // EntityRepository is one class for every entity, so php-di cannot pick
             // the right one by type: name it per constructor parameter.

@@ -58,7 +58,6 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
             <argument>%kernel.debug%</argument>

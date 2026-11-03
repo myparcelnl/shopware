@@ -6,7 +6,6 @@ namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
-use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
@@ -33,8 +32,7 @@ final class ShopwareServices
         public readonly EntityRepository $productRepository,
         public readonly EuroCurrency $euroCurrency,
         public readonly OrderDataWriter $orderDataWriter,
-        public readonly ProductSettingsWriter $productSettingsWriter,
-        public readonly OrderStateTransitionerInterface $orderStateTransitioner
+        public readonly ProductSettingsWriter $productSettingsWriter
     ) {
     }
 }
