@@ -54,7 +54,8 @@ final class ProductCustomFields
     ];
 
     /**
-     * Every product setting key, in the order of ProductSettings.
+     * Get every product setting key, in the order of ProductSettings. Use it to
+     * loop over the settings.
      *
      * @return list<string>
      */
@@ -67,7 +68,8 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field name of a setting, e.g. fitInMailbox becomes myparcel_fit_in_mailbox.
+     * Get the custom field name of a setting, e.g. fitInMailbox becomes
+     * myparcel_fit_in_mailbox. Use it wherever a setting key becomes a custom field.
      */
     public static function fieldName(string $key): string
     {
@@ -92,8 +94,9 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field values for these settings. "Inherit" becomes null, so the
-     * product falls back to its parent and to the plugin settings.
+     * Convert the settings to custom field values. "Inherit" becomes null, so the
+     * product falls back to its parent and to the plugin settings. Use it before a
+     * product write.
      *
      * @return array<string, null|int|string>
      */
@@ -132,7 +135,7 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field set payload for ProductCustomFieldSet, without ids.
+     * Get the custom field set payload for ProductCustomFieldSet, without ids.
      *
      * The set has no relation to an entity, so Shopware does not show its fields in
      * the "Custom fields" card of the product page. That is all the missing relation
@@ -162,7 +165,7 @@ final class ProductCustomFields
     }
 
     /**
-     * The custom field payloads for ProductCustomFieldSet, without ids.
+     * Get the custom field payloads for ProductCustomFieldSet, without ids.
      *
      * @return list<array{name: string, type: string, config: array<string, mixed>}>
      */
