@@ -171,8 +171,8 @@ and PrestaShop plug-ins: CI builds them before the tests. To build them locally,
 run this in the web container:
 
 ```shell
-corepack pnpm install
-corepack pnpm translations:import
+pnpm install
+pnpm translations:import
 ```
 
 Without these files every PDK translation lookup throws "File does not exist",
@@ -199,8 +199,8 @@ page. Rebuild a bundle after you change its source.
 Build the PDK admin app, and run the tests of both bundles, in the web container:
 
 ```shell
-corepack pnpm build:pdk
-corepack pnpm test:pdk
+pnpm build:pdk
+pnpm test:pdk
 ```
 
 Build the Shopware admin module in the web container, from the shop root.
