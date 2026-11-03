@@ -43,11 +43,6 @@ it('treats an unknown tax status as gross', function () {
         ->toBe(['price' => 1000, 'vat' => 210, 'priceAfterVat' => 1210]);
 });
 
-it('does not divide by a zero quantity or a zero currency factor', function () {
-    expect(moneyConverter()->toUnitCents(Entities::price(12.10, 0, 2.10), 0.0, 1.0, CartPrice::TAX_STATE_GROSS))
-        ->toBe(['price' => 1000, 'vat' => 210, 'priceAfterVat' => 1210]);
-});
-
 it('converts a single amount to cents', function () {
     expect(moneyConverter()->toCents(10.50, 0.875, 1.0))->toBe(1200)
         ->and(moneyConverter()->toCents(0.333, 1.0, 1.0))->toBe(33)

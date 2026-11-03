@@ -48,8 +48,7 @@ final class MoneyConverter
             return ['price' => $unit, 'vat' => 0, 'priceAfterVat' => $unit];
         }
 
-        $quantity = max(1, $price->getQuantity());
-        $vat      = $this->toCents($price->getCalculatedTaxes()->getAmount() / $quantity, $currencyFactor, $euroFactor);
+        $vat = $this->toCents($price->getCalculatedTaxes()->getAmount() / $price->getQuantity(), $currencyFactor, $euroFactor);
 
         if (CartPrice::TAX_STATE_NET === $taxStatus) {
             return ['price' => $unit, 'vat' => $vat, 'priceAfterVat' => $unit + $vat];
@@ -60,12 +59,10 @@ final class MoneyConverter
 
     /**
      * Converts one amount in the order currency to euro cents. Use it for an amount
-     * that is not a calculated price. A currency factor of 0 or less counts as 1.
+     * that is not a calculated price.
      */
     public function toCents(float $amount, float $currencyFactor, float $euroFactor): int
     {
-        $factor = $currencyFactor > 0 ? $currencyFactor : 1.0;
-
-        return $this->currencyService->convertToCents($amount / $factor * $euroFactor);
+        return $this->currencyService->convertToCents($amount / $currencyFactor * $euroFactor);
     }
 }
