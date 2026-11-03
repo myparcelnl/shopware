@@ -13,9 +13,7 @@ use Shopware\Core\Checkout\Order\OrderStates;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionCollection;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
@@ -31,12 +29,10 @@ use Throwable;
 final class OrderStateTransitioner implements OrderStateTransitionerInterface
 {
     /**
-     * @param  EntityRepository<OrderCollection>                  $orderRepository
-     * @param  EntityRepository<StateMachineTransitionCollection> $transitionRepository
+     * @param  EntityRepository<OrderCollection> $orderRepository
      */
     public function __construct(
         private readonly EntityRepository $orderRepository,
-        private readonly EntityRepository $transitionRepository,
         private readonly StateMachineRegistry $stateMachineRegistry,
         private readonly LoggerInterface $logger
     ) {
@@ -96,21 +92,17 @@ final class OrderStateTransitioner implements OrderStateTransitionerInterface
     }
 
     /**
-     * The action of every transition of order.state, keyed by "from>to".
+     * The action of every transition of order.state, keyed by "from>to". The
+     * registry loads the state machine once per request.
      *
      * @return array<string, string>
      */
     private function loadTransitions(Context $context): array
     {
-        $criteria = (new Criteria())
-            ->addFilter(new EqualsFilter('stateMachine.technicalName', OrderStates::STATE_MACHINE))
-            ->addAssociation('fromStateMachineState')
-            ->addAssociation('toStateMachineState');
-
         $transitions = [];
 
         /** @var StateMachineTransitionEntity $transition */
-        foreach ($this->transitionRepository->search($criteria, $context)->getEntities() as $transition) {
+        foreach ($this->stateMachineRegistry->getStateMachine(OrderStates::STATE_MACHINE, $context)->getTransitions() ?? [] as $transition) {
             $from = $transition->getFromStateMachineState()?->getTechnicalName();
             $to   = $transition->getToStateMachineState()?->getTechnicalName();
 

@@ -11,34 +11,37 @@ use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\System\StateMachine\Transition;
 
 /**
- * order.state of a default Shopware 6.7 install, in part.
+ * A registry with the transitions of order.state of a default Shopware 6.7
+ * install, in part.
+ *
+ * @param  list<string> $failingActions
  */
-function orderStateTransitions(): FakeEntityRepository
+function orderStateRegistry(array $failingActions = []): RecordingStateMachineRegistry
 {
-    return FakeEntityRepository::with(
+    return new RecordingStateMachineRegistry([
         Entities::transition('process', 'open', 'in_progress'),
         Entities::transition('cancel', 'open', 'cancelled'),
         Entities::transition('complete', 'in_progress', 'completed'),
-        Entities::transition('cancel', 'in_progress', 'cancelled')
-    );
+        Entities::transition('cancel', 'in_progress', 'cancelled'),
+    ], $failingActions);
 }
 
 it('runs the direct transition to the target state', function () {
-    $registry = new RecordingStateMachineRegistry();
+    $registry = orderStateRegistry();
     $order    = Entities::order(['state' => 'open']);
 
-    (new OrderStateTransitioner(FakeEntityRepository::with($order), orderStateTransitions(), $registry, new RecordingLogger()))
+    (new OrderStateTransitioner(FakeEntityRepository::with($order), $registry, new RecordingLogger()))
         ->transitionTo([Entities::ORDER_ID], 'in_progress');
 
     expect($registry->transitions)->toEqual([new Transition(OrderDefinition::ENTITY_NAME, Entities::ORDER_ID, 'process', 'stateId')]);
 });
 
 it('skips and logs an order without a direct transition, without intermediate states', function () {
-    $registry = new RecordingStateMachineRegistry();
+    $registry = orderStateRegistry();
     $logger   = new RecordingLogger();
     $order    = Entities::order(['state' => 'open']);
 
-    (new OrderStateTransitioner(FakeEntityRepository::with($order), orderStateTransitions(), $registry, $logger))
+    (new OrderStateTransitioner(FakeEntityRepository::with($order), $registry, $logger))
         ->transitionTo([Entities::ORDER_ID], 'completed');
 
     expect($registry->transitions)->toBe([])
@@ -48,11 +51,11 @@ it('skips and logs an order without a direct transition, without intermediate st
 });
 
 it('leaves an order alone that is in the target state already', function () {
-    $registry = new RecordingStateMachineRegistry();
+    $registry = orderStateRegistry();
     $logger   = new RecordingLogger();
     $order    = Entities::order(['state' => 'completed']);
 
-    (new OrderStateTransitioner(FakeEntityRepository::with($order), orderStateTransitions(), $registry, $logger))
+    (new OrderStateTransitioner(FakeEntityRepository::with($order), $registry, $logger))
         ->transitionTo([Entities::ORDER_ID], 'completed');
 
     expect($registry->transitions)->toBe([])
@@ -60,12 +63,12 @@ it('leaves an order alone that is in the target state already', function () {
 });
 
 it('logs a failed transition and goes on with the next order', function () {
-    $registry = new RecordingStateMachineRegistry(['cancel']);
+    $registry = orderStateRegistry(['cancel']);
     $logger   = new RecordingLogger();
     $other    = Entities::order(['id' => Entities::id(), 'state' => 'in_progress']);
     $orders   = FakeEntityRepository::with(Entities::order(['state' => 'open']), $other);
 
-    (new OrderStateTransitioner($orders, orderStateTransitions(), $registry, $logger))
+    (new OrderStateTransitioner($orders, $registry, $logger))
         ->transitionTo([Entities::ORDER_ID, $other->getId()], 'cancelled');
 
     expect($registry->transitions)->toBe([])
@@ -75,7 +78,7 @@ it('logs a failed transition and goes on with the next order', function () {
 it('ignores ids that are not order ids', function () {
     $orders = FakeEntityRepository::with();
 
-    (new OrderStateTransitioner($orders, orderStateTransitions(), new RecordingStateMachineRegistry(), new RecordingLogger()))
+    (new OrderStateTransitioner($orders, orderStateRegistry(), new RecordingLogger()))
         ->transitionTo(['not-an-id'], 'completed');
 
     expect($orders->criteria)->toBe([]);
