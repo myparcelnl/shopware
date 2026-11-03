@@ -20,7 +20,7 @@ use Shopware\Core\System\CustomField\Aggregate\CustomFieldSet\CustomFieldSetColl
  * migrations in src/Migration, and the plugin does not run the PDK installer yet
  * (INT-2154).
  *
- * Needs a booted PDK, for the dynamic export* settings.
+ * sync() needs a booted PDK, for the dynamic export* settings.
  */
 final class ProductCustomFieldSet
 {
@@ -52,23 +52,35 @@ final class ProductCustomFieldSet
     }
 
     /**
-     * Deletes the field set, its fields (they cascade) and the myparcel_* values of
-     * every product. Use it when the plugin is uninstalled without keepUserData.
+     * Deletes the field set, its fields (they cascade) and the values of those
+     * fields on every product. Use it when the plugin is uninstalled without
+     * keepUserData. Does not need a booted PDK.
      */
     public function remove(Context $context): void
     {
-        $this->customFieldSetRepository->delete([['id' => Uuid::fromStringToHex(ProductCustomFields::SET_NAME)]], $context);
+        $setId = Uuid::fromStringToHex(ProductCustomFields::SET_NAME);
+
+        // The names come from the stored fields, not from the PDK settings: sync()
+        // keeps the fields of settings that the PDK dropped, and their values must go too.
+        $names = $this->connection->fetchFirstColumn(
+            'SELECT `name` FROM `custom_field` WHERE `set_id` = :setId',
+            ['setId' => Uuid::fromHexToBytes($setId)]
+        );
+
+        $this->customFieldSetRepository->delete([['id' => $setId]], $context);
+
+        if ([] === $names) {
+            return;
+        }
 
         // product.custom_fields is translated, so the values live in
         // product_translation. JSON_REMOVE ignores paths that do not exist.
-        $paths = array_map(
-            static fn (string $key) => sprintf("'$.%s'", ProductCustomFields::fieldName($key)),
-            ProductCustomFields::keys()
+        $this->connection->executeStatement(
+            sprintf(
+                'UPDATE `product_translation` SET `custom_fields` = JSON_REMOVE(`custom_fields`, %s) WHERE `custom_fields` IS NOT NULL',
+                implode(', ', array_fill(0, count($names), '?'))
+            ),
+            array_map(static fn (string $name) => '$.' . $name, $names)
         );
-
-        $this->connection->executeStatement(sprintf(
-            'UPDATE `product_translation` SET `custom_fields` = JSON_REMOVE(`custom_fields`, %s) WHERE `custom_fields` IS NOT NULL',
-            implode(', ', $paths)
-        ));
     }
 }

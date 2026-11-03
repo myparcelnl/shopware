@@ -27,15 +27,28 @@ it('upserts the field set and its fields with ids from their names', function ()
         ->and($sets->deletes)->toBe([]);
 });
 
-it('deletes the field set and removes the values of every field from the products', function () {
+it('deletes the field set and removes the values of its stored fields from the products', function () {
+    $sets       = FakeEntityRepository::with();
+    // myparcel_dropped_setting stands for the field of a setting that the PDK dropped.
+    $connection = new RecordingConnection(['myparcel_package_type', 'myparcel_dropped_setting']);
+    $setId      = Uuid::fromStringToHex(ProductCustomFields::SET_NAME);
+
+    (new ProductCustomFieldSet($sets, $connection))->remove(Context::createDefaultContext());
+
+    expect($connection->queries)->toHaveCount(1)
+        ->and($connection->queries[0]['params'])->toBe(['setId' => Uuid::fromHexToBytes($setId)])
+        ->and($sets->deletes)->toBe([['id' => $setId]])
+        ->and($connection->statements)->toHaveCount(1)
+        ->and($connection->statements[0]['sql'])->toBe('UPDATE `product_translation` SET `custom_fields` = JSON_REMOVE(`custom_fields`, ?, ?) WHERE `custom_fields` IS NOT NULL')
+        ->and($connection->statements[0]['params'])->toBe(['$.myparcel_package_type', '$.myparcel_dropped_setting']);
+});
+
+it('deletes the field set without an update when it has no fields', function () {
     $sets       = FakeEntityRepository::with();
     $connection = new RecordingConnection();
 
     (new ProductCustomFieldSet($sets, $connection))->remove(Context::createDefaultContext());
 
     expect($sets->deletes)->toBe([['id' => Uuid::fromStringToHex(ProductCustomFields::SET_NAME)]])
-        ->and($connection->statements)->toHaveCount(1)
-        ->and($connection->statements[0]['sql'])->toStartWith('UPDATE `product_translation` SET `custom_fields` = JSON_REMOVE(`custom_fields`, ')
-        ->and(substr_count($connection->statements[0]['sql'], "'$.myparcel_"))->toBe(count(ProductCustomFields::keys()))
-        ->and($connection->statements[0]['sql'])->toContain("'$.myparcel_package_type'");
+        ->and($connection->statements)->toBe([]);
 });

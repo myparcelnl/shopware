@@ -9,7 +9,8 @@ use Doctrine\DBAL\Connection;
 
 /**
  * A DBAL connection without a database. transactional() runs the closure at once
- * and counts the call; executeStatement() records the SQL and its parameters.
+ * and counts the call; executeStatement() records the SQL and its parameters;
+ * fetchFirstColumn() records the query and returns the given column.
  */
 final class RecordingConnection extends Connection
 {
@@ -18,8 +19,21 @@ final class RecordingConnection extends Connection
     /** @var list<array{sql: string, params: array<mixed>}> */
     public array $statements = [];
 
-    public function __construct()
+    /** @var list<array{sql: string, params: array<mixed>}> */
+    public array $queries = [];
+
+    /**
+     * @param  list<mixed> $firstColumn the result of every fetchFirstColumn() call
+     */
+    public function __construct(private readonly array $firstColumn = [])
     {
+    }
+
+    public function fetchFirstColumn(string $query, array $params = [], array $types = []): array
+    {
+        $this->queries[] = ['sql' => $query, 'params' => $params];
+
+        return $this->firstColumn;
     }
 
     public function transactional(Closure $func): mixed
