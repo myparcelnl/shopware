@@ -42,6 +42,8 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
+require_once __DIR__ . '/Support/scoped-di-functions.php';
+
 /*
  * PDK models resolve services through the Pdk facade, so a test that builds one
  * needs a booted PDK. The PDK ships its own mock environment in its tests/

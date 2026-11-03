@@ -219,6 +219,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             // EntityRepository is one class for every entity, so php-di cannot pick
             // the right one by type: name it per constructor parameter.
+            // PdkBootstrapperRepositoryBindingTest fails when a name no longer matches.
             PdkOrderRepositoryInterface::class          => \_MyParcel\DI\autowire(PdkOrderRepository::class)
                 ->constructorParameter('orderRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderRepository'])),
             PdkOrderNoteRepositoryInterface::class      => \_MyParcel\DI\autowire(PdkOrderNoteRepository::class)
