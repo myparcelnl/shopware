@@ -45,6 +45,41 @@ it('maps the identity and the stored order data', function () {
         ->and($order->deliveryOptions->deliveryType)->toBe('standard');
 });
 
+it('maps a checkout order of the demo shop to a PdkOrder that can make a shipment', function () {
+    // The shape of an order that the storefront checkout of the demo shop makes:
+    // a primary delivery, a product line and a promotion line, gross prices in
+    // EUR, a customer comment, and no MyParcel data yet.
+    $order = mapOrder(Entities::order([
+        'orderNumber'     => '10000',
+        'orderData'       => null,
+        'shipments'       => [],
+        'primaryDelivery' => Entities::delivery(
+            Entities::address(['street' => 'Demostraat 7 bis', 'zipcode' => '2132 JE', 'city' => 'Hoofddorp']),
+            Entities::price(4.95, 1, 0.86)
+        ),
+    ]));
+
+    $shipment = $order->createShipment(false);
+
+    expect($order->referenceIdentifier)->toBe('10000')
+        ->and($order->exported)->toBeFalse()
+        ->and($order->shippingAddress->toArray())->toMatchArray([
+            'street'       => 'Demostraat',
+            'number'       => '7',
+            'numberSuffix' => 'bis',
+            'postalCode'   => '2132 JE',
+            'cc'           => 'NL',
+        ])
+        ->and($order->lines)->toHaveCount(1)
+        ->and($order->physicalProperties->initialWeight)->toBe(500)
+        ->and($order->orderPriceAfterVat)->toBe(2420)
+        ->and($order->shipmentPriceAfterVat)->toBe(495)
+        ->and($order->isDeliverable())->toBeTrue()
+        ->and($order->shipments)->toHaveCount(0)
+        ->and($shipment->recipient->postalCode)->toBe('2132 JE')
+        ->and($shipment->carrier->carrier)->not->toBeEmpty();
+});
+
 it('maps the shipping and billing address', function () {
     $order = mapOrder(Entities::order());
 
