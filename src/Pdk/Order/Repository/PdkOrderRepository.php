@@ -37,8 +37,8 @@ use Shopware\Core\Framework\Uuid\Uuid;
  * save($order->externalIdentifier, $order) on this repository itself.
  *
  * Reads run in the system scope (Context::createDefaultContext()), so they do not
- * check the order:read privilege. The admin endpoint only checks myparcel:access;
- * the role that INT-1958 adds for it also needs order:read and product:read.
+ * check the order:read privilege. The admin endpoint checks only myparcel:access,
+ * so that privilege alone gives access to the orders through the PDK.
  */
 final class PdkOrderRepository extends AbstractPdkOrderRepository
 {

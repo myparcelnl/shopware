@@ -27,8 +27,8 @@ use Shopware\Core\Framework\Uuid\Uuid;
  *
  * Reads run in the system scope (Context::createDefaultContext()) in the default
  * language, so they do not check the product:read privilege. The admin endpoint
- * only checks myparcel:access; the role that INT-1958 adds for it also needs
- * product:read.
+ * checks only myparcel:access, so that privilege alone gives access to the
+ * products through the PDK.
  */
 final class PdkProductRepository extends AbstractPdkPdkProductRepository
 {
