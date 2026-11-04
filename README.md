@@ -211,15 +211,16 @@ request and falls back to English.
 `fast-glob` is in `devDependencies` only because `@myparcel-dev/pdk-app-builder`
 imports it without declaring it. Remove it once the builder declares it itself.
 
-### Admin assets
+### Admin and storefront assets
 
-The plug-in ships two built admin bundles. Neither is in git: the plug-in build
-in CI builds both (INT-1963). Build them yourself after a fresh clone:
+The plug-in ships three built bundles. None is in git: the plug-in build in CI
+builds them (INT-1963). Build them yourself after a fresh clone:
 
 | Bundle                | Source                             | Output                                |
 | --------------------- | ---------------------------------- | ------------------------------------- |
 | Shopware admin module | `src/Resources/app/administration` | `src/Resources/public/administration` |
 | PDK admin app         | `src/Resources/app/pdk`            | `src/Resources/public/pdk`            |
+| Checkout script       | `src/Resources/app/storefront/src` | `src/Resources/app/storefront/dist`   |
 
 The PDK admin app is a separate IIFE with its own Vue, because the Shopware build
 replaces `vue` with the Shopware Vue. The admin module loads it on the settings
@@ -230,6 +231,18 @@ Build the PDK admin app, and run the tests of both bundles, in the web container
 ```shell
 pnpm build:pdk
 pnpm test:pdk
+```
+
+The checkout script mounts the delivery options on the confirm page. Vite
+builds it to the path where Shopware finds the script of a plug-in without
+building it. The plug-in has no `src/Resources/app/storefront/src/main.js`, so
+`bin/build-storefront.sh` skips it. Build it and run its tests in the web
+container, then compile the theme, which copies the script to the shop:
+
+```shell
+pnpm build:storefront
+pnpm test:storefront
+bin/console theme:compile
 ```
 
 Build the Shopware admin module in the web container, from the shop root.

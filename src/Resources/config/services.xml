@@ -65,6 +65,14 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
         </service>
 
+        <service id="MyParcel\Shopware\Checkout\SalesChannelContextHolder">
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Checkout\ShopwareCartLoader">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
@@ -77,6 +85,9 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Frontend\ViewService"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\OrderStatusService"/>
+            <argument type="service" id="shipping_method.repository"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\ShopwareCartLoader"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
             <argument>%kernel.debug%</argument>
@@ -111,8 +122,45 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="MyParcel\Shopware\Checkout\DeliveryOptionsRenderer">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Checkout\Subscriber\CheckoutConfirmPageSubscriber">
+            <argument type="service" id="MyParcel\Shopware\Checkout\DeliveryOptionsRenderer"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
+        </service>
+
+        <!-- After DeliveryProcessor (-5000), before the shipping discounts of promotions (-5100). -->
+        <service id="MyParcel\Shopware\Checkout\Cart\DeliveryOptionsFeeProcessor">
+            <argument type="service" id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <tag name="shopware.cart.processor" priority="-5050"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Checkout\Subscriber\CartConvertedSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\DeliveryOptionsController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\ShopwareCartLoader"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="MyParcel\Shopware\Controller\StorefrontPdkController" public="true">
             <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
             <tag name="controller.service_arguments"/>
         </service>
 

@@ -49,3 +49,20 @@ it('is no pdk page outside a request', function () {
 it('has no other pages yet', function (string $method) {
     expect(viewService(AdminScreen::PluginSettings)->{$method}())->toBeFalse();
 })->with(['isCheckoutPage', 'isChildProductPage', 'isOrderListPage', 'isOrderPage', 'isProductPage']);
+
+it('is the checkout page on the confirm page route', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+    $service = new ViewService($requestStack);
+
+    expect($service->isCheckoutPage())->toBeTrue()
+        // The checkout is no admin page, so the admin notifications stay off.
+        ->and($service->isAnyPdkPage())->toBeFalse();
+});
+
+it('is no checkout page on other storefront routes', function (string $route) {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => $route]));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeFalse();
+})->with(['frontend.checkout.cart.page', 'frontend.checkout.finish.page', 'frontend.myparcel.pdk']);
