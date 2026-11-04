@@ -10,8 +10,9 @@ namespace MyParcel\Shopware\Pdk\Routing;
  */
 final class RouteName
 {
-    public const ADMIN_PDK      = 'api.action.myparcel.pdk';
-    public const ADMIN_VIEW     = 'api.action.myparcel.view';
-    public const STOREFRONT_PDK = 'frontend.myparcel.pdk';
-    public const WEBHOOK        = 'api.myparcel.webhook';
+    public const ADMIN_PDK                   = 'api.action.myparcel.pdk';
+    public const ADMIN_VIEW                  = 'api.action.myparcel.view';
+    public const STOREFRONT_PDK              = 'frontend.myparcel.pdk';
+    public const STOREFRONT_DELIVERY_OPTIONS = 'frontend.myparcel.delivery-options';
+    public const WEBHOOK                     = 'api.myparcel.webhook';
 }
