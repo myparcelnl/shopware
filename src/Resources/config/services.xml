@@ -62,6 +62,7 @@
             <argument type="service" id="language.repository"/>
             <argument type="service" id="request_stack"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\State\OrderStateTransitioner"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
