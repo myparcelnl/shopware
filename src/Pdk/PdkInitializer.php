@@ -8,7 +8,9 @@ use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\Base\Pdk;
+use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -30,6 +32,8 @@ final class PdkInitializer
         private readonly ConfigStorageInterface $configStorage,
         private readonly LocaleResolverInterface $localeResolver,
         private readonly UrlResolverInterface $urlResolver,
+        private readonly ViewServiceInterface $viewService,
+        private readonly OrderStatusServiceInterface $orderStatusService,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -43,7 +47,13 @@ final class PdkInitializer
     {
         PdkBootstrapper::setLogger($this->logger);
         PdkBootstrapper::setServices(
-            new ShopwareServices($this->configStorage, $this->localeResolver, $this->urlResolver)
+            new ShopwareServices(
+                $this->configStorage,
+                $this->localeResolver,
+                $this->urlResolver,
+                $this->viewService,
+                $this->orderStatusService
+            )
         );
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

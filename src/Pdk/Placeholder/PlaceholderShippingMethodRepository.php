@@ -8,8 +8,8 @@ use MyParcelNL\Pdk\App\ShippingMethod\Collection\PdkShippingMethodCollection;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 
 /**
- * Temporary. It exists only so that the PDK container compiles in production
- * mode.
+ * Temporary. Lists no shipping methods, so that the checkout section of the
+ * plugin settings renders.
  *
  * @TODO INT-1961: replace with the real shipping method repository.
  */
@@ -17,6 +17,6 @@ final class PlaceholderShippingMethodRepository implements PdkShippingMethodRepo
 {
     public function all(): PdkShippingMethodCollection
     {
-        throw NotImplementedException::forContract(PdkShippingMethodRepositoryInterface::class);
+        return new PdkShippingMethodCollection();
     }
 }
