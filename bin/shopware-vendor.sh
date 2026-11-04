@@ -15,6 +15,9 @@ PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SHOPWARE_DIR="${PLUGIN_DIR}/.tmp/shopware"
 SHOPWARE_CONSTRAINT='>=v6.7.12.1 <6.8'
 SHOPWARE_STAMP="${SHOPWARE_DIR}/.installed-for"
+# The storefront is there for the checkout classes: the confirm page event and
+# its page.
+SHOPWARE_PACKAGES=(shopware/core shopware/storefront)
 
 cd "${PLUGIN_DIR}"
 
@@ -25,7 +28,7 @@ cd "${PLUGIN_DIR}"
 # explain it. The PHP version is part of the stamp because Composer resolves an
 # install's dependencies against the PHP that ran it.
 PHP_VERSION="$(php -r 'echo PHP_VERSION;')"
-SHOPWARE_TARGET="${SHOPWARE_CONSTRAINT} on PHP ${PHP_VERSION}"
+SHOPWARE_TARGET="${SHOPWARE_PACKAGES[*]} ${SHOPWARE_CONSTRAINT} on PHP ${PHP_VERSION}"
 
 # autoload.php as well as the stamp: the stamp is only written once the install
 # succeeded, but it survives a vendor directory somebody removed by hand.
@@ -42,7 +45,7 @@ mkdir -p "${SHOPWARE_DIR}"
 # --no-plugins: this install only ever supplies classes to read. Nothing needs a
 # Composer plugin's code to run, and without it symfony/runtime's plugin has no
 # allow-plugins config to be trusted by and aborts the install.
-composer require "shopware/core:${SHOPWARE_CONSTRAINT}" \
+composer require "${SHOPWARE_PACKAGES[@]/%/:${SHOPWARE_CONSTRAINT}}" \
   --working-dir="${SHOPWARE_DIR}" \
   --ignore-platform-req=ext-* \
   --no-interaction \
