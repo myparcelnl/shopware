@@ -13,10 +13,26 @@
 
     {% if myparcel %}
         {% block myparcel_checkout_delivery_options %}
+            {% set shippingAddress = context.shippingLocation.address %}
+
+            {# The storefront plugin reads these: the confirm page has no address form. #}
+            {% set myparcelOptions = {
+                shippingMethodId: context.shippingMethod.id,
+                storeUrl: path('frontend.myparcel.delivery-options'),
+                address: {
+                    cc: context.shippingLocation.country.iso,
+                    postalCode: shippingAddress ? shippingAddress.zipcode : '',
+                    city: shippingAddress ? shippingAddress.city : '',
+                    street: shippingAddress ? shippingAddress.street : '',
+                },
+            } %}
+
             <link rel="stylesheet" href="{{ myparcel.styleUrl }}">
             <script src="{{ myparcel.scriptUrl }}" defer></script>
 
-            <div class="myparcel-delivery-options mt-3" data-myparcel-delivery-options>
+            <div class="myparcel-delivery-options mt-3"
+                 data-myparcel-delivery-options
+                 data-myparcel-delivery-options-options="{{ myparcelOptions|json_encode }}">
                 {{ myparcel.html|raw }}
             </div>
         {% endblock %}
