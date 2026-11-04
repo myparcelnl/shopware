@@ -1,0 +1,17 @@
+{% block myparcel_product_detail_tab %}
+<div class="myparcel-product-detail-tab">
+    {% block myparcel_product_detail_tab_content %}
+    <mt-banner
+        class="myparcel-product-detail-tab__hint"
+        variant="info"
+    >
+        {{ $tc('myparcel-product.detail.saveHint') }}
+    </mt-banner>
+    <sw-loader v-if="isLoading" />
+    <div
+        ref="pdkRoot"
+        class="myparcel-pdk"
+    ></div>
+    {% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+    "myparcel-product": {
+        "detail": {
+            "tab": "MyParcel",
+            "saveHint": "MyParcel slaat deze instellingen direct op. De knop Opslaan van Shopware is hiervoor niet nodig.",
+            "loadError": "De MyParcel-gegevens van dit product konden niet laden."
+        }
+    }
+}

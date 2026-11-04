@@ -223,7 +223,15 @@ in CI builds both (INT-1963). Build them yourself after a fresh clone:
 
 The PDK admin app is a separate IIFE with its own Vue, because the Shopware build
 replaces `vue` with the Shopware Vue. The admin module loads it on the settings
-page. Rebuild a bundle after you change its source.
+page, in the order list (a "MyParcel" column and the PDK bulk actions), in a
+"MyParcel" tab of the order detail and in a "MyParcel" tab of the product detail.
+The order detail and the product tab each open one PDK session
+(`src/Resources/app/pdk/src/session.ts`). The order list opens a new session for
+each load of the list: a new page, sort, filter or column change. They show the
+PDK action and API notifications as Shopware toasts. The settings page shows them
+in the PDK. The product tab shows a banner: the PDK saves product settings
+directly, not with the Shopware save button. Rebuild a bundle after you change
+its source.
 
 Build the PDK admin app, and run the tests of both bundles, in the web container:
 
@@ -231,6 +239,10 @@ Build the PDK admin app, and run the tests of both bundles, in the web container
 pnpm build:pdk
 pnpm test:pdk
 ```
+
+The shop serves the copy in `public/bundles`, not the build output. After a
+build, run `bin/console assets:install` from the shop root, or the admin keeps
+the old bundle.
 
 Build the Shopware admin module in the web container, from the shop root.
 `bin/build-administration.sh` cannot do it here. It runs `npm ci` in every
@@ -295,8 +307,8 @@ its fields from every product.
 
 The set has no relation to the product entity, so the fields do not show in the
 "Custom fields" card of the product page.
-[INT-1960](https://myparcelnl.atlassian.net/browse/INT-1960) adds a MyParcel tab to
-the product page for these settings.
+The "MyParcel" tab of the product page shows these settings, with its own
+settings for each variant.
 
 ## Routes
 
@@ -311,7 +323,9 @@ The plug-in sends several kinds of requests to the PDK:
 
 The view route returns the PDK markup of one admin screen (`?view=pluginSettings`)
 as JSON, with the URLs of the PDK admin app. The Shopware admin is a single-page
-app, so no PHP page holds that markup.
+app, so no PHP page holds that markup. Some screens need a context: `orderIds[]`
+for the order list, `orderId` for the order detail and `productId` for the product
+detail.
 
 A webhook with a missing or wrong hash gets `404`. Until the webhooks are
 registered at MyParcel, no hash is stored, and every webhook gets `404`.

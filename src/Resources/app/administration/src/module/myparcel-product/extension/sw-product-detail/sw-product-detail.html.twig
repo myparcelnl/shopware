@@ -1,0 +1,12 @@
+{% block sw_product_detail_content_tabs_additional %}
+    {% parent %}
+
+    <sw-tabs-item
+        v-if="acl.can('myparcel.access') && $route.params.id"
+        class="myparcel-product-detail__tab"
+        :route="{ name: 'sw.product.detail.myparcel', params: { id: $route.params.id } }"
+        :title="$tc('myparcel-product.detail.tab')"
+    >
+        {{ $tc('myparcel-product.detail.tab') }}
+    </sw-tabs-item>
+{% endblock %}
