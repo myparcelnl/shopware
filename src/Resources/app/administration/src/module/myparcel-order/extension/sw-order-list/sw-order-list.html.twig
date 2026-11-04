@@ -1,0 +1,29 @@
+{% block sw_order_list_content_slot %}
+    {% parent %}
+
+    <div ref="myparcelPdkRoot" class="myparcel-pdk"></div>
+{% endblock %}
+
+{% block sw_order_list_grid_columns %}
+    {% parent %}
+
+    <template #column-myparcelShipments="{ item }">
+        <div class="myparcel-pdk" :data-myparcel-order-id="item.id"></div>
+    </template>
+{% endblock %}
+
+{% block sw_order_list_bulk_selected_actions_content_bulk_edit %}
+    {% parent %}
+
+    <a
+        v-for="bulkAction in myparcelBulkActions"
+        :key="bulkAction.action"
+        class="link link-primary"
+        role="link"
+        tabindex="0"
+        @click="onMyparcelBulkAction(bulkAction.action)"
+        @keydown.enter="onMyparcelBulkAction(bulkAction.action)"
+    >
+        {{ bulkAction.label }}
+    </a>
+{% endblock %}

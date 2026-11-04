@@ -54,6 +54,83 @@ export function getRequestHeaders() {
 }
 
 /**
+ * Fetches a PDK view with its context from the plugin's view route and loads
+ * its scripts and styles. Use it when you need the view data without a root
+ * element yet.
+ *
+ * @param {string} view an AdminScreen value, e.g. 'order'
+ * @param {object} params the context next to the view: orderIds, orderId or productId
+ * @returns {Promise<{html: string, items: object, bulkActions: object[], scripts: string[], styles: string[]}>}
+ */
+export async function fetchView(view, params = {}) {
+    const httpClient = Shopware.Application.getContainer('init').httpClient;
+    const {data} = await httpClient.get('_action/myparcel/view', {
+        params: {...params, view},
+        headers: {...getRequestHeaders(), Accept: 'application/json'},
+    });
+
+    await Promise.all([
+        ...(data.styles ?? []).map((url) => loadOnce(url, createStylesheet)),
+        ...(data.scripts ?? []).map((url) => loadOnce(url, createScript)),
+    ]);
+
+    return data;
+}
+
+/**
+ * Fetches a PDK view, puts its html in root and opens a PDK session on it.
+ * Use it for the order tab, order list and product tab. When isActive is false
+ * after loading, nothing is inserted and session is null.
+ *
+ * @param {string} view an AdminScreen value
+ * @param {object} params the context for the view route
+ * @param {HTMLElement} root
+ * @param {() => boolean} isActive false once the page is gone
+ * @param {{onNotification?: (notification: object) => void}} options
+ * @returns {Promise<{session: object|null, data: object}>}
+ */
+export async function openSession(view, params, root, isActive, {onNotification} = {}) {
+    const data = await fetchView(view, params);
+
+    if (!isActive()) {
+        return {session: null, data};
+    }
+
+    root.innerHTML = data.html;
+
+    const session = await window.MyParcelShopwarePdk.createSession(root, {getRequestHeaders, onNotification});
+
+    if (!isActive()) {
+        session.unmount();
+        root.innerHTML = '';
+
+        return {session: null, data};
+    }
+
+    return {session, data};
+}
+
+/**
+ * Creates a handler that shows a PDK notification as a Shopware notification.
+ * Use it as onNotification for openSession.
+ *
+ * @param {object} component a component with the Shopware notification mixin
+ * @returns {(notification: {variant: string, title?: string, message: string}) => void}
+ */
+export function notifyShopware(component) {
+    const methods = {
+        success: 'createNotificationSuccess',
+        error: 'createNotificationError',
+        warning: 'createNotificationWarning',
+        info: 'createNotificationInfo',
+    };
+
+    return ({variant, title, message}) => {
+        component[methods[variant] ?? methods.info]({...(title === undefined ? {} : {title}), message});
+    };
+}
+
+/**
  * Shows a PDK view in root. Resolves to a function that removes it again.
  *
  * @param {string} view an AdminScreen value, e.g. 'pluginSettings'
@@ -61,16 +138,7 @@ export function getRequestHeaders() {
  * @param {() => boolean} isActive false once the page is gone; the view is then not mounted
  */
 export async function mountView(view, root, isActive) {
-    const httpClient = Shopware.Application.getContainer('init').httpClient;
-    const {data} = await httpClient.get('_action/myparcel/view', {
-        params: {view},
-        headers: {...getRequestHeaders(), Accept: 'application/json'},
-    });
-
-    await Promise.all([
-        ...data.styles.map((url) => loadOnce(url, createStylesheet)),
-        ...data.scripts.map((url) => loadOnce(url, createScript)),
-    ]);
+    const data = await fetchView(view);
 
     if (!isActive()) {
         return () => {};
