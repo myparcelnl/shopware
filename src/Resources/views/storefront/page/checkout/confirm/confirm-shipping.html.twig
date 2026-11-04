@@ -1,0 +1,24 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/confirm-shipping.html.twig' %}
+
+{#
+  The delivery options go after the shipping form, not inside it: the form
+  submits itself on every change of an input in it, and the widget has inputs
+  of its own. CheckoutConfirmPageSubscriber adds page.extensions.myparcel only
+  when the PDK rendered the delivery options.
+#}
+{% block page_checkout_confirm_shipping_form %}
+    {{ parent() }}
+
+    {% set myparcel = page.extensions.myparcel ?? null %}
+
+    {% if myparcel %}
+        {% block myparcel_checkout_delivery_options %}
+            <link rel="stylesheet" href="{{ myparcel.styleUrl }}">
+            <script src="{{ myparcel.scriptUrl }}" defer></script>
+
+            <div class="myparcel-delivery-options mt-3" data-myparcel-delivery-options>
+                {{ myparcel.html|raw }}
+            </div>
+        {% endblock %}
+    {% endif %}
+{% endblock %}
