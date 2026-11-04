@@ -2,7 +2,13 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {createPdkAdmin} from '@myparcel-dev/pdk-admin';
 import {mount} from './mount';
 
-vi.mock('@myparcel-dev/pdk-admin', () => ({createPdkAdmin: vi.fn()}));
+vi.mock('@myparcel-dev/pdk-admin', () => ({
+  createPdkAdmin: vi.fn(),
+  useActionStore: vi.fn(),
+  useNotificationStore: vi.fn(),
+  AdminAction: {},
+  NotificationCategory: {},
+}));
 vi.mock('./config', () => ({createConfig: vi.fn((getRequestHeaders) => ({getRequestHeaders}))}));
 
 const createRoot = (): HTMLElement => {
