@@ -11,9 +11,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Tells the PDK which screen it renders for. The Shopware admin is a
  * single-page app, so no PHP page tells the PDK where it is: AdminViewRenderer
- * puts the screen on the request instead. Only the plugin settings exist so far.
+ * puts the screen on the request instead.
  *
- * @TODO INT-1960: recognise the order list, the order detail and the product page.
  * @TODO INT-1961: recognise the checkout.
  */
 final class ViewService extends AbstractViewService
@@ -27,19 +26,28 @@ final class ViewService extends AbstractViewService
         return false;
     }
 
+    /**
+     * Tell if the view route renders the settings of a variant.
+     */
     public function isChildProductPage(): bool
     {
-        return false;
+        return $this->isScreen(AdminScreen::ChildProduct);
     }
 
+    /**
+     * Tell if the view route renders the order list.
+     */
     public function isOrderListPage(): bool
     {
-        return false;
+        return $this->isScreen(AdminScreen::OrderList);
     }
 
+    /**
+     * Tell if the view route renders the order detail.
+     */
     public function isOrderPage(): bool
     {
-        return false;
+        return $this->isScreen(AdminScreen::Order);
     }
 
     /**
@@ -47,11 +55,19 @@ final class ViewService extends AbstractViewService
      */
     public function isPluginSettingsPage(): bool
     {
-        return AdminScreen::PluginSettings === $this->requestStack->getMainRequest()?->attributes->get(AdminScreen::REQUEST_ATTRIBUTE);
+        return $this->isScreen(AdminScreen::PluginSettings);
     }
 
+    /**
+     * Tell if the view route renders the settings of a product.
+     */
     public function isProductPage(): bool
     {
-        return false;
+        return $this->isScreen(AdminScreen::Product);
+    }
+
+    private function isScreen(AdminScreen $screen): bool
+    {
+        return $screen === $this->requestStack->getMainRequest()?->attributes->get(AdminScreen::REQUEST_ATTRIBUTE);
     }
 }

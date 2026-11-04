@@ -3,12 +3,17 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Controller\AdminViewController;
+use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
+use MyParcel\Shopware\Pdk\Frontend\AdminViewResult;
 use MyParcel\Shopware\Pdk\View\AdminScreen;
+use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use MyParcel\Shopware\Tests\Support\AdminAssetsFactory;
 use MyParcel\Shopware\Tests\Support\FixedAdminViewRenderer;
 use MyParcel\Shopware\Tests\Support\HttpBridgeFactory;
 use MyParcel\Shopware\Tests\Support\RecordingLogger;
 use Symfony\Component\HttpFoundation\Request;
+
+const CONTROLLER_ORDER_ID = '0190a1b2c3d4e5f60718293a4b5c6d01';
 
 function viewController(FixedAdminViewRenderer $renderer, RecordingLogger $logger = new RecordingLogger()): AdminViewController
 {
@@ -27,11 +32,13 @@ it('returns the rendered view with its assets', function () {
 
     expect($response->getStatusCode())->toBe(200)
         ->and(json_decode((string) $response->getContent(), true))->toBe([
-            'html'    => '<span id="myparcel-pdk-boot"></span>',
-            'scripts' => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
-            'styles'  => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
+            'html'        => '<span id="myparcel-pdk-boot"></span>',
+            'items'       => [],
+            'bulkActions' => [],
+            'scripts'     => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
+            'styles'      => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
         ])
-        ->and($renderer->rendered)->toBe([AdminScreen::PluginSettings]);
+        ->and($renderer->rendered)->toEqual([new AdminViewRequest(AdminScreen::PluginSettings, [])]);
 });
 
 it('rejects an unknown view without rendering', function (array $query) {
@@ -44,7 +51,10 @@ it('rejects an unknown view without rendering', function (array $query) {
         ->and($renderer->rendered)->toBe([]);
 })->with([
     'missing' => [[]],
-    'unknown' => [['view' => 'orderList']],
+    'unknown' => [['view' => 'unknownView']],
+    'child product' => [['view' => 'childProduct']],
+    'order list without ids' => [['view' => 'orderList']],
+    'order with a bad id' => [['view' => 'order', 'orderId' => 'nope']],
     'array'   => [['view' => ['pluginSettings']]],
 ]);
 
@@ -58,4 +68,32 @@ it('answers 500 and logs when rendering fails', function () {
 
     expect($response->getStatusCode())->toBe(500)
         ->and($logger->records)->toHaveCount(1);
+});
+
+it('returns the items and bulk actions of the result', function () {
+    $renderer = new FixedAdminViewRenderer(new AdminViewResult('<b></b>', [CONTROLLER_ORDER_ID => '<i></i>'], [['action' => 'action_edit', 'label' => 'Edit']]));
+
+    $response = viewController($renderer)->view(Request::create('/api/_action/myparcel/view', 'GET', ['view' => 'orderList', 'orderIds' => [CONTROLLER_ORDER_ID]]));
+    $body     = (string) $response->getContent();
+
+    expect(json_decode($body, true)['items'])->toBe([CONTROLLER_ORDER_ID => '<i></i>'])
+        ->and($body)->toContain('"items":{"' . CONTROLLER_ORDER_ID . '"');
+});
+
+it('passes the order ids to the renderer', function () {
+    $renderer = new FixedAdminViewRenderer();
+    $request  = Request::create('/api/_action/myparcel/view', 'GET', ['view' => 'orderList', 'orderIds' => [CONTROLLER_ORDER_ID]]);
+
+    viewController($renderer)->view($request);
+
+    expect($renderer->rendered)->toEqual([new AdminViewRequest(AdminScreen::OrderList, [CONTROLLER_ORDER_ID])]);
+});
+
+it('returns 404 when the order does not exist', function () {
+    $renderer = new FixedAdminViewRenderer(error: AdminViewNotFoundException::forScreen(AdminScreen::Order, CONTROLLER_ORDER_ID));
+
+    $response = viewController($renderer)->view(Request::create('/api/_action/myparcel/view', 'GET', ['view' => 'order', 'orderId' => CONTROLLER_ORDER_ID]));
+
+    expect($response->getStatusCode())->toBe(404)
+        ->and(json_decode((string) $response->getContent(), true))->toHaveKey('message');
 });
