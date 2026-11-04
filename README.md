@@ -191,7 +191,10 @@ The custom field set `myparcel_product` is neither: see "Product settings" below
 
 ### Translations
 
-The MyParcel texts come from the shared PDK translations sheet. They are built
+The MyParcel texts come from the shared PDK translations sheet. The tab
+`app:shopware` in that sheet (`additionalSheet` in `pdk.config.js`) overrides the
+keys that need a Shopware-specific text, for example the hint that Shopware
+changes an order status only with a direct transition. The texts are built
 into `config/pdk/translations` and not versioned, the same as in the WooCommerce
 and PrestaShop plug-ins: CI builds them before the tests. To build them locally,
 run this in the web container:
