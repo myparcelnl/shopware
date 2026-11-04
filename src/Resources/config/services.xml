@@ -21,7 +21,12 @@
 
         <service id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver">
             <argument type="service" id="request_stack"/>
-            <argument type="service" id="Shopware\Core\System\Locale\LanguageLocaleCodeProvider"/>
+            <argument type="service" id="Shopware\Core\Framework\App\AppLocaleProvider"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="request_stack"/>
         </service>
 
         <service id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver">
@@ -48,16 +53,29 @@
             <argument type="service" id="monolog.logger.myparcel"/>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\Frontend\ViewService">
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Order\OrderStatusService">
+            <argument type="service" id="state_machine_state.repository"/>
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
-            <argument type="service" id="MyParcel\Shopware\Pdk\Language\ShopwareLocaleResolver"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Language\RequestCachedLocaleResolver"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Routing\ShopwareUrlResolver"/>
             <argument type="service" id="order.repository"/>
             <argument type="service" id="product.repository"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Frontend\ViewService"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\OrderStatusService"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
             <argument>%kernel.debug%</argument>
@@ -73,6 +91,22 @@
 
         <service id="MyParcel\Shopware\Controller\AdminPdkController" public="true">
             <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Admin\AdminAssets">
+            <argument type="service" id="assets.packages"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="MyParcel\Shopware\Controller\AdminViewController" public="true">
+            <argument type="service" id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer"/>
+            <argument type="service" id="MyParcel\Shopware\Admin\AdminAssets"/>
             <tag name="controller.service_arguments"/>
         </service>
 

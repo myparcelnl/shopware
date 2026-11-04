@@ -11,7 +11,9 @@ use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\Base\Pdk;
+use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Content\Product\ProductCollection;
@@ -45,6 +47,8 @@ final class PdkInitializer
         private readonly EuroCurrency $euroCurrency,
         private readonly OrderDataWriter $orderDataWriter,
         private readonly ProductSettingsWriter $productSettingsWriter,
+        private readonly ViewServiceInterface $viewService,
+        private readonly OrderStatusServiceInterface $orderStatusService,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -65,7 +69,9 @@ final class PdkInitializer
             $this->productRepository,
             $this->euroCurrency,
             $this->orderDataWriter,
-            $this->productSettingsWriter
+            $this->productSettingsWriter,
+            $this->viewService,
+            $this->orderStatusService
         ));
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

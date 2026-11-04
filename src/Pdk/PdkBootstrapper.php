@@ -11,6 +11,7 @@ use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
 use MyParcel\Shopware\Pdk\Audit\Repository\NoopAuditRepository;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
+use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
 use MyParcel\Shopware\Pdk\Language\LanguageService;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
 use MyParcel\Shopware\Pdk\Logger\PdkLogger;
@@ -18,11 +19,9 @@ use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderOrderStatusService;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderViewService;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
+use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
@@ -43,6 +42,7 @@ use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
 use MyParcelNL\Pdk\Audit\Contract\PdkAuditRepositoryInterface;
 use MyParcelNL\Pdk\Base\Contract\CronServiceInterface;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as AbstractPdkBootstrapper;
+use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
@@ -142,6 +142,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
+    public static function getOrderStatusService(): OrderStatusServiceInterface
+    {
+        return self::getShopwareServices()->orderStatusService;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
     public static function getEuroCurrency(): EuroCurrency
     {
         return self::getShopwareServices()->euroCurrency;
@@ -161,6 +169,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     public static function getProductSettingsWriter(): ProductSettingsWriter
     {
         return self::getShopwareServices()->productSettingsWriter;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getViewService(): ViewServiceInterface
+    {
+        return self::getShopwareServices()->viewService;
     }
 
     /**
@@ -205,10 +221,6 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // cannot compile an interface without a concrete class.
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
-            // @TODO INT-1958: bind OrderStatusService instead of the placeholder, and let
-            // updateStatus() call OrderStateTransitionerInterface::transitionTo().
-            OrderStatusServiceInterface::class          => \_MyParcel\DI\autowire(PlaceholderOrderStatusService::class),
-            ViewServiceInterface::class                 => \_MyParcel\DI\autowire(PlaceholderViewService::class),
 
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
@@ -216,6 +228,9 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             EuroCurrency::class                         => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getEuroCurrency']),
             OrderDataWriter::class                      => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderDataWriter']),
             ProductSettingsWriter::class                => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductSettingsWriter']),
+            ViewServiceInterface::class                 => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getViewService']),
+            FrontendRenderServiceInterface::class       => \_MyParcel\DI\autowire(FrontendRenderService::class),
+            OrderStatusServiceInterface::class          => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderStatusService']),
             PdkSettingsRepositoryInterface::class       => \_MyParcel\DI\autowire(PdkSettingsRepository::class),
             // EntityRepository is one class for every entity, so php-di cannot pick
             // the right one by type: name it per constructor parameter.

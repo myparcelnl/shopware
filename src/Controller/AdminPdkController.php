@@ -13,8 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * The admin app's way into the PDK. The api scope requires an admin API
- * token; myparcel:access becomes a role in the admin module (INT-1958). Until
- * then only users and integrations with all rights pass.
+ * token. The admin module adds the myparcel:access role.
  */
 final class AdminPdkController
 {

@@ -10,6 +10,8 @@ use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
+use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -32,7 +34,9 @@ final class ShopwareServices
         public readonly EntityRepository $productRepository,
         public readonly EuroCurrency $euroCurrency,
         public readonly OrderDataWriter $orderDataWriter,
-        public readonly ProductSettingsWriter $productSettingsWriter
+        public readonly ProductSettingsWriter $productSettingsWriter,
+        public readonly ViewServiceInterface $viewService,
+        public readonly OrderStatusServiceInterface $orderStatusService
     ) {
     }
 }

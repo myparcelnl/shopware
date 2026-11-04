@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Tests\Support;
 
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
+use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * A bridge whose initializer is never booted: the tests call the conversion
@@ -28,6 +30,8 @@ final class HttpBridgeFactory
             new EuroCurrency(FakeEntityRepository::with()),
             new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
             new ProductSettingsWriter(FakeEntityRepository::with()),
+            new ViewService(new RequestStack()),
+            new FixedOrderStatusService(),
             '0.0.0-test',
             'https://shop.test',
             true

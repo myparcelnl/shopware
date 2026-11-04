@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
+use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
@@ -12,6 +13,7 @@ use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\ShopwareServices;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
 use MyParcel\Shopware\Tests\Support\FixedLocaleResolver;
+use MyParcel\Shopware\Tests\Support\FixedOrderStatusService;
 use MyParcel\Shopware\Tests\Support\FixedUrlResolver;
 use MyParcel\Shopware\Tests\Support\InMemoryConfigStorage;
 use MyParcel\Shopware\Tests\Support\RecordingConnection;
@@ -20,6 +22,7 @@ use MyParcelNL\Pdk\App\Order\Contract\PdkOrderNoteRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\Facade\Pdk;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /*
  * The repository bindings in PdkBootstrapper name the constructor parameter that
@@ -55,7 +58,9 @@ beforeEach(function () {
         $this->products,
         new EuroCurrency(FakeEntityRepository::with()),
         new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
-        new ProductSettingsWriter(FakeEntityRepository::with())
+        new ProductSettingsWriter(FakeEntityRepository::with()),
+        new ViewService(new RequestStack()),
+        new FixedOrderStatusService()
     ));
 
     TestPdk::boot(bootstrapperDefinitions([
