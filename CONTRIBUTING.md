@@ -51,6 +51,17 @@ directory name.
    cd /var/www/html && bin/console assets:install
    ```
 
+5. Build the checkout script, then compile the theme, which copies the script to
+   the shop:
+
+   ```shell
+   pnpm build:storefront
+   bin/console theme:compile
+   ```
+
+   Vite builds the script to the path where Shopware finds the script of a
+   plug-in without building it.
+
 After each build of a bundle, run `bin/console assets:install` from the shop root.
 The shop serves the copy in `public/bundles`, not the build output.
 
@@ -60,6 +71,7 @@ The shop serves the copy in `public/bundles`, not the build output.
 composer test
 composer analyse
 pnpm test:pdk
+pnpm test:storefront
 ```
 
 - `composer test` swaps `vendor/` with a development install while it runs. The
