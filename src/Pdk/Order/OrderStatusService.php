@@ -6,7 +6,7 @@ namespace MyParcel\Shopware\Pdk\Order;
 
 use MyParcel\Shopware\Http\ContextObject;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
-use MyParcel\Shopware\Pdk\Placeholder\NotImplementedException;
+use MyParcel\Shopware\Pdk\Order\Contract\OrderStateTransitionerInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use Shopware\Core\Checkout\Order\OrderStates;
 use Shopware\Core\Framework\Context;
@@ -35,7 +35,8 @@ final class OrderStatusService implements OrderStatusServiceInterface
         private readonly EntityRepository $stateRepository,
         private readonly EntityRepository $languageRepository,
         private readonly RequestStack $requestStack,
-        private readonly LocaleResolverInterface $localeResolver
+        private readonly LocaleResolverInterface $localeResolver,
+        private readonly OrderStateTransitionerInterface $stateTransitioner
     ) {
     }
 
@@ -63,13 +64,15 @@ final class OrderStatusService implements OrderStatusServiceInterface
     }
 
     /**
-     * @param  array<int|string> $orderIds
+     * Changes the orders to the order state with this technical name. The PDK
+     * calls it after an export or a status update. An order without a direct
+     * transition keeps its state and is logged.
      *
-     * @TODO INT-1962: change the order state with a state machine transition.
+     * @param  array<int|string> $orderIds
      */
     public function updateStatus(array $orderIds, string $status): void
     {
-        throw NotImplementedException::forContract(OrderStatusServiceInterface::class);
+        $this->stateTransitioner->transitionTo(array_map('strval', $orderIds), $status);
     }
 
     /**

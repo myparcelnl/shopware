@@ -38,6 +38,10 @@ fi
 
 bin/dev-vendor.sh
 
+# The tests build Shopware entities, and tests/Pest.php loads their classes from
+# .tmp/shopware. Install it before the swap: it needs no vendor/.
+bin/shopware-vendor.sh
+
 # Only a run that was killed outright leaves this behind. Restoring it
 # automatically could overwrite a vendor directory somebody rebuilt since.
 if [[ -d "${BACKUP_DIR}" ]]; then

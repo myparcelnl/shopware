@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk;
 
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
+use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
+use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
+use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Content\Product\ProductCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
  * Boots the PDK with the plug-in's own details, taken from Shopware rather than
@@ -27,11 +33,20 @@ use Psr\Log\LoggerInterface;
  */
 final class PdkInitializer
 {
+    /**
+     * @param  EntityRepository<OrderCollection>   $orderRepository
+     * @param  EntityRepository<ProductCollection> $productRepository
+     */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ConfigStorageInterface $configStorage,
         private readonly LocaleResolverInterface $localeResolver,
         private readonly UrlResolverInterface $urlResolver,
+        private readonly EntityRepository $orderRepository,
+        private readonly EntityRepository $productRepository,
+        private readonly EuroCurrency $euroCurrency,
+        private readonly OrderDataWriter $orderDataWriter,
+        private readonly ProductSettingsWriter $productSettingsWriter,
         private readonly ViewServiceInterface $viewService,
         private readonly OrderStatusServiceInterface $orderStatusService,
         private readonly string $pluginVersion,
@@ -46,15 +61,18 @@ final class PdkInitializer
     public function boot(): Pdk
     {
         PdkBootstrapper::setLogger($this->logger);
-        PdkBootstrapper::setServices(
-            new ShopwareServices(
-                $this->configStorage,
-                $this->localeResolver,
-                $this->urlResolver,
-                $this->viewService,
-                $this->orderStatusService
-            )
-        );
+        PdkBootstrapper::setServices(new ShopwareServices(
+            $this->configStorage,
+            $this->localeResolver,
+            $this->urlResolver,
+            $this->orderRepository,
+            $this->productRepository,
+            $this->euroCurrency,
+            $this->orderDataWriter,
+            $this->productSettingsWriter,
+            $this->viewService,
+            $this->orderStatusService
+        ));
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {
             // The PDK has no setting for its cache directory, only this switch.
