@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Checkout\CartLoaderInterface;
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
@@ -16,6 +18,7 @@ use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
@@ -25,8 +28,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
  *
  * The mode follows kernel.debug, the same as the WooCommerce plugin follows
  * WP_DEBUG. Production mode compiles the container into the PDK cache
- * directory. The placeholders in Pdk/Placeholder keep that possible until the
- * adapter layer of epic INT-1748 lands.
+ * directory.
  *
  * When that directory is read-only, production mode runs without a compiled
  * container instead of failing on every boot.
@@ -36,6 +38,7 @@ final class PdkInitializer
     /**
      * @param  EntityRepository<OrderCollection>   $orderRepository
      * @param  EntityRepository<ProductCollection> $productRepository
+     * @param  EntityRepository<ShippingMethodCollection> $shippingMethodRepository
      */
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -49,6 +52,9 @@ final class PdkInitializer
         private readonly ProductSettingsWriter $productSettingsWriter,
         private readonly ViewServiceInterface $viewService,
         private readonly OrderStatusServiceInterface $orderStatusService,
+        private readonly EntityRepository $shippingMethodRepository,
+        private readonly SalesChannelContextHolder $contextHolder,
+        private readonly CartLoaderInterface $cartLoader,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -71,7 +77,10 @@ final class PdkInitializer
             $this->orderDataWriter,
             $this->productSettingsWriter,
             $this->viewService,
-            $this->orderStatusService
+            $this->orderStatusService,
+            $this->shippingMethodRepository,
+            $this->contextHolder,
+            $this->cartLoader
         ));
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

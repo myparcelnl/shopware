@@ -38,6 +38,8 @@ use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Tests\Support\FixedCartLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -110,6 +112,9 @@ function adminViewRenderer(): array
         new ProductSettingsWriter(FakeEntityRepository::with()),
         $viewService,
         new FixedOrderStatusService(),
+        FakeEntityRepository::with(),
+        new SalesChannelContextHolder(),
+        new FixedCartLoader(),
         '0.0.0-test',
         'https://shop.test',
         true

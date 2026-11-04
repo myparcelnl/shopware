@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
+use MyParcel\Shopware\Checkout\CartLoaderInterface;
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Account\Repository\PdkAccountRepository;
 use MyParcel\Shopware\Pdk\Api\BackendEndpointService;
 use MyParcel\Shopware\Pdk\Api\FrontendEndpointService;
 use MyParcel\Shopware\Pdk\Api\Guzzle7ClientAdapter;
 use MyParcel\Shopware\Pdk\Audit\Repository\NoopAuditRepository;
+use MyParcel\Shopware\Pdk\Cart\Repository\PdkCartRepository;
 use MyParcel\Shopware\Pdk\Cron\SynchronousCronService;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\FrontendRenderService;
@@ -18,13 +21,13 @@ use MyParcel\Shopware\Pdk\Logger\PdkLogger;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderRepository;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderCartRepository;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
-use MyParcel\Shopware\Pdk\Placeholder\PlaceholderShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Settings\Repository\PdkSettingsRepository;
+use MyParcel\Shopware\Pdk\ShippingMethod\Repository\PdkShippingMethodRepository;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
+use MyParcel\Shopware\Pdk\Tax\TaxService;
 use MyParcel\Shopware\Pdk\Webhook\Repository\PdkWebhooksRepository;
 use MyParcel\Shopware\Pdk\Webhook\Service\PdkWebhookService;
 use MyParcelNL\Pdk\Api\Contract\ClientAdapterInterface;
@@ -37,6 +40,7 @@ use MyParcelNL\Pdk\App\Order\Contract\PdkOrderNoteRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
+use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhookServiceInterface;
 use MyParcelNL\Pdk\App\Webhook\Contract\PdkWebhooksRepositoryInterface;
 use MyParcelNL\Pdk\Audit\Contract\PdkAuditRepositoryInterface;
@@ -50,6 +54,7 @@ use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Shopware\Core\Checkout\Order\OrderCollection;
+use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Product\ProductCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
@@ -77,7 +82,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
 
     /**
      * The same kind of seam as setLogger(), for the services behind the settings,
-     * account, language, webhook, endpoint, order and product contracts.
+     * account, language, webhook, endpoint, order, product, cart, shipping method
+     * and tax contracts.
      */
     public static function setServices(ShopwareServices $services): void
     {
@@ -137,6 +143,32 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     public static function getProductRepository(): EntityRepository
     {
         return self::getShopwareServices()->productRepository;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     *
+     * @return EntityRepository<ShippingMethodCollection>
+     */
+    public static function getShippingMethodRepository(): EntityRepository
+    {
+        return self::getShopwareServices()->shippingMethodRepository;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getContextHolder(): SalesChannelContextHolder
+    {
+        return self::getShopwareServices()->contextHolder;
+    }
+
+    /**
+     * @internal Only the PDK container calls this.
+     */
+    public static function getCartLoader(): CartLoaderInterface
+    {
+        return self::getShopwareServices()->cartLoader;
     }
 
     /**
@@ -216,11 +248,12 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // migrations in this directory run.
             'migrationDirectory'                        => \_MyParcel\DI\value(rtrim($path, '/') . '/src/Pdk/Migration'),
 
-            // Placeholders for the contracts that the adapter layer of epic
-            // INT-1748 adds. Production mode compiles the container, and php-di
-            // cannot compile an interface without a concrete class.
-            PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PlaceholderCartRepository::class),
-            PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PlaceholderShippingMethodRepository::class),
+            PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PdkCartRepository::class),
+            PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PdkShippingMethodRepository::class)
+                ->constructorParameter('shippingMethodRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getShippingMethodRepository'])),
+            TaxServiceInterface::class                  => \_MyParcel\DI\autowire(TaxService::class),
+            SalesChannelContextHolder::class            => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getContextHolder']),
+            CartLoaderInterface::class                  => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getCartLoader']),
 
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),

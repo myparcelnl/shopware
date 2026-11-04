@@ -84,10 +84,10 @@ spl_autoload_register(static function (string $class) use ($pdkTestsDir): void {
  * - Shopware\Core: the entities, the DAL classes and the state machine.
  * - Doctrine\DBAL: the Connection that OrderDataWriter and ProductCustomFieldSet take.
  * - Symfony\Component\VarExporter: EntityRepository uses its LazyGhostTrait.
+ * - Ramsey\Uuid and Brick\Math: Uuid::randomHex(), which a cart LineItem calls
+ *   in its constructor.
  * symfony/polyfill-php85 is loaded by hand: Shopware's code calls PHP 8.5
  * functions, and the development install does not have that polyfill.
- * ramsey/uuid is not mapped, so Uuid::randomHex() fails in a test: use
- * Entities::id().
  */
 $shopwareVendorDir = dirname(__DIR__) . '/.tmp/shopware/vendor';
 
@@ -103,6 +103,8 @@ spl_autoload_register(static function (string $class) use ($shopwareVendorDir): 
         'Shopware\\Core\\'                  => $shopwareVendorDir . '/shopware/core/',
         'Doctrine\\DBAL\\'                  => $shopwareVendorDir . '/doctrine/dbal/src/',
         'Symfony\\Component\\VarExporter\\' => $shopwareVendorDir . '/symfony/var-exporter/',
+        'Ramsey\\Uuid\\'                    => $shopwareVendorDir . '/ramsey/uuid/src/',
+        'Brick\\Math\\'                     => $shopwareVendorDir . '/brick/math/src/',
     ];
 
     foreach ($directories as $prefix => $directory) {
