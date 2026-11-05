@@ -4,13 +4,19 @@ import vue from '@vitejs/plugin-vue';
 
 const root = import.meta.dirname;
 
+// The Shopware admin build imports a .twig template as a string. The specs of the admin module need the same.
+const twigAsString = {
+  name: 'twig-as-string',
+  transform: (code: string, id: string) => (id.endsWith('.twig') ? `export default ${JSON.stringify(code)};` : undefined),
+};
+
 /**
  * The PDK admin app as one IIFE with its own Vue. The Shopware admin build
  * replaces "vue" with the Shopware Vue, so the app cannot be part of it.
  */
 export default defineConfig({
   root,
-  plugins: [vue()],
+  plugins: [vue(), twigAsString],
   css: {postcss: resolve(root, 'postcss.config.cjs')},
   define: {
     // Lib mode does not replace this, and Vue and js-pdk read it.
