@@ -36,7 +36,7 @@ export function createOrderListController({root, getCells, isActive, onNotificat
          * Loads the PDK order list view for the orders and puts each item in its cell.
          * It loads also when no cell is shown, because the bulk actions need the session.
          * Call it after every change of the orders or of the cells in the grid.
-         * A response that is no longer the latest is thrown away.
+         * A response or a failure that is no longer the latest is thrown away.
          *
          * @param {string[]} orderIds
          */
@@ -56,7 +56,20 @@ export function createOrderListController({root, getCells, isActive, onNotificat
             root.appendChild(element);
             loadRoot = element;
 
-            const result = await openSession('orderList', {orderIds}, element, isCurrent, {onNotification});
+            let result;
+
+            try {
+                result = await openSession('orderList', {orderIds}, element, isCurrent, {onNotification});
+            } catch (error) {
+                // A newer load replaced this one: its failure must not clear the newer bulk actions.
+                if (!isCurrent()) {
+                    element.remove();
+
+                    return;
+                }
+
+                throw error;
+            }
 
             if (!isCurrent()) {
                 result.session?.unmount();
@@ -80,9 +93,20 @@ export function createOrderListController({root, getCells, isActive, onNotificat
             }
 
             // The PDK renders each element by its own data-pdk-component and id, so pass the components.
-            const stop = await session.render(
-                cells.flatMap((cell) => Array.from(cell.querySelectorAll('[data-pdk-component]'))),
-            );
+            let stop;
+
+            try {
+                stop = await session.render(
+                    cells.flatMap((cell) => Array.from(cell.querySelectorAll('[data-pdk-component]'))),
+                );
+            } catch (error) {
+                // The newer load already closed this session and removed its element.
+                if (!isCurrent()) {
+                    return;
+                }
+
+                throw error;
+            }
 
             if (isCurrent()) {
                 stopRender = stop;
