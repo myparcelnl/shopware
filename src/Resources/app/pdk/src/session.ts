@@ -172,7 +172,15 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
         return;
       }
 
-      await useActionStore().dispatch(adminAction, {orderIds});
+      const actionStore = useActionStore();
+
+      // The PDK registers the order actions in OrderListItem and OrderBox. With
+      // the MyParcel column hidden, neither renders.
+      if (!actionStore.get(adminAction)) {
+        actionStore.registerOrderActions();
+      }
+
+      await actionStore.dispatch(adminAction, {orderIds});
     },
 
     unmount: stopAll,
