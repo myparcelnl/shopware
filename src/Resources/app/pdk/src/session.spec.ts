@@ -49,14 +49,16 @@ const setup = () => {
   });
   const dispose = vi.fn();
   const dispatch = vi.fn();
+  const get = vi.fn<(action: string) => unknown>(() => ({id: 'registered'}));
+  const registerOrderActions = vi.fn();
   const remove = vi.fn();
   const store = reactive({notifications: [] as Record<string, unknown>[], remove});
 
   vi.mocked(createPdkAdmin).mockReturnValue({render, dispose} as never);
-  vi.mocked(useActionStore).mockReturnValue({dispatch} as never);
+  vi.mocked(useActionStore).mockReturnValue({dispatch, get, registerOrderActions} as never);
   vi.mocked(useNotificationStore).mockReturnValue(store as never);
 
-  return {apps, render, dispose, dispatch, remove, store};
+  return {apps, render, dispose, dispatch, get, registerOrderActions, remove, store};
 };
 
 const options = {getRequestHeaders: () => ({})};
@@ -106,6 +108,26 @@ describe('createSession', () => {
     await session.dispatchBulkAction('action_export', ['a', 'b']);
 
     expect(dispatch).toHaveBeenCalledWith('ordersExport', {orderIds: ['a', 'b']});
+  });
+
+  it('registers the order actions first when no order component did', async () => {
+    const {dispatch, get, registerOrderActions} = setup();
+    const session = await createSession(createRoot(), options);
+
+    get.mockReturnValue(undefined);
+    await session.dispatchBulkAction('action_export', ['a']);
+
+    expect(registerOrderActions).toHaveBeenCalledOnce();
+    expect(registerOrderActions.mock.invocationCallOrder[0]).toBeLessThan(dispatch.mock.invocationCallOrder[0]);
+  });
+
+  it('does not register the order actions twice', async () => {
+    const {registerOrderActions} = setup();
+    const session = await createSession(createRoot(), options);
+
+    await session.dispatchBulkAction('action_export', ['a']);
+
+    expect(registerOrderActions).not.toHaveBeenCalled();
   });
 
   it('does not dispatch without order ids', async () => {
