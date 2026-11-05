@@ -2,8 +2,8 @@
     "myparcel-product": {
         "detail": {
             "tab": "MyParcel",
-            "saveHint": "MyParcel saves these settings directly. You do not need the Shopware Save button for them.",
-            "loadError": "Could not load the MyParcel data of this product."
+            "loadError": "Could not load the MyParcel data of this product.",
+            "saveError": "Could not save the MyParcel settings of this product."
         }
     }
 }

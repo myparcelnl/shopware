@@ -1,10 +1,11 @@
-import {type App, watch, type WatchStopHandle} from 'vue';
+import {type App, toRaw, watch, type WatchStopHandle} from 'vue';
 import {
   AdminAction,
   type AdminView,
   createPdkAdmin,
   NotificationCategory,
   useActionStore,
+  useFormBuilder,
   useNotificationStore,
 } from '@myparcel-dev/pdk-admin';
 import {createConfig} from './config';
@@ -48,6 +49,14 @@ export interface PdkSession {
    * Runs a bulk action of the PDK for the given orders. Does nothing without order ids.
    */
   dispatchBulkAction(action: BulkAction, orderIds: string[]): Promise<void>;
+
+  /**
+   * Get the values of the PDK forms that have changes, in one object, for
+   * example the product settings when the merchant saves the product page.
+   *
+   * @returns null without changes; rejects when a changed form is not valid
+   */
+  getChangedFormValues(): Promise<Record<string, unknown> | null>;
 
   /**
    * Unmounts every rendered app, stops the notification forwarding and stops the PDK admin.
@@ -181,6 +190,26 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
       }
 
       await actionStore.dispatch(adminAction, {orderIds});
+    },
+
+    async getChangedFormValues() {
+      // The forms registry is reactive and unwraps the refs of a form, which its own
+      // methods then fail to write. So use the form itself.
+      const dirtyForms = Object.values(useFormBuilder().forms.value)
+        .map((form) => toRaw(form))
+        .filter((form) => form.isDirty.value);
+
+      if (!dirtyForms.length) {
+        return null;
+      }
+
+      const validity = await Promise.all(dirtyForms.map((form) => form.validate()));
+
+      if (validity.includes(false)) {
+        throw new Error('The MyParcel settings are not valid.');
+      }
+
+      return Object.assign({}, ...dirtyForms.map((form) => form.getValues()));
     },
 
     unmount: stopAll,

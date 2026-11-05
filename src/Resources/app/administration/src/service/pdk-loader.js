@@ -54,6 +54,26 @@ export function getRequestHeaders() {
 }
 
 /**
+ * Saves the MyParcel settings of a product with the PDK action
+ * updateProductSettings. Use it when the merchant saves the product page.
+ *
+ * @param {string} productId
+ * @param {object} settings the product settings, keyed as the PDK ProductSettings
+ */
+export async function saveProductSettings(productId, settings) {
+    // The PDK admin app cannot call this action. Its mutation sends the product id
+    // under "params", which the SDK ignores, and as productIds, where the action reads
+    // productId. It also puts the values under the form name, where the action reads
+    // them directly. So the admin module calls the action itself.
+    const httpClient = Shopware.Application.getContainer('init').httpClient;
+
+    await httpClient.put('_action/myparcel/pdk', {data: {product_settings: settings}}, {
+        params: {action: 'updateProductSettings', productId},
+        headers: {...getRequestHeaders(), Accept: 'application/json'},
+    });
+}
+
+/**
  * Fetches a PDK view with its context from the plugin's view route and loads
  * its scripts and styles. Use it when you need the view data without a root
  * element yet.
