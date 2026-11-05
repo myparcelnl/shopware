@@ -158,6 +158,49 @@ describe('order-list-controller', () => {
         expect(stop).toHaveBeenCalled();
     });
 
+    it('ignores a failed load that a newer refresh replaced, and removes its element', async () => {
+        const fresh = makeSession();
+        const bulkActions = [{action: 'action_export', label: 'Export'}];
+        let rejectStale;
+        openSession
+            .mockImplementationOnce(() => new Promise((resolve, reject) => { rejectStale = reject; }))
+            .mockResolvedValueOnce({session: fresh, data: makeData({aa: item('fresh')}, bulkActions)});
+        const controller = create();
+
+        const stale = controller.refresh(['aa']);
+        await controller.refresh(['aa']);
+        const [staleElement] = openSession.mock.calls.map((call) => call[2]);
+        rejectStale(new Error('network'));
+
+        await expect(stale).resolves.toBeUndefined();
+        expect(staleElement.isConnected).toBe(false);
+        expect(controller.bulkActions).toEqual(bulkActions);
+        expect(cells[0].innerHTML).toBe(item('fresh'));
+    });
+
+    it('ignores a failed render that a newer refresh replaced', async () => {
+        const slow = makeSession();
+        let rejectRender;
+        slow.render.mockImplementation(() => new Promise((resolve, reject) => { rejectRender = reject; }));
+        openSession
+            .mockResolvedValueOnce({session: slow, data: makeData({aa: item(1)})})
+            .mockResolvedValueOnce({session: makeSession(), data: makeData({aa: item(2)})});
+        const controller = create();
+
+        const first = controller.refresh(['aa']);
+        await vi.waitFor(() => expect(slow.render).toHaveBeenCalled());
+        await controller.refresh(['aa']);
+        rejectRender(new Error('render'));
+
+        await expect(first).resolves.toBeUndefined();
+    });
+
+    it('still rejects when the current load fails', async () => {
+        openSession.mockRejectedValue(new Error('network'));
+
+        await expect(create().refresh(['aa'])).rejects.toThrow('network');
+    });
+
     it('dispatches the bulk action through the session', async () => {
         const session = makeSession();
         const bulkActions = [{action: 'action_export', label: 'Export'}];
