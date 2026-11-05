@@ -1,11 +1,12 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {nextTick, reactive} from 'vue';
-import {createPdkAdmin, useActionStore, useNotificationStore} from '@myparcel-dev/pdk-admin';
+import {nextTick, reactive, ref} from 'vue';
+import {createPdkAdmin, useActionStore, useFormBuilder, useNotificationStore} from '@myparcel-dev/pdk-admin';
 import {createSession} from './session';
 
 vi.mock('@myparcel-dev/pdk-admin', () => ({
   createPdkAdmin: vi.fn(),
   useActionStore: vi.fn(),
+  useFormBuilder: vi.fn(),
   useNotificationStore: vi.fn(),
   AdminAction: {
     OrdersEdit: 'ordersEdit',
@@ -128,6 +129,60 @@ describe('createSession', () => {
     await session.dispatchBulkAction('action_export', ['a']);
 
     expect(registerOrderActions).not.toHaveBeenCalled();
+  });
+
+  // Like a vue-form-builder form: its methods write to its own refs.
+  class FakeForm {
+    public readonly isDirty;
+
+    public readonly isValid = ref(false);
+
+    public readonly validate = vi.fn(async function (this: FakeForm) {
+      this.isValid.value = this.valid;
+
+      return this.valid;
+    });
+
+    public constructor(
+      isDirty: boolean,
+      private readonly values: Record<string, unknown> = {},
+      private readonly valid = true,
+    ) {
+      this.isDirty = ref(isDirty);
+    }
+
+    public getValues() {
+      return this.values;
+    }
+  }
+
+  const sessionWithForms = async (forms: Record<string, FakeForm>) => {
+    setup();
+    vi.mocked(useFormBuilder).mockReturnValue({forms: ref(forms)} as never);
+
+    return createSession(createRoot(), options);
+  };
+
+  it('returns the values of the forms that have changes', async () => {
+    const changed = new FakeForm(true, {fitInMailbox: 2});
+    const unchanged = new FakeForm(false, {packageType: 'package'});
+    const session = await sessionWithForms({changed, unchanged});
+
+    await expect(session.getChangedFormValues()).resolves.toEqual({fitInMailbox: 2});
+    expect(changed.isValid.value).toBe(true);
+    expect(unchanged.validate).not.toHaveBeenCalled();
+  });
+
+  it('returns null without changes', async () => {
+    const session = await sessionWithForms({unchanged: new FakeForm(false)});
+
+    await expect(session.getChangedFormValues()).resolves.toBeNull();
+  });
+
+  it('rejects when a changed form is not valid', async () => {
+    const session = await sessionWithForms({invalid: new FakeForm(true, {}, false)});
+
+    await expect(session.getChangedFormValues()).rejects.toThrow('not valid');
   });
 
   it('does not dispatch without order ids', async () => {

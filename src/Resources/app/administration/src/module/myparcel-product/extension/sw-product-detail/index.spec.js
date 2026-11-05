@@ -3,23 +3,40 @@ import {beforeAll, describe, expect, it, vi} from 'vitest';
 const override = vi.fn();
 
 describe('sw-product-detail override', () => {
-    let saveProduct;
+    let component;
 
     beforeAll(async () => {
         globalThis.Shopware = {Component: {override}};
         await import('./index');
-        saveProduct = override.mock.calls[0][1].methods.saveProduct;
+        [[, component]] = override.mock.calls;
     });
 
-    const createPage = (customFields) => {
+    const createPage = (customFields, settings = {submit: vi.fn(() => Promise.resolve())}) => {
         const origin = {customFields: customFields && {...customFields}};
 
         return {
             product: {customFields, getOrigin: () => origin},
             origin,
-            $super: vi.fn(() => Promise.resolve()),
+            $refs: {myparcelProductSettings: settings},
+            $tc: (key) => key,
+            createNotificationError: vi.fn(),
+            $super: vi.fn(() => Promise.resolve('saved')),
         };
     };
+
+    const saveProduct = (page) => component.methods.saveProduct.call(page);
+
+    it('submits the MyParcel settings before the product save', async () => {
+        const page = createPage({});
+
+        await expect(saveProduct(page)).resolves.toBe('saved');
+
+        const [submitOrder] = page.$refs.myparcelProductSettings.submit.mock.invocationCallOrder;
+        const [saveOrder] = page.$super.mock.invocationCallOrder;
+
+        expect(submitOrder).toBeLessThan(saveOrder);
+        expect(page.$super).toHaveBeenCalledWith('saveProduct');
+    });
 
     it('removes the MyParcel custom fields from the draft and the origin before the save', async () => {
         const page = createPage({myparcel_fit_in_mailbox: 2, myparcel_country_of_origin: 'NL', other_field: 'kept'});
@@ -31,15 +48,35 @@ describe('sw-product-detail override', () => {
             return Promise.resolve('saved');
         });
 
-        await expect(saveProduct.call(page)).resolves.toBe('saved');
-        expect(page.$super).toHaveBeenCalledWith('saveProduct');
+        await expect(saveProduct(page)).resolves.toBe('saved');
     });
 
-    it('saves a product without custom fields', async () => {
+    it('shows an error and still saves the product when the MyParcel save fails', async () => {
+        const page = createPage({}, {submit: vi.fn(() => Promise.reject(new Error('pdk')))});
+
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await expect(saveProduct(page)).resolves.toBe('saved');
+        expect(page.createNotificationError).toHaveBeenCalledWith({message: 'myparcel-product.detail.saveError'});
+    });
+
+    it('saves a product when the MyParcel tab was not opened', async () => {
         const page = createPage(null);
 
-        await saveProduct.call(page);
+        page.$refs = {};
 
-        expect(page.$super).toHaveBeenCalledWith('saveProduct');
+        await expect(saveProduct(page)).resolves.toBe('saved');
+    });
+
+    it('opens the MyParcel settings on the first visit of the tab and keeps them', () => {
+        const page = {myparcelSettingsOpened: false};
+        const {handler} = component.watch['$route.name'];
+
+        handler.call(page, 'sw.product.detail.base');
+        expect(page.myparcelSettingsOpened).toBe(false);
+
+        handler.call(page, 'sw.product.detail.myparcel');
+        handler.call(page, 'sw.product.detail.base');
+        expect(page.myparcelSettingsOpened).toBe(true);
     });
 });

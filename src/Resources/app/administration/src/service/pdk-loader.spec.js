@@ -1,6 +1,7 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 const get = vi.fn();
+const put = vi.fn();
 const mountPdk = vi.fn();
 let token = 'one';
 
@@ -18,11 +19,12 @@ describe('pdk-loader', () => {
     beforeEach(() => {
         vi.resetModules();
         get.mockReset();
+        put.mockReset();
         mountPdk.mockReset();
         token = 'one';
 
         globalThis.Shopware = {
-            Application: {getContainer: () => ({httpClient: {get}})},
+            Application: {getContainer: () => ({httpClient: {get, put}})},
             Service: () => ({getToken: () => token}),
             Context: {api: {languageId: 'language-id'}},
         };
@@ -38,6 +40,22 @@ describe('pdk-loader', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+    });
+
+    it('saves product settings with the pdk action', async () => {
+        put.mockResolvedValue({data: {}});
+        const {saveProductSettings} = await loadModule();
+
+        await saveProductSettings('product-id', {fitInMailbox: 2});
+
+        expect(put).toHaveBeenCalledWith(
+            '_action/myparcel/pdk',
+            {data: {product_settings: {fitInMailbox: 2}}},
+            expect.objectContaining({
+                params: {action: 'updateProductSettings', productId: 'product-id'},
+                headers: expect.objectContaining({Authorization: 'Bearer one'}),
+            }),
+        );
     });
 
     it('inserts the view html and mounts the pdk app', async () => {

@@ -1,7 +1,8 @@
-import template from './myparcel-product-detail-tab.html.twig';
-import {openSession, notifyShopware} from '../../../../service/pdk-loader';
+import template from './myparcel-product-settings.html.twig';
+import {openSession, notifyShopware, saveProductSettings} from '../../../../service/pdk-loader';
 
-// The MyParcel tab of the product detail page. It shows the PDK product box of the open product.
+// The PDK product settings of the open product. The product detail page keeps this component
+// while the merchant switches tabs, so the changes stay until the Shopware Save submits them.
 export default {
     template,
 
@@ -63,6 +64,18 @@ export default {
     },
 
     methods: {
+        /**
+         * Saves the changed PDK product settings. The product detail page calls it on Save.
+         * Does nothing without changes.
+         */
+        async submit() {
+            const settings = await this.session?.getChangedFormValues();
+
+            if (settings) {
+                await saveProductSettings(this.$route.params.id.toLowerCase(), settings);
+            }
+        },
+
         /**
          * Closes the open PDK session and removes the element of that load.
          */

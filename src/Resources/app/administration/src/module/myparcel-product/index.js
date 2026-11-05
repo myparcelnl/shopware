@@ -1,6 +1,12 @@
 import './extension/sw-product-detail';
 
-Shopware.Component.register('myparcel-product-detail-tab', () => import('./view/myparcel-product-detail-tab'));
+Shopware.Component.register('myparcel-product-settings', () => import('./component/myparcel-product-settings'));
+
+// The route of the MyParcel tab needs a component. The settings themselves are on the
+// product detail page, so they stay while the merchant opens another tab.
+Shopware.Component.register('myparcel-product-detail-tab', {
+    template: '<div class="myparcel-product-detail-tab"></div>',
+});
 
 // The module only adds a child route to the product detail page. It has no routes of its own.
 Shopware.Module.register('myparcel-product', {

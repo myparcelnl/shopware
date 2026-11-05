@@ -1,0 +1,11 @@
+{% block myparcel_product_settings %}
+<div class="myparcel-product-settings">
+    {% block myparcel_product_settings_content %}
+    <sw-loader v-if="isLoading" />
+    <div
+        ref="pdkRoot"
+        class="myparcel-pdk"
+    ></div>
+    {% endblock %}
+</div>
+{% endblock %}

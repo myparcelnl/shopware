@@ -229,9 +229,7 @@ The order detail and the product tab each open one PDK session
 (`src/Resources/app/pdk/src/session.ts`). The order list opens a new session for
 each load of the list: a new page, sort, filter or column change. They show the
 PDK action and API notifications as Shopware toasts. The settings page shows them
-in the PDK. The product tab shows a banner: the PDK saves product settings
-directly, not with the Shopware save button. Rebuild a bundle after you change
-its source.
+in the PDK. Rebuild a bundle after you change its source.
 
 Build the PDK admin app, and run the tests of both bundles, in the web container:
 
@@ -308,7 +306,10 @@ its fields from every product.
 The set has no relation to the product entity, so the fields do not show in the
 "Custom fields" card of the product page.
 The "MyParcel" tab of the product page shows these settings, with its own
-settings for each variant.
+settings for each variant. The settings stay on the page while the merchant opens
+another tab. The Shopware Save submits the changed settings to the PDK first, then
+saves the product without the `myparcel_*` fields, so it cannot write old values
+back.
 
 ## Routes
 

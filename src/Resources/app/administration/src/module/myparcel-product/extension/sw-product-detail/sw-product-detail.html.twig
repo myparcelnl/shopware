@@ -10,3 +10,13 @@
         {{ $tc('myparcel-product.detail.tab') }}
     </sw-tabs-item>
 {% endblock %}
+
+{% block sw_product_detail_content_view %}
+    {% parent %}
+
+    <myparcel-product-settings
+        v-if="myparcelSettingsOpened"
+        v-show="$route.name === 'sw.product.detail.myparcel'"
+        ref="myparcelProductSettings"
+    />
+{% endblock %}
