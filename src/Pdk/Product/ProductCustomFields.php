@@ -141,9 +141,9 @@ final class ProductCustomFields
      * the "Custom fields" card of the product page. That is all the missing relation
      * does. The product page still loads every custom field of the product, and
      * when any custom field changes, the admin sends the whole customFields object
-     * on save, with the MyParcel values in it. So a save of the product page can
-     * write old MyParcel values back; INT-1960 decides how the MyParcel tab
-     * prevents that. Shopware stores and types the values without the relation,
+     * on save, with the MyParcel values in it. The sw-product-detail override
+     * removes the MyParcel values before that save, so the page cannot write old
+     * values back. Shopware stores and types the values without the relation,
      * because it reads the type of a custom field from its name.
      *
      * @return array{name: string, active: bool, config: array<string, mixed>, customFields: list<array{name: string, type: string, config: array<string, mixed>}>}
