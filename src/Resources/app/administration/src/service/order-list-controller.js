@@ -52,10 +52,10 @@ export function createOrderListController({root, getCells, isActive, onNotificat
             const cells = getCells();
 
             cells.forEach((cell) => {
-                cell.innerHTML = data.items?.[cell.dataset.myparcelOrderId] ?? '';
+                cell.innerHTML = data.items[cell.dataset.myparcelOrderId] ?? '';
             });
 
-            bulkActions = data.bulkActions ?? [];
+            bulkActions = data.bulkActions;
 
             // Without cells (column hidden) only the session and the bulk actions are needed.
             if (cells.length === 0) {

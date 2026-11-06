@@ -90,8 +90,8 @@ export async function fetchView(view, params = {}) {
     });
 
     await Promise.all([
-        ...(data.styles ?? []).map((url) => loadOnce(url, createStylesheet)),
-        ...(data.scripts ?? []).map((url) => loadOnce(url, createScript)),
+        ...data.styles.map((url) => loadOnce(url, createStylesheet)),
+        ...data.scripts.map((url) => loadOnce(url, createScript)),
     ]);
 
     return data;
