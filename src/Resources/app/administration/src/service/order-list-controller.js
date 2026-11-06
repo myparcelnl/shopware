@@ -1,4 +1,4 @@
-import {openSession} from './pdk-loader';
+import {createSessionLoader} from './session-loader';
 
 /**
  * Creates the controller of the MyParcel column in the order list. It is a
@@ -13,22 +13,17 @@ import {openSession} from './pdk-loader';
  * @returns {{refresh: Function, dispatch: Function, bulkActions: object[], destroy: Function}}
  */
 export function createOrderListController({root, getCells, isActive, onNotification}) {
-    let requestId = 0;
-    let session = null;
+    const loader = createSessionLoader({root, isActive, onNotification});
     let stopRender = null;
-    let loadRoot = null;
     let bulkActions = [];
 
     /**
-     * Stops the rendered cells and the session, and removes the element of that load.
+     * Stops the rendered cells and closes the session of the last load.
      */
     function close() {
         stopRender?.();
         stopRender = null;
-        session?.unmount();
-        session = null;
-        loadRoot?.remove();
-        loadRoot = null;
+        loader.close();
     }
 
     return {
@@ -41,51 +36,26 @@ export function createOrderListController({root, getCells, isActive, onNotificat
          * @param {string[]} orderIds
          */
         async refresh(orderIds) {
-            const currentRequest = ++requestId;
-            const isCurrent = () => isActive() && currentRequest === requestId;
-
             close();
 
             if (orderIds.length === 0) {
                 return;
             }
 
-            // A fresh element for this load only. A superseded load cleans up its own element.
-            const element = document.createElement('div');
+            const result = await loader.load('orderList', {orderIds});
 
-            root.appendChild(element);
-            loadRoot = element;
-
-            let result;
-
-            try {
-                result = await openSession('orderList', {orderIds}, element, isCurrent, {onNotification});
-            } catch (error) {
-                // A newer load replaced this one: its failure must not clear the newer bulk actions.
-                if (!isCurrent()) {
-                    element.remove();
-
-                    return;
-                }
-
-                throw error;
-            }
-
-            if (!isCurrent()) {
-                result.session?.unmount();
-                element.remove();
-
+            if (!result) {
                 return;
             }
 
+            const {session, data, isCurrent} = result;
             const cells = getCells();
 
             cells.forEach((cell) => {
-                cell.innerHTML = result.data.items?.[cell.dataset.myparcelOrderId] ?? '';
+                cell.innerHTML = data.items?.[cell.dataset.myparcelOrderId] ?? '';
             });
 
-            session = result.session;
-            bulkActions = result.data.bulkActions ?? [];
+            bulkActions = data.bulkActions ?? [];
 
             // Without cells (column hidden) only the session and the bulk actions are needed.
             if (cells.length === 0) {
@@ -122,11 +92,11 @@ export function createOrderListController({root, getCells, isActive, onNotificat
          * @param {string[]} orderIds
          */
         async dispatch(action, orderIds) {
-            if (!session) {
+            if (!loader.session) {
                 throw new Error('The MyParcel order list is not loaded.');
             }
 
-            await session.dispatchBulkAction(action, orderIds);
+            await loader.session.dispatchBulkAction(action, orderIds);
         },
 
         /**
@@ -140,7 +110,6 @@ export function createOrderListController({root, getCells, isActive, onNotificat
          * Closes everything. Call it when the page closes.
          */
         destroy() {
-            requestId++;
             close();
         },
     };
