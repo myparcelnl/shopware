@@ -1,5 +1,6 @@
 import template from './myparcel-product-settings.html.twig';
-import {openSession, notifyShopware, saveProductSettings} from '../../../../service/pdk-loader';
+import {notifyShopware, saveProductSettings} from '../../../../service/pdk-loader';
+import {createSessionLoader} from '../../../../service/session-loader';
 
 // The PDK product settings of the open product. The product detail page keeps this component
 // while the merchant switches tabs, so the changes stay until the Shopware Save submits them.
@@ -14,11 +15,7 @@ export default {
         return {
             isLoading: true,
             isActive: true,
-            session: null,
-            // The element of the current load. Each load gets its own, so a late load cannot wipe a newer one.
-            loadRoot: null,
-            // Counts the loads, so a slow load of an earlier product does not replace a later one.
-            loadId: 0,
+            loader: null,
         };
     },
 
@@ -45,7 +42,7 @@ export default {
 
             // The core awaits initProductMeasurementUnits() before it sets isLoading, so the page is
             // not loading yet and this load can start early, for the old product data. The isLoading
-            // watcher loads again when the page finishes, and the loadId check discards this early load.
+            // watcher loads again when the page finishes, and the loader discards this early load.
             if (!this.isProductLoading) {
                 this.load();
             }
@@ -53,6 +50,12 @@ export default {
     },
 
     mounted() {
+        this.loader = createSessionLoader({
+            root: this.$refs.pdkRoot,
+            isActive: () => this.isActive,
+            onNotification: notifyShopware(this),
+        });
+
         if (!this.isProductLoading) {
             this.load();
         }
@@ -60,7 +63,7 @@ export default {
 
     beforeUnmount() {
         this.isActive = false;
-        this.closeSession();
+        this.loader?.close();
     },
 
     methods: {
@@ -69,7 +72,7 @@ export default {
          * Does nothing without changes.
          */
         async submit() {
-            const settings = await this.session?.getChangedFormValues();
+            const settings = await this.loader?.session?.getChangedFormValues();
 
             if (settings) {
                 await saveProductSettings(this.$route.params.id.toLowerCase(), settings);
@@ -77,60 +80,29 @@ export default {
         },
 
         /**
-         * Closes the open PDK session and removes the element of that load.
-         */
-        closeSession() {
-            this.session?.unmount();
-            this.session = null;
-            this.loadRoot?.remove();
-            this.loadRoot = null;
-        },
-
-        /**
-         * Closes the current session and opens a PDK session for the product of the route.
+         * Opens a PDK session for the product of the route, in place of the one before.
          * Shows a notification when the product box cannot load.
          */
         async load() {
-            const loadId = ++this.loadId;
-            const isCurrent = () => this.isActive && loadId === this.loadId;
+            if (!this.loader) {
+                return;
+            }
 
             this.isLoading = true;
-            this.closeSession();
-
-            // A fresh element for this load only. A superseded load cleans up its own element.
-            const root = document.createElement('div');
-
-            this.$refs.pdkRoot.appendChild(root);
-            this.loadRoot = root;
 
             try {
-                const {session} = await openSession(
-                    'product',
-                    {productId: this.$route.params.id.toLowerCase()},
-                    root,
-                    isCurrent,
-                    {onNotification: notifyShopware(this)},
-                );
-
-                // The tab can close, or another product can open, while the view loads.
-                if (isCurrent()) {
-                    this.session = session;
-                } else {
-                    session?.unmount();
+                // null: a newer load or the end of the page replaced this one, and it owns isLoading.
+                if (!(await this.loader.load('product', {productId: this.$route.params.id.toLowerCase()}))) {
+                    return;
                 }
             } catch (error) {
                 console.error(error);
-
-                if (isCurrent()) {
-                    this.createNotificationError({
-                        message: this.$tc('myparcel-product.detail.loadError'),
-                    });
-                }
-            } finally {
-                if (loadId === this.loadId) {
-                    this.isLoading = false;
-                }
+                this.createNotificationError({
+                    message: this.$tc('myparcel-product.detail.loadError'),
+                });
             }
+
+            this.isLoading = false;
         },
     },
 };
