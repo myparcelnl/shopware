@@ -15,15 +15,14 @@
 {% block sw_order_list_bulk_selected_actions_content_bulk_edit %}
     {% parent %}
 
-    <a
+    <!-- A command, so a button. It looks like the "Bulk edit" link of the core next to it. -->
+    <button
         v-for="bulkAction in myparcelBulkActions"
         :key="bulkAction.action"
-        class="link link-primary"
-        role="link"
-        tabindex="0"
+        class="link link-primary myparcel-bulk-action"
+        type="button"
         @click="onMyparcelBulkAction(bulkAction.action)"
-        @keydown.enter="onMyparcelBulkAction(bulkAction.action)"
     >
         {{ bulkAction.label }}
-    </a>
+    </button>
 {% endblock %}
