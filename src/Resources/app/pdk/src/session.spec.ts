@@ -85,6 +85,51 @@ describe('createSession', () => {
     expect(createPdkAdmin).toHaveBeenCalledOnce();
   });
 
+  it('starts the pdk admin with the request headers of the caller', async () => {
+    setup();
+    const getRequestHeaders = () => ({Authorization: 'Bearer x'});
+
+    await createSession(createRoot(), {getRequestHeaders});
+
+    expect(createPdkAdmin).toHaveBeenCalledWith({getRequestHeaders});
+  });
+
+  it('unmounts what did render and stops the pdk admin when one render fails', async () => {
+    const {render, dispose, apps} = setup();
+    const error = new Error('render failed');
+    const root = createRoot();
+
+    root.insertAdjacentHTML('beforeend', '<div data-pdk-component="PluginSettings" id="pdk-plugin-settings-2"></div>');
+    render.mockImplementationOnce(() => {
+      const app = {unmount: vi.fn()};
+
+      apps.push(app);
+
+      return Promise.resolve(app);
+    });
+    render.mockRejectedValueOnce(error);
+
+    await expect(createSession(root, options)).rejects.toBe(error);
+    expect(apps[0].unmount).toHaveBeenCalledOnce();
+    expect(dispose).toHaveBeenCalledOnce();
+  });
+
+  it('skips an app that did not mount', async () => {
+    const {render} = setup();
+
+    render.mockResolvedValue(undefined);
+    const session = await createSession(createRoot(), options);
+
+    expect(() => session.unmount()).not.toThrow();
+  });
+
+  it('fails when the pdk admin does not start', async () => {
+    setup();
+    vi.mocked(createPdkAdmin).mockReturnValue(undefined as never);
+
+    await expect(createSession(createRoot(), options)).rejects.toThrow('did not start');
+  });
+
   it('unmounts rendered elements without stopping the session', async () => {
     const {apps, dispose} = setup();
     const session = await createSession(createRoot(), options);

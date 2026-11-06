@@ -2,7 +2,6 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 const get = vi.fn();
 const put = vi.fn();
-const mountPdk = vi.fn();
 let token = 'one';
 
 const response = {
@@ -20,7 +19,6 @@ describe('pdk-loader', () => {
         vi.resetModules();
         get.mockReset();
         put.mockReset();
-        mountPdk.mockReset();
         token = 'one';
 
         globalThis.Shopware = {
@@ -28,7 +26,7 @@ describe('pdk-loader', () => {
             Service: () => ({getToken: () => token}),
             Context: {api: {languageId: 'language-id'}},
         };
-        window.MyParcelShopwarePdk = {mount: mountPdk};
+        window.MyParcelShopwarePdk = {};
 
         // happy-dom does not fetch scripts; report every asset as loaded.
         vi.spyOn(document.head, 'appendChild').mockImplementation((element) => {
@@ -58,41 +56,16 @@ describe('pdk-loader', () => {
         );
     });
 
-    it('inserts the view html and mounts the pdk app', async () => {
-        const unmount = vi.fn();
-        get.mockResolvedValue(response);
-        mountPdk.mockResolvedValue(unmount);
-        const {mountView} = await loadModule();
-        const root = document.createElement('div');
-
-        expect(await mountView('pluginSettings', root, () => true)).toBe(unmount);
-        expect(root.innerHTML).toBe(response.data.html);
-        expect(get).toHaveBeenCalledWith('_action/myparcel/view', expect.objectContaining({params: {view: 'pluginSettings'}}));
-        expect(mountPdk).toHaveBeenCalledWith(root, expect.objectContaining({getRequestHeaders: expect.any(Function)}));
-    });
-
     it('loads each asset only once, also on a second visit', async () => {
         get.mockResolvedValue(response);
-        mountPdk.mockResolvedValue(() => {});
-        const {mountView} = await loadModule();
+        window.MyParcelShopwarePdk = {createSession: vi.fn().mockResolvedValue({unmount: vi.fn()})};
+        const {openSession} = await loadModule();
 
-        await mountView('pluginSettings', document.createElement('div'), () => true);
-        await mountView('pluginSettings', document.createElement('div'), () => true);
+        await openSession('pluginSettings', {}, document.createElement('div'), () => true);
+        await openSession('pluginSettings', {}, document.createElement('div'), () => true);
 
         expect(document.head.appendChild).toHaveBeenCalledTimes(2);
-        expect(mountPdk).toHaveBeenCalledTimes(2);
-    });
-
-    it('does not mount when the page closed while loading', async () => {
-        get.mockResolvedValue(response);
-        const {mountView} = await loadModule();
-        const root = document.createElement('div');
-
-        const unmount = await mountView('pluginSettings', root, () => false);
-
-        expect(mountPdk).not.toHaveBeenCalled();
-        expect(root.innerHTML).toBe('');
-        expect(() => unmount()).not.toThrow();
+        expect(window.MyParcelShopwarePdk.createSession).toHaveBeenCalledTimes(2);
     });
 
     it('reads the token again for every request', async () => {
@@ -123,7 +96,7 @@ describe('pdk-loader', () => {
         const createSession = vi.fn().mockResolvedValue(session);
         const onNotification = vi.fn();
         get.mockResolvedValue(response);
-        window.MyParcelShopwarePdk = {mount: mountPdk, createSession};
+        window.MyParcelShopwarePdk = {createSession};
         const {openSession} = await loadModule();
         const root = document.createElement('div');
 
@@ -140,7 +113,7 @@ describe('pdk-loader', () => {
     it('does not open a session when the page closed', async () => {
         const createSession = vi.fn();
         get.mockResolvedValue(response);
-        window.MyParcelShopwarePdk = {mount: mountPdk, createSession};
+        window.MyParcelShopwarePdk = {createSession};
         const {openSession} = await loadModule();
         const root = document.createElement('div');
 
@@ -181,7 +154,7 @@ describe('pdk-loader', () => {
             return session;
         });
         get.mockResolvedValue(response);
-        window.MyParcelShopwarePdk = {mount: mountPdk, createSession};
+        window.MyParcelShopwarePdk = {createSession};
         const {openSession} = await loadModule();
         const root = document.createElement('div');
 

@@ -99,7 +99,7 @@ export async function fetchView(view, params = {}) {
 
 /**
  * Fetches a PDK view, puts its html in root and opens a PDK session on it.
- * Use it for the order tab, order list and product tab. When isActive is false
+ * Use it for each admin page that shows a PDK view. When isActive is false
  * after loading, nothing is inserted and session is null.
  *
  * @param {string} view an AdminScreen value
@@ -148,23 +148,4 @@ export function notifyShopware(component) {
     return ({variant, title, message}) => {
         component[methods[variant] ?? methods.info]({...(title === undefined ? {} : {title}), message});
     };
-}
-
-/**
- * Shows a PDK view in root. Resolves to a function that removes it again.
- *
- * @param {string} view an AdminScreen value, e.g. 'pluginSettings'
- * @param {HTMLElement} root
- * @param {() => boolean} isActive false once the page is gone; the view is then not mounted
- */
-export async function mountView(view, root, isActive) {
-    const data = await fetchView(view);
-
-    if (!isActive()) {
-        return () => {};
-    }
-
-    root.innerHTML = data.html;
-
-    return window.MyParcelShopwarePdk.mount(root, {getRequestHeaders});
 }

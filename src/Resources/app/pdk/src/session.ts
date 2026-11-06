@@ -8,8 +8,7 @@ import {
   useFormBuilder,
   useNotificationStore,
 } from '@myparcel-dev/pdk-admin';
-import {createConfig} from './config';
-import {type MountOptions} from './mount';
+import {createConfig, type RequestHeadersProvider} from './config';
 
 /**
  * The bulk actions of the order list, named as the Shopware admin names them.
@@ -29,7 +28,8 @@ export interface ForwardedNotification {
  * Options for a session. Set onNotification to show action and api
  * notifications in Shopware instead of in the PDK.
  */
-export interface SessionOptions extends MountOptions {
+export interface SessionOptions {
+  getRequestHeaders: RequestHeadersProvider;
   onNotification?: (notification: ForwardedNotification) => void;
 }
 
