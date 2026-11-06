@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
-use MyParcel\Shopware\Pdk\View\AdminScreen;
+use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 
 /**
  * A seam of our own so the controller can be tested without booting the PDK,
@@ -15,7 +15,9 @@ interface AdminViewRendererInterface
     /**
      * Render the HTML that the admin app needs to show the screen: the
      * bootstrap container, the notifications, the modals and the component of
-     * the screen.
+     * the screen. The order list gets its items and bulk actions apart.
+     *
+     * @throws AdminViewNotFoundException when the order of the order screen does not exist
      */
-    public function render(AdminScreen $screen): string;
+    public function render(AdminViewRequest $request): AdminViewResult;
 }

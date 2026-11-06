@@ -10,14 +10,11 @@ import {
   DefaultCol,
   DefaultCurrencyInput,
   DefaultDropOffInput,
-  DefaultDropdownButton,
   DefaultFormGroup,
   DefaultHeading,
-  DefaultIcon,
   DefaultImage,
   DefaultLink,
   DefaultLoader,
-  DefaultModal,
   DefaultMultiDateInput,
   DefaultMultiSelectInput,
   DefaultNotification,
@@ -38,6 +35,9 @@ import {
   DefaultToggleInput,
   DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
+import ShopwareIcon from './components/ShopwareIcon.vue';
+import ShopwareModal from './components/ShopwareModal.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -47,8 +47,10 @@ const FADE = 'mypa-fade';
  * Create the PDK admin configuration with the components of preset-default and
  * the request headers of the Shopware admin.
  *
- * The components render plain HTML. The utilities are the WooCommerce set,
- * prefixed and scoped to .myparcel-pdk by Tailwind.
+ * The components render plain HTML, except the icons: the preset icon only prints the name, so ShopwareIcon draws them.
+ * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
+ * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
+ * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
  */
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({
   logLevel: LogLevel.Info,
@@ -67,14 +69,14 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
     [AdminComponent.DropOffInput]: DefaultDropOffInput,
-    [AdminComponent.DropdownButton]: DefaultDropdownButton,
+    [AdminComponent.DropdownButton]: ShopwareDropdownButton,
     [AdminComponent.FormGroup]: DefaultFormGroup,
     [AdminComponent.Heading]: DefaultHeading,
-    [AdminComponent.Icon]: DefaultIcon,
+    [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
     [AdminComponent.Link]: DefaultLink,
     [AdminComponent.Loader]: DefaultLoader,
-    [AdminComponent.Modal]: DefaultModal,
+    [AdminComponent.Modal]: ShopwareModal,
     [AdminComponent.MultiDateInput]: DefaultMultiDateInput,
     [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
     [AdminComponent.Notification]: DefaultNotification,
