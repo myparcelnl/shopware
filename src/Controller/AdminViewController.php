@@ -32,7 +32,7 @@ final class AdminViewController
      * Renders one PDK admin screen for the admin module, with the order list
      * items or the order or product it needs. Answers 400 for an unknown `view`
      * parameter or missing IDs, without booting the PDK, and 404 for an order
-     * that does not exist.
+     * or a product that does not exist.
      */
     #[Route(
         path: '/api/_action/myparcel/view',

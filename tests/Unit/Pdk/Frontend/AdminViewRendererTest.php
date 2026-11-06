@@ -157,6 +157,13 @@ it('throws not found for a missing order', function () {
         ->toThrow(AdminViewNotFoundException::class, 'order');
 });
 
+it('throws not found for a missing product', function () {
+    [$renderer] = adminViewRenderer();
+
+    expect(fn () => $renderer->render(new AdminViewRequest(AdminScreen::Product, [Entities::id()])))
+        ->toThrow(AdminViewNotFoundException::class, 'product');
+});
+
 it('renders a product with its settings', function () {
     [$renderer, $request] = adminViewRenderer();
 
