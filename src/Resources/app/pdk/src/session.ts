@@ -100,7 +100,7 @@ const renderElements = async (
 
 /**
  * Starts one PDK admin and renders the PDK components in the HTML that the
- * view route returned. The boot element (#myparcel-pdk-boot) must already be in
+ * view route returned. The bootstrap container (#myparcel-pdk-boot) must already be in
  * the document. When the first render fails, it stops the PDK admin and rethrows.
  */
 export const createSession = async (root: HTMLElement, options: SessionOptions): Promise<PdkSession> => {
