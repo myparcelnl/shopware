@@ -6,7 +6,7 @@ Shopware.Component.override('sw-bulk-edit-modal', {
 
     computed: {
         /**
-         * The columns of the modal without the MyParcel column of the order list.
+         * Get the columns of the modal without the MyParcel column of the order list.
          */
         myparcelBulkEditColumns() {
             return this.bulkGridEditColumns.filter((column) => column.property !== 'myparcelShipments');
