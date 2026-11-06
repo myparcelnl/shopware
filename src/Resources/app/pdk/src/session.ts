@@ -11,7 +11,8 @@ import {
 import {createConfig, type RequestHeadersProvider} from './config';
 
 /**
- * The bulk actions of the order list, named as the Shopware admin names them.
+ * The bulk actions of the order list, as the PDK names them in its bulkActions
+ * config. A new PDK bulk action needs an entry in BULK_ACTIONS too.
  */
 export type BulkAction = 'action_edit' | 'action_export' | 'action_print' | 'action_export_print';
 
