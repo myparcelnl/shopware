@@ -75,14 +75,13 @@ export async function saveProductSettings(productId, settings) {
 
 /**
  * Fetches a PDK view with its context from the plugin's view route and loads
- * its scripts and styles. Use it when you need the view data without a root
- * element yet.
+ * its scripts and styles.
  *
  * @param {string} view an AdminScreen value, e.g. 'order'
  * @param {object} params the context next to the view: orderIds, orderId or productId
  * @returns {Promise<{html: string, items: object, bulkActions: object[], scripts: string[], styles: string[]}>}
  */
-export async function fetchView(view, params = {}) {
+async function fetchView(view, params = {}) {
     const httpClient = Shopware.Application.getContainer('init').httpClient;
     const {data} = await httpClient.get('_action/myparcel/view', {
         params: {...params, view},
