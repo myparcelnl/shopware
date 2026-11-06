@@ -12,7 +12,11 @@ use Shopware\Core\Framework\Uuid\Uuid;
  */
 final class AdminViewRequest
 {
-    public const MAX_ORDER_IDS = 500;
+    /**
+     * Keeps one request from rendering an unlimited number of orders. 100 is the
+     * largest page of the order list: the biggest step of sw-pagination in Shopware 6.7.
+     */
+    public const MAX_ORDER_IDS = 100;
 
     /**
      * @param list<string> $ids the order IDs or the product ID, empty for screens without context
@@ -38,7 +42,7 @@ final class AdminViewRequest
         }
 
         $ids = match ($screen) {
-            AdminScreen::OrderList => self::readIds($query['orderIds'] ?? null),
+            AdminScreen::OrderList => self::readIds($query['orderIds'] ?? null, self::MAX_ORDER_IDS),
             AdminScreen::Order     => self::readIds([$query['orderId'] ?? null], 1),
             AdminScreen::Product   => self::readIds([$query['productId'] ?? null], 1),
             default                => [],
@@ -50,7 +54,7 @@ final class AdminViewRequest
     /**
      * @return null|list<string> null when the list is empty, too long or holds a non-UUID
      */
-    private static function readIds(mixed $value, int $max = self::MAX_ORDER_IDS): ?array
+    private static function readIds(mixed $value, int $max): ?array
     {
         if (!is_array($value) || [] === $value) {
             return null;
