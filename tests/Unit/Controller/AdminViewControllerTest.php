@@ -89,6 +89,14 @@ it('passes the order ids to the renderer', function () {
     expect($renderer->rendered)->toEqual([new AdminViewRequest(AdminScreen::OrderList, [CONTROLLER_ORDER_ID])]);
 });
 
+it('returns 404 when the product does not exist', function () {
+    $renderer = new FixedAdminViewRenderer(error: AdminViewNotFoundException::forScreen(AdminScreen::Product, CONTROLLER_ORDER_ID));
+
+    $response = viewController($renderer)->view(Request::create('/api/_action/myparcel/view', 'GET', ['view' => 'product', 'productId' => CONTROLLER_ORDER_ID]));
+
+    expect($response->getStatusCode())->toBe(404);
+});
+
 it('returns 404 when the order does not exist', function () {
     $renderer = new FixedAdminViewRenderer(error: AdminViewNotFoundException::forScreen(AdminScreen::Order, CONTROLLER_ORDER_ID));
 

@@ -95,7 +95,13 @@ final class AdminViewRenderer implements AdminViewRendererInterface
 
     private function renderProduct(AdminViewRequest $request): AdminViewResult
     {
-        $product = Pdk::get(PdkProductRepositoryInterface::class)->getProduct($request->ids[0]);
+        $id = $request->ids[0];
+        // getProduct() gives a product with only the ID for an unknown ID; getProducts() leaves it out.
+        $product = Pdk::get(PdkProductRepositoryInterface::class)->getProducts([$id])->first();
+
+        if (null === $product) {
+            throw AdminViewNotFoundException::forScreen($request->screen, $id);
+        }
 
         if (null === $product->parent) {
             return new AdminViewResult($this->compose($request->screen, Frontend::renderProductSettings($product)));
