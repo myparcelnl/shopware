@@ -42,5 +42,15 @@ export default defineConfig({
     environment: 'happy-dom',
     // The loader of the Shopware admin module has no test runner of its own.
     include: ['src/**/*.spec.ts', '../administration/src/**/*.spec.js'],
+    // CI uploads this report to Codecov with the flag frontend, next to the PHP coverage.
+    coverage: {
+      provider: 'v8',
+      // The admin module is outside the root of this config.
+      allowExternal: true,
+      include: ['src/**/*.{ts,vue}', resolve(root, '../administration/src/**/*.js')],
+      exclude: ['**/*.spec.*', 'src/main.ts'],
+      reporter: ['text-summary', 'clover'],
+      reportsDirectory: resolve(root, '../../../../coverage'),
+    },
   },
 });

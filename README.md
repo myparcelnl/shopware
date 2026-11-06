@@ -246,6 +246,10 @@ pnpm build:pdk
 pnpm test:pdk
 ```
 
+`pnpm test:pdk:coverage` runs the same tests with coverage, as CI does. It writes
+`coverage/clover.xml` and `junit/frontend.xml`, which CI sends to Codecov under
+the flag `frontend`.
+
 The shop serves the copy in `public/bundles`, not the build output. After a
 build, run `bin/console assets:install` from the shop root, or the admin keeps
 the old bundle.
