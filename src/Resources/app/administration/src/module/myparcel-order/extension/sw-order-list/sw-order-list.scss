@@ -33,7 +33,7 @@
         }
 
         // The PDK puts the barcode with the dropdown, and the package type with the status, in flex rows. They need a gap and may wrap.
-        .mypa-flex:not([role='menu']) {
+        .mypa-flex:not([popover]) {
             flex-wrap: wrap;
             align-items: center;
             column-gap: var(--scale-size-8);
@@ -54,8 +54,9 @@
         }
 
         // The order mode shows its action buttons in a group of plain div. Put them side by side.
-        // The dropdown button lays itself out, and its menu is in the body.
-        div:has(> button):not(.mypa-inline-flex, [role='menu']) {
+        // The dropdown button lays itself out. Its menu is a popover, which must keep the
+        // display: none of the browser while it is closed.
+        div:has(> button):not(.mypa-inline-flex, [popover]) {
             display: flex;
             flex-wrap: wrap;
             gap: var(--scale-size-4);
