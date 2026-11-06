@@ -30,6 +30,15 @@
   // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
   .mypa-dropdown-menu {
     min-width: 8rem;
+    // Undo the default place and padding of a popover: the script gives top and left.
+    inset: auto;
+    margin: 0;
+    padding-inline: 0;
+
+    // Not on the element itself: that would also show the menu while it is closed.
+    &:popover-open {
+      display: flex;
+    }
   }
 
   .mypa-dropdown-menu__item {

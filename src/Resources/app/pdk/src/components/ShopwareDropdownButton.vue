@@ -24,42 +24,44 @@
       :class="{'!mypa-rounded-l-none -mypa-ml-px': dropdownActions.standalone.length > 0}"
       :disabled="disabled"
       :icon="dropdownIcon"
-      :size="size"
-      aria-haspopup="true"
-      @click="onToggle">
+      :popovertarget="menuId"
+      :size="size">
       <slot />
     </PdkButton>
 
-    <!-- The menu leaves the grid cell: a cell is a stacking context that the sticky columns of the grid paint over. -->
-    <Teleport
-      v-if="hasMenu && toggled"
-      to="body">
-      <div class="myparcel-pdk">
-        <div
-          ref="menu"
-          :style="menuStyle"
-          class="mypa-dropdown-menu mypa-fixed mypa-z-[1100] mypa-flex mypa-flex-col mypa-items-stretch mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-py-1 mypa-shadow"
-          role="menu">
-          <ActionButton
-            v-for="(action, index) in dropdownActions.hidden"
-            :key="`${index}_${action.id}`"
-            v-test="[AdminComponent.DropdownButton, 'item']"
-            :action="action"
-            :disabled="disabled"
-            :icon="action.icon"
-            :size="size"
-            :variant="action.variant"
-            :class="{'mypa-dropdown-menu__item--danger': action.variant === Variant.Error}"
-            class="mypa-dropdown-menu__item"
-            @click="toggle(false)" />
-        </div>
-      </div>
-    </Teleport>
+    <!-- A popover is in the top layer, above the grid cell and the sticky columns. It comes next to the toggle in the focus order. -->
+    <div
+      v-if="hasMenu"
+      :id="menuId"
+      ref="menu"
+      :style="menuStyle"
+      class="mypa-dropdown-menu mypa-flex-col mypa-items-stretch mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-py-1 mypa-shadow"
+      popover="auto"
+      @beforetoggle="onBeforeToggle"
+      @toggle="onToggle">
+      <ActionButton
+        v-for="(action, index) in dropdownActions.hidden"
+        :key="`${index}_${action.id}`"
+        v-test="[AdminComponent.DropdownButton, 'item']"
+        :action="action"
+        :disabled="disabled"
+        :icon="action.icon"
+        :size="size"
+        :variant="action.variant"
+        :class="{'mypa-dropdown-menu__item--danger': action.variant === Variant.Error}"
+        class="mypa-dropdown-menu__item"
+        @click="close" />
+    </div>
   </div>
 </template>
 
+<script lang="ts">
+// Each menu needs its own id for popovertarget. Vue 3.4 has no useId.
+let menuCount = 0;
+</script>
+
 <script lang="ts" setup>
-import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {
   ActionButton,
   AdminComponent,
@@ -79,37 +81,44 @@ const {toggled, toggle, dropdownActions, dropdownIcon} = useDropdownButtonContex
 
 const {translate} = useLanguage();
 
+const menuId = `mypa-dropdown-menu-${++menuCount}`;
 const root = ref<HTMLElement>();
 const menu = ref<HTMLElement>();
-const menuStyle = ref<{top?: string; left?: string}>({});
+const menuStyle = ref<{top?: string; left?: string; visibility?: 'hidden'}>({});
 
 const hasMenu = computed(() => dropdownActions.value.hidden.length > 0);
 
 const GAP = 4;
 
 /**
- * Opens the menu below the buttons, or above them when the viewport has no room below.
- * The menu exists only while open. It is fixed, because the grid of the order list clips an absolute menu, and teleported to the body, because the cell
- * is a stacking context. It has a size once it is shown, so it is
- * placed after the render: at the left edge of the group, or at its right edge when the menu would pass the viewport.
+ * Hides a menu that opens until it has its place, because it has a size only once it is shown.
  */
-const onToggle = async () => {
-  const opening = !toggled.value;
+const onBeforeToggle = (event: Event) => {
+  if ((event as ToggleEvent).newState === 'open') {
+    menuStyle.value = {visibility: 'hidden'};
+  }
+};
 
-  // A new menu is measured at its natural place, not at the place of the last time.
-  menuStyle.value = {};
-  toggle(opening);
+/**
+ * Keeps the state of the PDK in line with the popover, and places a menu that opened below
+ * the buttons, or above them when the viewport has no room below. It is at the left edge
+ * of the group, or at its right edge when the menu would pass the viewport.
+ */
+const onToggle = (event: Event) => {
+  const opened = (event as ToggleEvent).newState === 'open';
 
-  if (!opening) {
+  toggle(opened);
+
+  if (!opened) {
     return;
   }
-
-  await nextTick();
 
   const group = root.value?.getBoundingClientRect();
   const size = menu.value?.getBoundingClientRect();
 
   if (!group || !size) {
+    menuStyle.value = {};
+
     return;
   }
 
@@ -121,10 +130,10 @@ const onToggle = async () => {
   menuStyle.value = {top: `${top}px`, left: `${left}px`};
 };
 
-// The fixed menu does not follow its buttons, so it closes instead of moving.
+// Hiding the popover gives the focus back to the toggle.
 const close = () => {
   if (toggled.value) {
-    toggle(false);
+    menu.value?.hidePopover();
   }
 };
 
@@ -137,32 +146,14 @@ watch(
   },
 );
 
-// The menu is no hover or focus menu: it only leaves on a click outside, on Escape or after an action.
-const onDocumentClick = (event: MouseEvent) => {
-  const target = event.target as Node;
-
-  if (toggled.value && !root.value?.contains(target) && !menu.value?.contains(target)) {
-    toggle(false);
-  }
-};
-
-const onDocumentKeydown = (event: KeyboardEvent) => {
-  if (toggled.value && event.key === 'Escape') {
-    toggle(false);
-  }
-};
-
+// The menu does not follow its buttons, so it closes instead of moving.
 onMounted(() => {
-  document.addEventListener('click', onDocumentClick);
-  document.addEventListener('keydown', onDocumentKeydown);
   // Capture: a scroll does not bubble, and the grid wrapper scrolls, not the window.
   window.addEventListener('scroll', close, true);
   window.addEventListener('resize', close);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick);
-  document.removeEventListener('keydown', onDocumentKeydown);
   window.removeEventListener('scroll', close, true);
   window.removeEventListener('resize', close);
 });
