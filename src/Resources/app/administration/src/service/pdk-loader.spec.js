@@ -80,9 +80,10 @@ describe('pdk-loader', () => {
 
     it('passes the context params to the view route', async () => {
         get.mockResolvedValue(response);
-        const {fetchView} = await loadModule();
+        window.MyParcelShopwarePdk = {createSession: vi.fn().mockResolvedValue({unmount: vi.fn()})};
+        const {openSession} = await loadModule();
 
-        const data = await fetchView('orderList', {orderIds: ['a', 'b']});
+        const {data} = await openSession('orderList', {orderIds: ['a', 'b']}, document.createElement('div'), () => true);
 
         expect(data).toBe(response.data);
         expect(get).toHaveBeenCalledWith(
