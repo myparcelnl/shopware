@@ -8,6 +8,8 @@
 /.phpunit.result.cache
 /clover.xml
 /junit.xml
+/coverage/
+/junit/
 
 ###
 # Plans and specs — never committed
