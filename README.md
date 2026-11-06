@@ -208,6 +208,14 @@ Without these files every PDK translation lookup throws "File does not exist",
 and `composer test` fails. The plug-in shows texts in the language of the Shopware
 request and falls back to English.
 
+The texts of the admin module (tab names, the column name and its error
+notifications) come from the same sheet: keys that start with `shopware_admin_`,
+and `plugin_title_short`, in the tab `app:shopware`. `pnpm translations:import`
+also runs `bin/build-admin-snippets.mjs`, which writes them to the `snippet`
+folder of each admin module. These files are not versioned either. To add a text,
+add the key to the tab `app:shopware`, add it to `SNIPPETS` in the script, and
+run the import again. The script stops when a key is missing in English.
+
 `fast-glob` is in `devDependencies` only because `@myparcel-dev/pdk-app-builder`
 imports it without declaring it. Remove it once the builder declares it itself.
 

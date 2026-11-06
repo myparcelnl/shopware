@@ -9,7 +9,7 @@
   "scripts": {
     "build:pdk": "vite build --config src/Resources/app/pdk/vite.config.ts",
     "test:pdk": "vitest run --config src/Resources/app/pdk/vite.config.ts",
-    "translations:import": "pdk-builder translations"
+    "translations:import": "pdk-builder translations && node bin/build-admin-snippets.mjs"
   },
   "devDependencies": {
     "@myparcel-dev/pdk-admin": "^2.4.0",

@@ -26,3 +26,9 @@ node_modules/
 ###
 /src/Resources/public/administration/
 /src/Resources/public/pdk/
+
+###
+# Admin snippets, built from the PDK translations sheet by
+# bin/build-admin-snippets.mjs (pnpm translations:import).
+###
+/src/Resources/app/administration/src/module/*/snippet/
