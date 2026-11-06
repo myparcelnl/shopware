@@ -49,7 +49,7 @@ const FADE = 'mypa-fade';
  *
  * The components render plain HTML, except the icons: the preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
- * Its modal has no position or backdrop, so ShopwareModal shows it as a dialog on the body.
+ * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
  */
 export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAdminConfiguration => ({

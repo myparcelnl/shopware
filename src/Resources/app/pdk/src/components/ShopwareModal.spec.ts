@@ -45,14 +45,16 @@ const mount = () => {
   app.mount(container);
 };
 
-const dialog = (): HTMLElement => document.body.querySelector<HTMLElement>('[role="dialog"]') as HTMLElement;
-const backdrop = (): HTMLElement => document.body.querySelector<HTMLElement>('[data-modal-backdrop]') as HTMLElement;
+const dialog = (): HTMLDialogElement => container.querySelector<HTMLDialogElement>('dialog') as HTMLDialogElement;
 const closeButton = (): HTMLElement => dialog().querySelector<HTMLElement>('[aria-label="t:action_close"]') as HTMLElement;
 
 const click = async (element: Element) => {
   element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
   await nextTick();
 };
+
+// happy-dom sends the close event in a later task, as a browser does.
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('ShopwareModal', () => {
   beforeEach(() => {
@@ -72,23 +74,30 @@ describe('ShopwareModal', () => {
     container.remove();
   });
 
-  it('renders the dialog under the body, in a .myparcel-pdk wrapper, not in the component', () => {
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
-    expect(dialog().getAttribute('aria-modal')).toBe('true');
-    expect(dialog().closest('.myparcel-pdk')?.parentElement).toBe(document.body);
-    expect(dialog().classList.contains('mypa-z-[1000]')).toBe(true);
+  it('opens a native modal dialog in the component when the pdk opens the modal', () => {
+    expect(dialog().open).toBe(true);
+    expect(dialog().hasAttribute('role')).toBe(false);
+    expect(dialog().hasAttribute('aria-modal')).toBe(false);
   });
 
-  it('renders nothing while closed', async () => {
+  it('gives the dialog no display class, which would show it while closed', () => {
+    expect([...dialog().classList].some((name) => /^mypa-(flex|block|grid|inline)/.test(name))).toBe(false);
+  });
+
+  it('labels the dialog with its heading', () => {
+    const heading = dialog().querySelector('h2') as HTMLElement;
+
+    expect(heading.id).not.toBe('');
+    expect(dialog().getAttribute('aria-labelledby')).toBe(heading.id);
+    expect(heading.textContent).toContain('t:modal_title');
+  });
+
+  it('closes the dialog and renders no content when the pdk closes the modal', async () => {
     state.open.value = false;
     await nextTick();
 
-    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
-    expect(document.body.querySelector('.myparcel-pdk')).toBeNull();
-  });
-
-  it('translates the title', () => {
-    expect(dialog().textContent).toContain('t:modal_title');
+    expect(dialog().open).toBe(false);
+    expect(dialog().querySelector('.content')).toBeNull();
   });
 
   it('renders the slot, the modal notifications and the actions', () => {
@@ -97,12 +106,19 @@ describe('ShopwareModal', () => {
     expect(dialog().querySelectorAll('[data-action]')).toHaveLength(2);
   });
 
-  it('closes on Escape', async () => {
-    document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
-    await nextTick();
+  it('tells the pdk when the dialog closes itself, as on Escape', async () => {
+    dialog().close();
+    await flush();
 
     expect(state.close).toHaveBeenCalledTimes(1);
-    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('does not tell the pdk again when the pdk closed the modal', async () => {
+    state.open.value = false;
+    await nextTick();
+    await flush();
+
+    expect(state.close).not.toHaveBeenCalled();
   });
 
   it('closes with the close button', async () => {
@@ -111,41 +127,24 @@ describe('ShopwareModal', () => {
     expect(state.close).toHaveBeenCalledTimes(1);
   });
 
-  it('closes on a click on the backdrop', async () => {
-    await click(backdrop());
+  it('closes on a click on the backdrop, which is a click on the dialog itself', async () => {
+    await click(dialog());
 
     expect(state.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stays open on a click inside the dialog', async () => {
-    await click(dialog());
+  it('stays open on a click on its content', async () => {
     await click(dialog().querySelector('.content') as HTMLElement);
 
     expect(state.close).not.toHaveBeenCalled();
   });
 
-  it('removes the dialog from the body on unmount', () => {
-    app?.unmount();
-    app = undefined;
-
-    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
-    expect(document.body.querySelector('.myparcel-pdk')).toBeNull();
-  });
-
-  it('removes its Escape listener on unmount', () => {
-    const remove = vi.spyOn(document, 'removeEventListener');
+  it('adds no document listeners', () => {
+    const add = vi.spyOn(document, 'addEventListener');
 
     app?.unmount();
-    app = undefined;
+    mount();
 
-    expect(remove.mock.calls.map(([type]) => type)).toContain('keydown');
-  });
-
-  it('ignores Escape after it closed', async () => {
-    state.open.value = false;
-    await nextTick();
-    document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
-
-    expect(state.close).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
   });
 });
