@@ -28,6 +28,10 @@
   }
 
   // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
+  .mypa-modal::backdrop {
+    background: rgb(0 0 0 / 40%);
+  }
+
   .mypa-dropdown-menu {
     min-width: 8rem;
     // Undo the default place and padding of a popover: the script gives top and left.
