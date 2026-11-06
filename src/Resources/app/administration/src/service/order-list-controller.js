@@ -101,7 +101,7 @@ export function createOrderListController({root, getCells, isActive, onNotificat
         },
 
         /**
-         * The bulk actions of the last load.
+         * Get the bulk actions of the last load.
          */
         get bulkActions() {
             return bulkActions;
