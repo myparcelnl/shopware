@@ -1,9 +1,10 @@
 import {createSessionLoader} from './session-loader';
 
 /**
- * Creates the controller of the MyParcel column in the order list. It is a
- * plain module without Shopware, so a test can run it. Use it from the
- * sw-order-list override.
+ * Creates the controller of the MyParcel column in the order list. It keeps the
+ * session, the rendered cells and the bulk actions of the last load out of the
+ * sw-order-list override, which only passes the grid events on to it.
+ * Use it from the sw-order-list override.
  *
  * @param {object} options
  * @param {HTMLElement} options.root the shell element; each load gets its own child inside it
