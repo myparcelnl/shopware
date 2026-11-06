@@ -1,9 +1,0 @@
-{
-    "myparcel-product": {
-        "detail": {
-            "tab": "MyParcel",
-            "loadError": "Die MyParcel-Daten dieses Produkts konnten nicht geladen werden.",
-            "saveError": "Die MyParcel-Einstellungen dieses Produkts konnten nicht gespeichert werden."
-        }
-    }
-}
