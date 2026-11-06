@@ -28,11 +28,11 @@ final class AdminViewMarkup
         string $modals,
         string $component
     ): string {
-        if ('' === $initScript || '' === $component) {
+        if ('' === $component) {
             throw EmptyAdminViewException::forView($screen);
         }
 
-        return $initScript . $notifications . $modals . $component;
+        return self::composeShell($screen, $initScript, $notifications, $modals) . $component;
     }
 
     /**
