@@ -153,7 +153,7 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
 
     /**
      * Stores the order data and the shipments. Stored shipments that the order no
-     * longer carries stay; incoming shipments replace stored ones with the same id.
+     * longer carries stay; see mergeShipments() for a shipment that both carry.
      */
     public function update(PdkOrder $order): PdkOrder
     {
@@ -254,11 +254,9 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
      * A shipment without an id cannot be matched. The incoming one is the current
      * one, so stored shipments without an id are dropped and incoming ones kept.
      * Incoming shipments that the PDK marked deleted stay in the list, so
-     * OrderDataWriter deletes their rows. An incoming copy wins over the stored copy
-     * by id, so a request with an older copy of a shipment overwrites what another
-     * request (for example a shipment webhook) stored in the meantime.
-     *
-     * @TODO INT-1962: keep the stored copy of a shipment when it is newer than the incoming one, so shipment webhooks do not lose updates.
+     * OrderDataWriter deletes their rows. An incoming copy replaces the stored copy
+     * with the same id, unless the stored copy is newer: another request (for
+     * example a shipment webhook) can have saved it after this request read it.
      */
     private function mergeShipments(ShipmentCollection $stored, ShipmentCollection $incoming): ShipmentCollection
     {
@@ -276,12 +274,28 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
         foreach ($incoming as $shipment) {
             if (null === $shipment->id) {
                 $withoutId[] = $shipment;
-            } else {
+            } elseif (! isset($byId[$shipment->id]) || ! self::isNewer($byId[$shipment->id], $shipment)) {
                 $byId[$shipment->id] = $shipment;
             }
         }
 
         return new ShipmentCollection(array_merge(array_values($byId), $withoutId));
+    }
+
+    /**
+     * Whether $stored is newer than $incoming. `modified` is the time of the last
+     * change in the API, `updated` the time the plugin saved the shipment. A copy
+     * fresh from the API has no `updated` yet, so it is never older by that field.
+     */
+    private static function isNewer(Shipment $stored, Shipment $incoming): bool
+    {
+        foreach (['modified', 'updated'] as $field) {
+            if (null !== $stored->{$field} && null !== $incoming->{$field} && $stored->{$field} > $incoming->{$field}) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
