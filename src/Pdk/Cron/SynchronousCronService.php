@@ -12,10 +12,10 @@ use RuntimeException;
  * Runs PDK work in the current request.
  *
  * The webhook manager dispatches the processing of a webhook through this
- * service.
- *
- * @TODO INT-1962: replace this class with a queue-based cron service (Shopware
- * Messenger). Until then, nothing can be scheduled for later.
+ * service. That is the only call the PDK makes, and the WooCommerce and
+ * PrestaShop plugins also run it in the current request. A queue cannot carry
+ * that call: the callback is a container service and the argument a Request.
+ * The PDK never schedules work for later, so this class does not schedule.
  */
 final class SynchronousCronService implements CronServiceInterface
 {
