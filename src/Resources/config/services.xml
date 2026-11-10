@@ -82,6 +82,15 @@
             <argument>%kernel.debug%</argument>
         </service>
 
+        <service id="MyParcel\Shopware\Pdk\Order\AutomaticOrderExport"/>
+
+        <service id="MyParcel\Shopware\Subscriber\AutomaticOrderExportSubscriber">
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\Order\AutomaticOrderExport"/>
+            <argument type="service" id="monolog.logger.myparcel"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="MyParcel\Shopware\Pdk\Http\PdkHttpBridge">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <argument type="service" id="monolog.logger.myparcel"/>
