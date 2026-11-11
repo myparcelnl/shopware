@@ -18,11 +18,6 @@ import truck from '@shopware-ag/meteor-icon-kit/icons/regular/truck.svg?raw';
 import undo from '@shopware-ag/meteor-icon-kit/icons/regular/undo.svg?raw';
 import {AdminIcon} from '@myparcel-dev/pdk-admin';
 
-export interface IconShape {
-  viewBox: string;
-  paths: string[];
-}
-
 const SHOPWARE_ICONS: Partial<Record<AdminIcon, string>> = {
   [AdminIcon.Add]: plus,
   [AdminIcon.ArrowDown]: chevronDown,
@@ -43,28 +38,13 @@ const SHOPWARE_ICONS: Partial<Record<AdminIcon, string>> = {
   [AdminIcon.Yes]: checkmark,
 };
 
-const shapes = new Map<string, IconShape>();
-
 /**
- * Get the viewBox and the paths of a Shopware icon, read once from its SVG file.
- * The PDK also asks for package and delivery types, which have no icon.
+ * Get the SVG markup of a Shopware icon, as the icon kit ships it. The PDK also
+ * asks for package and delivery types, which have no icon.
  *
  * @returns undefined for a name without an icon
  */
-export const getIconShape = (icon: string): IconShape | undefined => {
+export const getIconSvg = (icon: string): string | undefined => {
   // Own keys only: a name like "constructor" must not find a member of Object.prototype.
-  if (!Object.hasOwn(SHOPWARE_ICONS, icon)) {
-    return undefined;
-  }
-
-  if (!shapes.has(icon)) {
-    const svg = new DOMParser().parseFromString(SHOPWARE_ICONS[icon as AdminIcon] as string, 'image/svg+xml').documentElement;
-
-    shapes.set(icon, {
-      viewBox: svg.getAttribute('viewBox') ?? '0 0 24 24',
-      paths: Array.from(svg.querySelectorAll('path'), (path) => path.getAttribute('d') ?? ''),
-    });
-  }
-
-  return shapes.get(icon);
+  return Object.hasOwn(SHOPWARE_ICONS, icon) ? SHOPWARE_ICONS[icon as AdminIcon] : undefined;
 };

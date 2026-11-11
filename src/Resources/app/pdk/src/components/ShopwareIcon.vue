@@ -1,28 +1,21 @@
 <template>
-  <svg
-    v-if="shape"
+  <span
+    v-if="svg"
     v-test="[AdminComponent.Icon, icon]"
     :class="['mypa-icon', {'mypa-icon--spin': icon === AdminIcon.Spinner}]"
-    :viewBox="shape.viewBox"
-    fill="currentColor"
     role="none"
-    xmlns="http://www.w3.org/2000/svg">
-    <path
-      v-for="(path, index) in shape.paths"
-      :key="index"
-      :d="path"
-      clip-rule="evenodd"
-      fill-rule="evenodd" />
-  </svg>
+    v-html="svg" />
 </template>
 
 <script lang="ts" setup>
 import {computed} from 'vue';
 import {AdminComponent, AdminIcon, type IconProps} from '@myparcel-dev/pdk-admin';
-import {getIconShape} from './shopwareIcons';
+import {getIconSvg} from './shopwareIcons';
 
 const props = defineProps<IconProps>();
 
 // The PDK also passes package and delivery types here. They have no icon and render nothing.
-const shape = computed(() => getIconShape(props.icon));
+// v-html is safe: the markup comes from the icon kit in the build, never from input. mt-icon of
+// Shopware renders its icons the same way.
+const svg = computed(() => getIconSvg(props.icon));
 </script>
