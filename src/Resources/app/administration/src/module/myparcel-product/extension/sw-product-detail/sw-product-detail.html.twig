@@ -5,9 +5,9 @@
         v-if="acl.can('myparcel.access') && $route.params.id"
         class="myparcel-product-detail__tab"
         :route="{ name: 'sw.product.detail.myparcel', params: { id: $route.params.id } }"
-        :title="$tc('myparcel-product.detail.tab')"
+        :title="$tc('myparcel.plugin_title_short')"
     >
-        {{ $tc('myparcel-product.detail.tab') }}
+        {{ $tc('myparcel.plugin_title_short') }}
     </sw-tabs-item>
 {% endblock %}
 

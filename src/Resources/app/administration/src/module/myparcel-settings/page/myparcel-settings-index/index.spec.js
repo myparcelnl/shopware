@@ -48,7 +48,7 @@ describe('myparcel-settings-index', () => {
 
         await component.mounted.call(page);
 
-        expect(page.createNotificationError).toHaveBeenCalledWith({message: 'myparcel-settings.index.loadError'});
+        expect(page.createNotificationError).toHaveBeenCalledWith({message: 'myparcel.shopware_admin_settings_load_error'});
         expect(page.isLoading).toBe(false);
     });
 

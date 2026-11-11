@@ -71,7 +71,7 @@ describe('myparcel-order-detail-tab', () => {
 
         await tab.load();
 
-        expect(tab.createNotificationError).toHaveBeenCalledWith({message: 'myparcel-order.detail.loadError'});
+        expect(tab.createNotificationError).toHaveBeenCalledWith({message: 'myparcel.shopware_admin_order_load_error'});
         expect(tab.isLoading).toBe(false);
     });
 

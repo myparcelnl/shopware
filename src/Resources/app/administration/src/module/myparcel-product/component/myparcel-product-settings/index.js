@@ -112,7 +112,7 @@ export default {
             } catch (error) {
                 console.error(error);
                 this.createNotificationError({
-                    message: this.$tc('myparcel-product.detail.loadError'),
+                    message: this.$tc('myparcel.shopware_admin_product_load_error'),
                 });
             }
 
