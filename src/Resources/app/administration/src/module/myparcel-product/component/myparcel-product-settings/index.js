@@ -81,7 +81,7 @@ export default {
 
         /**
          * Opens a PDK session for the product of the route, in place of the one before.
-         * Shows a notification when the product box cannot load.
+         * Shows a notification when the product settings cannot load.
          */
         async load() {
             if (!this.loader) {
