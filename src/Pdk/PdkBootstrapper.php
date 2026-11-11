@@ -211,7 +211,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
 
             // The PDK's own migrations of plugin data go here, apart from the
-            // Shopware migrations in src/Migration (see "Migrations" in README.md).
+            // Shopware migrations in src/Migration (see "Migrations" in CONTRIBUTING.md).
             // @TODO INT-2154: run the PDK installer from the plugin lifecycle, so the
             // migrations in this directory run.
             'migrationDirectory'                        => \_MyParcel\DI\value(rtrim($path, '/') . '/src/Pdk/Migration'),
