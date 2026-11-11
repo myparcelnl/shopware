@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Frontend;
 
 use MyParcel\Shopware\Pdk\PdkInitializer;
+use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
-use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\Facade\Frontend;
 use MyParcelNL\Pdk\Facade\Language;
 use MyParcelNL\Pdk\Facade\Pdk;
@@ -95,9 +95,8 @@ final class AdminViewRenderer implements AdminViewRendererInterface
 
     private function renderProduct(AdminViewRequest $request): AdminViewResult
     {
-        $id = $request->ids[0];
-        // getProduct() gives a product with only the ID for an unknown ID; getProducts() leaves it out.
-        $product = Pdk::get(PdkProductRepositoryInterface::class)->getProducts([$id])->first();
+        $id      = $request->ids[0];
+        $product = Pdk::get(PdkProductRepository::class)->find($id);
 
         if (null === $product) {
             throw AdminViewNotFoundException::forScreen($request->screen, $id);
