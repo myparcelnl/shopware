@@ -37,6 +37,11 @@ Shopware.Component.override('sw-product-detail', {
          * Saves the changed MyParcel settings through the PDK, then saves the product
          * without the MyParcel custom fields. A failed MyParcel save shows an error,
          * and the product still saves.
+         *
+         * A product that fails validation saves neither: onSave() stops before it calls
+         * this method. When the server rejects the product after the PDK saved, the
+         * MyParcel settings stay saved. They save first because a successful product
+         * save loads the product again, and the MyParcel settings with it.
          */
         async saveProduct() {
             try {
