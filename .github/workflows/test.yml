@@ -10,6 +10,38 @@ on:
         default: ${{ github.ref }}
 
 jobs:
+  # The specs of the PDK admin app and the admin module, with their coverage under
+  # the flag frontend.
+  test-frontend:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: myparcelnl/actions/pnpm-install@v5
+
+      - name: 'Run frontend tests'
+        shell: bash
+        #language=bash
+        run: pnpm test:pdk:coverage
+
+      - uses: myparcelnl/actions/codecov-coverage@v5
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: frontend
+          flags: frontend
+          files: coverage/clover.xml
+
+      - uses: myparcelnl/actions/codecov-test-results@v5
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: frontend
+          flags: frontend
+          files: junit/frontend.xml
+
   test:
     runs-on: ubuntu-22.04
     steps:

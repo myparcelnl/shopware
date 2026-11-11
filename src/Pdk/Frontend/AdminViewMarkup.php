@@ -28,10 +28,31 @@ final class AdminViewMarkup
         string $modals,
         string $component
     ): string {
-        if ('' === $initScript || '' === $component) {
-            throw EmptyAdminViewException::forView($screen);
+        if ('' === $component) {
+            throw EmptyAdminViewException::forScreen($screen);
         }
 
-        return $initScript . $notifications . $modals . $component;
+        return self::composeShell($screen, $initScript, $notifications, $modals) . $component;
+    }
+
+    /**
+     * Join the bootstrap container, the notifications and the modals into the
+     * shell of a screen that renders its components one by one, such as the
+     * order list. Without the bootstrap container the app cannot start, so the
+     * admin shows a message instead.
+     *
+     * @throws EmptyAdminViewException
+     */
+    public static function composeShell(
+        AdminScreen $screen,
+        string $initScript,
+        string $notifications,
+        string $modals
+    ): string {
+        if ('' === $initScript) {
+            throw EmptyAdminViewException::forScreen($screen);
+        }
+
+        return $initScript . $notifications . $modals;
     }
 }

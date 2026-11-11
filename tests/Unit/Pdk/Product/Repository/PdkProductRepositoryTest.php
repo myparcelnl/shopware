@@ -91,6 +91,14 @@ it('gives a bare product for an unknown or malformed id', function () {
         ->and($repository->getProduct('not-a-product')->externalIdentifier)->toBe('not-a-product');
 });
 
+it('finds a product, and nothing for an unknown or malformed id', function () {
+    $repository = productRepository(FakeEntityRepository::with(Entities::product()));
+
+    expect($repository->find(Entities::PRODUCT_ID)?->sku)->toBe('SW-1')
+        ->and($repository->find(Entities::id()))->toBeNull()
+        ->and($repository->find('not-a-product'))->toBeNull();
+});
+
 it('gets many products and leaves unknown ids out', function () {
     $repository = productRepository(FakeEntityRepository::with(Entities::product()));
 

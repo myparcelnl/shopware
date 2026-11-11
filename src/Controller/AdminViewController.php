@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Controller;
 
 use MyParcel\Shopware\Admin\AdminAssets;
+use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRendererInterface;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
 use MyParcel\Shopware\Pdk\Routing\RouteName;
-use MyParcel\Shopware\Pdk\View\AdminScreen;
+use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,8 +29,10 @@ final class AdminViewController
     }
 
     /**
-     * Renders one PDK admin screen for the admin module. Answers 400 for an
-     * unknown `view` parameter, without booting the PDK.
+     * Renders one PDK admin screen for the admin module, with the order list
+     * items or the order or product it needs. Answers 400 for an unknown `view`
+     * parameter or missing IDs, without booting the PDK, and 404 for an order
+     * or a product that does not exist.
      */
     #[Route(
         path: '/api/_action/myparcel/view',
@@ -39,17 +42,27 @@ final class AdminViewController
     )]
     public function view(Request $request): Response
     {
-        $value  = $request->query->all()['view'] ?? null;
-        $screen = is_string($value) ? AdminScreen::tryFrom($value) : null;
+        $viewRequest = AdminViewRequest::fromQuery($request->query->all());
 
-        if (null === $screen) {
-            return new JsonResponse(['message' => 'Unknown MyParcel admin view.'], Response::HTTP_BAD_REQUEST);
+        if (null === $viewRequest) {
+            return new JsonResponse(['message' => 'Unknown MyParcel admin view or invalid IDs.'], Response::HTTP_BAD_REQUEST);
         }
 
-        return $this->bridge->run(fn (): Response => new JsonResponse([
-            'html'    => $this->renderer->render($screen),
-            'scripts' => $this->assets->getScripts(),
-            'styles'  => $this->assets->getStyles(),
-        ]));
+        return $this->bridge->run(function () use ($viewRequest): Response {
+            try {
+                $result = $this->renderer->render($viewRequest);
+            } catch (AdminViewNotFoundException $exception) {
+                return new JsonResponse(['message' => $exception->getMessage()], Response::HTTP_NOT_FOUND);
+            }
+
+            return new JsonResponse([
+                'html'        => $result->html,
+                // An object, so the admin app reads a map even when it holds one order.
+                'items'       => (object) $result->items,
+                'bulkActions' => $result->bulkActions,
+                'scripts'     => $this->assets->getScripts(),
+                'styles'      => $this->assets->getStyles(),
+            ]);
+        });
     }
 }

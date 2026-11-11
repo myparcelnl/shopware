@@ -57,12 +57,22 @@ final class PdkProductRepository extends AbstractPdkPdkProductRepository
      */
     public function getProduct($identifier): PdkProduct
     {
+        return $this->find($identifier) ?? new PdkProduct(['externalIdentifier' => (string) $identifier]);
+    }
+
+    /**
+     * Returns the product, or null when there is no product with this id. Use it
+     * when an unknown product must not count as a product, for example to render it.
+     *
+     * @param  mixed $identifier
+     */
+    public function find($identifier): ?PdkProduct
+    {
         $productId = (string) $identifier;
 
         return $this->retrieve(
             self::KEY_PREFIX . $productId,
-            fn (): PdkProduct => $this->readProducts([$productId])[$productId]
-                ?? new PdkProduct(['externalIdentifier' => $productId])
+            fn (): ?PdkProduct => $this->readProducts([$productId])[$productId] ?? null
         );
     }
 
