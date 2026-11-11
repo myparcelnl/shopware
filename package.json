@@ -2,9 +2,9 @@
   "name": "@myparcel/shopware",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.9.1",
+  "packageManager": "pnpm@12.14.0",
   "engines": {
-    "node": "24"
+    "node": "^24.21"
   },
   "scripts": {
     "build:pdk": "vite build --config src/Resources/app/pdk/vite.config.ts",
@@ -26,5 +26,17 @@
     "vite": "^8.3.3",
     "vitest": "^5.0.3",
     "vue": "3.4.31"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.21",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.11",
+      "onFail": "download"
+    }
   }
 }

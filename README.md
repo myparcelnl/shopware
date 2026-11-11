@@ -12,11 +12,14 @@ MyParcel plug-in for Shopware 6.7 and up, built on the
 
 ## Requirements
 
-|          |                           |
-| -------- | ------------------------- |
-| Shopware | 6.7.12 or newer           |
-| PHP      | 8.2 – 8.5                 |
-| Node     | 24 (only to build assets) |
+|          |                                                   |
+| -------- | ------------------------------------------------- |
+| Shopware | 6.7.12 or newer                                   |
+| PHP      | 8.2 – 8.5                                         |
+| Node.js  | 24, version 24.21 or later (only to build assets) |
+| pnpm     | 12, version 12.11 or later (only to build assets) |
+
+Do not install Volta: its `yarn` does not go through corepack, so the `packageManager` field in `package.json` does not stop it.
 
 ## Development
 
