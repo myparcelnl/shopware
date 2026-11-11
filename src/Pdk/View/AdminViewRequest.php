@@ -14,7 +14,8 @@ final class AdminViewRequest
 {
     /**
      * Keeps one request from rendering an unlimited number of orders. 100 is the
-     * largest page of the order list: the biggest step of sw-pagination in Shopware 6.7.
+     * biggest step of sw-pagination in Shopware 6.7. A larger limit in the URL of
+     * the order list gets a 400, and the order list shows its load error.
      */
     public const MAX_ORDER_IDS = 100;
 
