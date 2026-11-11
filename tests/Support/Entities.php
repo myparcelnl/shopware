@@ -43,6 +43,8 @@ final class Entities
     public const ORDER_ID   = '0190a1b2c3d4e5f60718293a4b5c6d01';
     public const PRODUCT_ID = '0190a1b2c3d4e5f60718293a4b5c0001';
 
+    public const DELIVERY_ID = '0190a1b2c3d4e5f60718293a4b5cd001';
+
     /**
      * A random id in the format of Uuid::randomHex(), which needs ramsey/uuid.
      */
@@ -150,13 +152,20 @@ final class Entities
     }
 
     /**
-     * A delivery to this address with these shipping costs.
+     * A delivery to this address with these shipping costs and tracking codes.
+     *
+     * @param  list<string> $trackingCodes
      */
-    public static function delivery(?OrderAddressEntity $address, CalculatedPrice $shippingCosts, ?string $id = null): OrderDeliveryEntity
-    {
+    public static function delivery(
+        ?OrderAddressEntity $address,
+        CalculatedPrice $shippingCosts,
+        ?string $id = null,
+        array $trackingCodes = []
+    ): OrderDeliveryEntity {
         $delivery = new OrderDeliveryEntity();
         $delivery->setId($id ?? self::id());
         $delivery->setShippingCosts($shippingCosts);
+        $delivery->setTrackingCodes($trackingCodes);
 
         if (null !== $address) {
             $delivery->setShippingOrderAddress($address);
