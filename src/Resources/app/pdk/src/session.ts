@@ -4,6 +4,7 @@ import {
   type AdminView,
   createPdkAdmin,
   NotificationCategory,
+  type PdkNotification,
   useActionStore,
   useFormBuilder,
   useNotificationStore,
@@ -58,6 +59,13 @@ export interface PdkSession {
    * @returns null without changes; rejects when a changed form is not valid
    */
   getChangedFormValues(): Promise<Record<string, unknown> | null>;
+
+  /**
+   * Adds PDK notifications from a response that the PDK admin did not request
+   * itself, for example the error of a product settings save. With onNotification
+   * they show in Shopware, the same as the notifications of the PDK's own requests.
+   */
+  addNotifications(notifications: PdkNotification[]): void;
 
   /**
    * Unmounts every rendered app, stops the notification forwarding and stops the PDK admin.
@@ -211,6 +219,12 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
       }
 
       return Object.assign({}, ...dirtyForms.map((form) => form.getValues()));
+    },
+
+    addNotifications(notifications) {
+      const store = useNotificationStore();
+
+      notifications.forEach((notification) => store.add(notification));
     },
 
     unmount: stopAll,
