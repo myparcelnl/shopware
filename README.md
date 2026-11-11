@@ -110,6 +110,26 @@ The plug-in stores the choice in `myparcel_order_data` with the order. The
 shipping address of the order stays the consumer's address, also for a pickup
 point.
 
+## Tracking codes
+
+When a shipment gets a barcode, the plug-in adds it to the tracking codes of the
+order delivery. That is the delivery that the shipping address comes from.
+Shopware shows these codes in the admin and in the customer account, with the
+tracking URL of the shipping method. The plug-in removes the barcode of a deleted
+shipment and keeps the codes that the merchant entered. A return shipment adds
+no code.
+
+The default mail templates of Shopware do not show tracking codes. To show them
+in a mail, add this to the template:
+
+```twig
+{% for delivery in order.deliveries %}
+    {% for trackingCode in delivery.trackingCodes %}
+        {{ trackingCode }}
+    {% endfor %}
+{% endfor %}
+```
+
 ## Routes
 
 The plug-in sends several kinds of requests to the PDK:

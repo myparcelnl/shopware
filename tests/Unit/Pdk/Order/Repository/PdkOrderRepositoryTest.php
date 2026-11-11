@@ -208,6 +208,38 @@ it('takes the incoming copy of a shipment that is as new or newer', function (ar
     'no timestamps'                     => [[], []],
 ]);
 
+/**
+ * Updates an order whose shipping delivery has $trackingCodes with shipment 101,
+ * barcode 3SA. Returns the writes to the order repository.
+ *
+ * @param  list<string> $trackingCodes
+ *
+ * @return list<array<string, mixed>>
+ */
+function updateWithBarcode(array $trackingCodes): array
+{
+    $delivery   = Entities::delivery(Entities::address(), Entities::price(4.95, 1, 0.86), Entities::DELIVERY_ID, $trackingCodes);
+    $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => $delivery]));
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL', 'barcode' => '3SA']]);
+    $repository->update($order);
+
+    return $orders->updates;
+}
+
+it('adds the barcodes to the tracking codes of the shipping delivery', function () {
+    expect(updateWithBarcode(['OWN-1']))->toBe([[
+        'id'         => Entities::ORDER_ID,
+        'deliveries' => [['id' => Entities::DELIVERY_ID, 'trackingCodes' => ['OWN-1', '3SA']]],
+    ]]);
+});
+
+it('does not write the tracking codes when they stay the same', function () {
+    expect(updateWithBarcode(['3SA']))->toBe([]);
+});
+
 it('returns the updated order from the cache afterwards', function () {
     $orders     = FakeEntityRepository::with(Entities::order());
     $repository = orderRepository($orders);
