@@ -25,6 +25,12 @@
   // The icons size with the text around them and take its color.
   .mypa-icon {
     @apply mypa-inline-block mypa-h-[1em] mypa-w-[1em] mypa-align-[-0.125em];
+
+    // The svg of the icon kit has fill="none". The CSS fill overrides that attribute.
+    svg {
+      @apply mypa-block mypa-h-full mypa-w-full;
+      fill: currentColor;
+    }
   }
 
   // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.

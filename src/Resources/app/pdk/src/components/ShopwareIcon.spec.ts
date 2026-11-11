@@ -23,18 +23,17 @@ describe('ShopwareIcon', () => {
   });
 
   it.each(Object.values(AdminIcon))('renders an svg for the icon %s', (icon) => {
-    const svg = render(icon).querySelector('svg');
+    const element = render(icon).querySelector('.mypa-icon');
 
-    expect(svg).not.toBeNull();
-    expect(svg?.getAttribute('role')).toBe('none');
-    expect(svg?.querySelector('path')?.getAttribute('d')).toBeTruthy();
+    expect(element?.getAttribute('role')).toBe('none');
+    expect(element?.querySelector('svg path')?.getAttribute('d')).toBeTruthy();
   });
 
   it.each(['package', 'STANDARD_DELIVERY', 'constructor', 'toString', '__proto__'])('renders nothing for the name %s', (icon) => {
-    expect(render(icon).querySelector('svg')).toBeNull();
+    expect(render(icon).querySelector('.mypa-icon')).toBeNull();
   });
 
-  it('takes the viewBox and the path from the svg file of the icon kit', () => {
+  it('renders the svg file of the icon kit as it is', () => {
     const svg = render(AdminIcon.Add).querySelector('svg');
 
     expect(svg?.getAttribute('viewBox')).toBe('0 0 20 20');
@@ -42,7 +41,7 @@ describe('ShopwareIcon', () => {
   });
 
   it('lets only the spinner spin', () => {
-    expect(render(AdminIcon.Spinner).querySelector('svg')?.classList.contains('mypa-icon--spin')).toBe(true);
-    expect(render(AdminIcon.Save).querySelector('svg')?.classList.contains('mypa-icon--spin')).toBe(false);
+    expect(render(AdminIcon.Spinner).querySelector('.mypa-icon')?.classList.contains('mypa-icon--spin')).toBe(true);
+    expect(render(AdminIcon.Save).querySelector('.mypa-icon')?.classList.contains('mypa-icon--spin')).toBe(false);
   });
 });
