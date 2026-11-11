@@ -3,8 +3,8 @@ Shopware.Component.register('myparcel-settings-index', () => import('./page/mypa
 Shopware.Module.register('myparcel-settings', {
     type: 'plugin',
     name: 'myparcel-settings',
-    title: 'myparcel-settings.general.title',
-    description: 'myparcel-settings.general.description',
+    title: 'myparcel.plugin_title_short',
+    description: 'myparcel.shopware_admin_plugin_description',
     color: '#0f5c47',
     icon: 'regular-truck',
 

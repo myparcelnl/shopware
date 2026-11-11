@@ -103,7 +103,7 @@ describe('myparcel-product-settings', () => {
 
         await settings.load();
 
-        expect(settings.createNotificationError).toHaveBeenCalledWith({message: 'myparcel-product.detail.loadError'});
+        expect(settings.createNotificationError).toHaveBeenCalledWith({message: 'myparcel.shopware_admin_product_load_error'});
         expect(settings.isLoading).toBe(false);
     });
 

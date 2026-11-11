@@ -48,7 +48,7 @@ Shopware.Component.override('sw-product-detail', {
                 await this.$refs.myparcelProductSettings?.submit();
             } catch (error) {
                 console.error(error);
-                this.createNotificationError({message: this.$tc('myparcel-product.detail.saveError')});
+                this.createNotificationError({message: this.$tc('myparcel.shopware_admin_product_save_error')});
             }
 
             // The PDK wrote the MyParcel custom fields, so the values in the draft are old.

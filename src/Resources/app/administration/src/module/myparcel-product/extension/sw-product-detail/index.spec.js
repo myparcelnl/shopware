@@ -57,7 +57,7 @@ describe('sw-product-detail override', () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(saveProduct(page)).resolves.toBe('saved');
-        expect(page.createNotificationError).toHaveBeenCalledWith({message: 'myparcel-product.detail.saveError'});
+        expect(page.createNotificationError).toHaveBeenCalledWith({message: 'myparcel.shopware_admin_product_save_error'});
     });
 
     it('saves a product when the MyParcel tab was not opened', async () => {

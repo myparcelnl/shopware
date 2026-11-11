@@ -60,7 +60,7 @@ Shopware.Component.override('sw-order-list', {
 
             columns.splice(index === -1 ? columns.length : index + 1, 0, {
                 property: 'myparcelShipments',
-                label: 'myparcel-order.list.column',
+                label: 'myparcel.plugin_title_short',
                 allowResize: true,
                 sortable: false,
             });
@@ -83,7 +83,7 @@ Shopware.Component.override('sw-order-list', {
                 console.error(error);
                 // The links of the last load must not stay: they have no orders to run on.
                 this.myparcelBulkActions = [];
-                this.createNotificationError({message: this.$tc('myparcel-order.list.loadError')});
+                this.createNotificationError({message: this.$tc('myparcel.shopware_admin_order_list_load_error')});
             }
         },
 
@@ -116,7 +116,7 @@ Shopware.Component.override('sw-order-list', {
                 await this.myparcelController.dispatch(action, Object.keys(this.$refs.orderGrid.selection));
             } catch (error) {
                 console.error(error);
-                this.createNotificationError({message: this.$tc('myparcel-order.list.actionError')});
+                this.createNotificationError({message: this.$tc('myparcel.shopware_admin_order_list_action_error')});
             }
         },
     },
