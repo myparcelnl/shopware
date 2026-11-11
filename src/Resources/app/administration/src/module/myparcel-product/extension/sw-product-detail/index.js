@@ -21,11 +21,22 @@ Shopware.Component.override('sw-product-detail', {
         };
     },
 
+    computed: {
+        // The route of the MyParcel tab, for the product that is open.
+        myparcelTabRoute() {
+            return {name: MYPARCEL_ROUTE, params: {id: this.$route.params.id}};
+        },
+
+        isMyparcelRoute() {
+            return this.$route.name === MYPARCEL_ROUTE;
+        },
+    },
+
     watch: {
-        '$route.name': {
+        isMyparcelRoute: {
             immediate: true,
-            handler(name) {
-                if (name === MYPARCEL_ROUTE) {
+            handler(isMyparcelRoute) {
+                if (isMyparcelRoute) {
                     this.myparcelSettingsOpened = true;
                 }
             },
