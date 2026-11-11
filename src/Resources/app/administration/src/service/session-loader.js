@@ -20,7 +20,7 @@ export function createSessionLoader({root, isActive, onNotification}) {
     let session = null;
     let element = null;
 
-    function close() {
+    function removeSession() {
         session?.unmount();
         session = null;
         element?.remove();
@@ -41,7 +41,7 @@ export function createSessionLoader({root, isActive, onNotification}) {
             const currentLoad = ++loadId;
             const isCurrent = () => isActive() && currentLoad === loadId;
 
-            close();
+            removeSession();
 
             const loadElement = document.createElement('div');
 
@@ -80,7 +80,7 @@ export function createSessionLoader({root, isActive, onNotification}) {
          */
         close() {
             loadId++;
-            close();
+            removeSession();
         },
 
         /**
