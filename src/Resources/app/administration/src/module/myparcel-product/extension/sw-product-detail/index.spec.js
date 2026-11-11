@@ -70,13 +70,22 @@ describe('sw-product-detail override', () => {
 
     it('opens the MyParcel settings on the first visit of the tab and keeps them', () => {
         const page = {myparcelSettingsOpened: false};
-        const {handler} = component.watch['$route.name'];
+        const {handler} = component.watch.isMyparcelRoute;
 
-        handler.call(page, 'sw.product.detail.base');
+        handler.call(page, false);
         expect(page.myparcelSettingsOpened).toBe(false);
 
-        handler.call(page, 'sw.product.detail.myparcel');
-        handler.call(page, 'sw.product.detail.base');
+        handler.call(page, true);
+        handler.call(page, false);
         expect(page.myparcelSettingsOpened).toBe(true);
+    });
+
+    it('knows the route of the MyParcel tab and when it is open', () => {
+        const page = {$route: {name: 'sw.product.detail.myparcel', params: {id: 'aabb'}}};
+
+        expect(component.computed.myparcelTabRoute.call(page))
+            .toEqual({name: 'sw.product.detail.myparcel', params: {id: 'aabb'}});
+        expect(component.computed.isMyparcelRoute.call(page)).toBe(true);
+        expect(component.computed.isMyparcelRoute.call({$route: {name: 'sw.product.detail.base'}})).toBe(false);
     });
 });
