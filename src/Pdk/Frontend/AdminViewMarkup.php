@@ -29,7 +29,7 @@ final class AdminViewMarkup
         string $component
     ): string {
         if ('' === $component) {
-            throw EmptyAdminViewException::forView($screen);
+            throw EmptyAdminViewException::forScreen($screen);
         }
 
         return self::composeShell($screen, $initScript, $notifications, $modals) . $component;
@@ -50,7 +50,7 @@ final class AdminViewMarkup
         string $modals
     ): string {
         if ('' === $initScript) {
-            throw EmptyAdminViewException::forView($screen);
+            throw EmptyAdminViewException::forScreen($screen);
         }
 
         return $initScript . $notifications . $modals;
