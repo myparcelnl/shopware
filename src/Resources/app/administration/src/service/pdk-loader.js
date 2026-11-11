@@ -62,9 +62,10 @@ export function getRequestHeaders() {
  */
 export async function saveProductSettings(productId, settings) {
     // The PDK admin app cannot call this action. Its mutation sends the product id
-    // under "params", which the SDK ignores, and as productIds, where the action reads
-    // productId. It also puts the values under the form name, where the action reads
-    // them directly. So the admin module calls the action itself.
+    // under "params", which @myparcel-dev/sdk ignores, and as productIds, where the
+    // action reads productId. It also puts the values under the form name, where the
+    // action reads them directly. So the admin module calls the action itself.
+    // @TODO INT-2235: use the PDK mutation once it sends productId and the flat values.
     const httpClient = Shopware.Application.getContainer('init').httpClient;
 
     await httpClient.put('_action/myparcel/pdk', {data: {product_settings: settings}}, {
