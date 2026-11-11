@@ -84,7 +84,7 @@ describe('myparcel-product-settings', () => {
         expect(settings.load).toHaveBeenCalledOnce();
     });
 
-    it('stops loading when the product box loaded, and not for a replaced load', async () => {
+    it('stops loading when the product settings loaded, and not for a replaced load', async () => {
         const settings = createSettings({loader});
 
         loader.load.mockResolvedValueOnce(null);
@@ -96,7 +96,7 @@ describe('myparcel-product-settings', () => {
         expect(settings.isLoading).toBe(false);
     });
 
-    it('shows a notification when the product box cannot load', async () => {
+    it('shows a notification when the product settings cannot load', async () => {
         const settings = createSettings({loader});
         loader.load.mockRejectedValue(new Error('network'));
         vi.spyOn(console, 'error').mockImplementation(() => {});
