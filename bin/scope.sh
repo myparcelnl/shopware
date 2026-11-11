@@ -118,7 +118,7 @@ the plug-in cannot boot until you add the PDK to it:
 
   bin/scope-pdk.sh
 
-See "Working on the PDK" in the README.
+See "Working on the PDK" in CONTRIBUTING.md.
 MESSAGE
   exit 3
 fi
