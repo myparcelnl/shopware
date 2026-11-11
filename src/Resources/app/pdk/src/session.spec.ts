@@ -53,7 +53,11 @@ const setup = () => {
   const get = vi.fn<(action: string) => unknown>(() => ({id: 'registered'}));
   const registerOrderActions = vi.fn();
   const remove = vi.fn();
-  const store = reactive({notifications: [] as Record<string, unknown>[], remove});
+  const store = reactive({
+    notifications: [] as Record<string, unknown>[],
+    remove,
+    add: vi.fn((notification: Record<string, unknown>) => store.notifications.push(notification)),
+  });
 
   vi.mocked(createPdkAdmin).mockReturnValue({render, dispose} as never);
   vi.mocked(useActionStore).mockReturnValue({dispatch, get, registerOrderActions} as never);
@@ -295,5 +299,17 @@ describe('createSession', () => {
 
     expect(useNotificationStore).not.toHaveBeenCalled();
     expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('forwards the notifications that a caller adds from a response', async () => {
+    const {store} = setup();
+    const onNotification = vi.fn();
+    const session = await createSession(createRoot(), {...options, onNotification});
+
+    session.addNotifications([{id: 'n1', category: 'action', variant: 'error', title: 'Not saved', content: []}] as never);
+    await nextTick();
+
+    expect(store.add).toHaveBeenCalledOnce();
+    expect(onNotification).toHaveBeenCalledWith({variant: 'error', title: 'Not saved', message: ''});
   });
 });

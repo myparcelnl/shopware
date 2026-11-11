@@ -69,13 +69,27 @@ export default {
     methods: {
         /**
          * Saves the changed PDK product settings. The product detail page calls it on Save.
-         * Does nothing without changes.
+         * Does nothing without changes. Rejects only for a failure that the PDK did not
+         * report with its own notifications.
          */
         async submit() {
-            const settings = await this.loader?.session?.getChangedFormValues();
+            const session = this.loader?.session;
+            const settings = await session?.getChangedFormValues();
 
-            if (settings) {
+            if (!settings) {
+                return;
+            }
+
+            try {
                 await saveProductSettings(this.$route.params.id.toLowerCase(), settings);
+            } catch (error) {
+                const notifications = error?.response?.data?.notifications;
+
+                if (!notifications?.length) {
+                    throw error;
+                }
+
+                session.addNotifications(notifications);
             }
         },
 

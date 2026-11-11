@@ -116,6 +116,32 @@ describe('myparcel-product-settings', () => {
         expect(saveProductSettings).toHaveBeenCalledWith('aabb', {fitInMailbox: 2});
     });
 
+    it('gives the notifications of a failed save to the pdk, without a second error', async () => {
+        const settings = createSettings({loader});
+        const notifications = [{category: 'action', variant: 'error', title: 'Not saved'}];
+        loader.session = {
+            getChangedFormValues: vi.fn().mockResolvedValue({fitInMailbox: 2}),
+            addNotifications: vi.fn(),
+        };
+        saveProductSettings.mockRejectedValue({response: {data: {notifications}}});
+
+        await component.methods.submit.call(settings);
+
+        expect(loader.session.addNotifications).toHaveBeenCalledWith(notifications);
+    });
+
+    it('rejects a failed save that has no notifications', async () => {
+        const settings = createSettings({loader});
+        loader.session = {
+            getChangedFormValues: vi.fn().mockResolvedValue({fitInMailbox: 2}),
+            addNotifications: vi.fn(),
+        };
+        saveProductSettings.mockRejectedValue(new Error('network'));
+
+        await expect(component.methods.submit.call(settings)).rejects.toThrow('network');
+        expect(loader.session.addNotifications).not.toHaveBeenCalled();
+    });
+
     it('saves nothing without changes or without a session', async () => {
         const settings = createSettings({loader});
 
