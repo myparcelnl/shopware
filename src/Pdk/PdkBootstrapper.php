@@ -241,6 +241,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
                 ->constructorParameter('orderRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderRepository'])),
             PdkProductRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkProductRepository::class)
                 ->constructorParameter('productRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductRepository'])),
+            // The admin view renders a product with find(), which is not in the PDK contract.
+            PdkProductRepository::class                 => \_MyParcel\DI\get(PdkProductRepositoryInterface::class),
             PdkAuditRepositoryInterface::class          => \_MyParcel\DI\autowire(NoopAuditRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),

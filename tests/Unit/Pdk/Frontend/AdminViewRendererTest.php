@@ -85,6 +85,7 @@ function adminViewRenderer(): array
         FrontendRenderServiceInterface::class => autowire(FrontendRenderService::class),
         ViewServiceInterface::class           => $viewService,
         PdkProductRepositoryInterface::class  => $products,
+        PdkProductRepository::class           => $products,
         PdkOrderRepositoryInterface::class    => new PdkOrderRepository(
             new MemoryCacheStorage(),
             FakeEntityRepository::with(Entities::order()),

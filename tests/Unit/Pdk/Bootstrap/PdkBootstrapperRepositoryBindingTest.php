@@ -67,6 +67,7 @@ beforeEach(function () {
         PdkOrderRepositoryInterface::class,
         PdkOrderNoteRepositoryInterface::class,
         PdkProductRepositoryInterface::class,
+        PdkProductRepository::class,
         EuroCurrency::class,
         OrderDataWriter::class,
         ProductSettingsWriter::class,
@@ -83,3 +84,7 @@ it('gives each pdk repository the shopware repository of its entity', function (
     'order note' => [PdkOrderNoteRepositoryInterface::class, PdkOrderNoteRepository::class, 'orderRepository', 'orders'],
     'product'    => [PdkProductRepositoryInterface::class, PdkProductRepository::class, 'productRepository', 'products'],
 ]);
+
+it('gives the product repository class the same instance as its pdk contract', function () {
+    expect(Pdk::get(PdkProductRepository::class))->toBe(Pdk::get(PdkProductRepositoryInterface::class));
+});
