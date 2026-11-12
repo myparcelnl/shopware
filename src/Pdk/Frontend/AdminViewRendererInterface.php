@@ -17,7 +17,7 @@ interface AdminViewRendererInterface
      * bootstrap container, the notifications, the modals and the component of
      * the screen. The order list gets its items and bulk actions apart.
      *
-     * @throws AdminViewNotFoundException when the order of the order screen does not exist
+     * @throws AdminViewNotFoundException when the order or the product of the request does not exist
      */
     public function render(AdminViewRequest $request): AdminViewResult;
 }
