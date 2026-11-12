@@ -15,19 +15,18 @@ use MyParcelNL\Pdk\Frontend\Service\FrontendRenderService as PdkFrontendRenderSe
  * 'unsafe-inline'), and HTML inserted with innerHTML does not run them either.
  * This template names the component in a data attribute instead, and the admin
  * app renders it.
- *
- * The admin app also renders the variant component on its own, without the
- * parent product component before it. Its settings view needs the product
- * settings view context for that.
  */
 final class FrontendRenderService extends PdkFrontendRenderService
 {
     private const RENDER_TEMPLATE = '<div data-pdk-component="__COMPONENT__" data-pdk-context="__CONTEXT__" id="__ID__"></div>';
 
     /**
-     * Renders the variant settings with the product settings view context.
-     * Use it for a variant: the PDK default leaves this context out, and the
-     * component fails without it.
+     * Renders the variant settings with the product settings view context. The
+     * admin app renders the variant component on its own, without the product
+     * component before it, so the PDK default, which leaves this context out,
+     * fails.
+     *
+     * @TODO INT-2263: remove this method when the PDK passes the product settings view context itself.
      */
     public function renderChildProductSettings(PdkProduct $product): string
     {
