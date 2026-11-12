@@ -56,7 +56,15 @@ export function createOrderListController({root, getCells, isActive, onNotificat
                 cell.innerHTML = data.items[cell.dataset.myparcelOrderId] ?? '';
             });
 
-            bulkActions = data.bulkActions;
+            bulkActions = data.bulkActions.filter(({action}) => {
+                if (session.isBulkAction(action)) {
+                    return true;
+                }
+
+                console.warn(`MyParcel: the order list does not know the bulk action ${action}.`);
+
+                return false;
+            });
 
             // Without cells (column hidden) only the session and the bulk actions are needed.
             if (cells.length === 0) {

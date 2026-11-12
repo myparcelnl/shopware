@@ -239,6 +239,14 @@ describe('createSession', () => {
     await expect(session.getChangedFormValues()).rejects.toThrow('not valid');
   });
 
+  it('knows the bulk actions that it can dispatch', async () => {
+    setup();
+    const session = await createSession(createRoot(), options);
+
+    expect(['action_export', 'action_export_print', 'action_new', 'constructor'].filter((action) => session.isBulkAction(action)))
+      .toEqual(['action_export', 'action_export_print']);
+  });
+
   it('does not dispatch without order ids', async () => {
     const {dispatch} = setup();
     const session = await createSession(createRoot(), options);

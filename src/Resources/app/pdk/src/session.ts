@@ -13,7 +13,8 @@ import {createConfig, type RequestHeadersProvider} from './config';
 
 /**
  * The bulk actions of the order list, as the PDK names them in its bulkActions
- * config. A new PDK bulk action needs an entry in BULK_ACTIONS too.
+ * config. A new PDK bulk action needs an entry in BULK_ACTIONS too. Until it has
+ * one, the order list leaves it out.
  */
 export type BulkAction = 'action_edit' | 'action_export' | 'action_print' | 'action_export_print';
 
@@ -53,6 +54,12 @@ export interface PdkSession {
   dispatchBulkAction(action: BulkAction, orderIds: string[]): Promise<void>;
 
   /**
+   * True when dispatchBulkAction() can run this PDK bulk action. Use it to leave out
+   * a bulk action that the PDK added after this plug-in.
+   */
+  isBulkAction(action: string): action is BulkAction;
+
+  /**
    * Get the values of the PDK forms that have changes, in one object, for
    * example the product settings when the merchant saves the product page.
    *
@@ -81,6 +88,7 @@ export interface PdkSession {
 
 const COMPONENT_SELECTOR = '[data-pdk-component]';
 
+// @TODO INT-2262: use the mapping of js-pdk.
 const BULK_ACTIONS: Record<BulkAction, AdminAction> = {
   action_edit: AdminAction.OrdersEdit,
   action_export: AdminAction.OrdersExport,
@@ -211,6 +219,10 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
       }
 
       await actionStore.dispatch(adminAction, {orderIds});
+    },
+
+    isBulkAction(action): action is BulkAction {
+      return Object.hasOwn(BULK_ACTIONS, action);
     },
 
     async getChangedFormValues() {

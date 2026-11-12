@@ -15,7 +15,12 @@ const makeCell = (id) => {
     return cell;
 };
 
-const makeSession = () => ({render: vi.fn().mockResolvedValue(() => {}), dispatchBulkAction: vi.fn().mockResolvedValue(), unmount: vi.fn()});
+const makeSession = () => ({
+    render: vi.fn().mockResolvedValue(() => {}),
+    dispatchBulkAction: vi.fn().mockResolvedValue(),
+    isBulkAction: (action) => action.startsWith('action_export'),
+    unmount: vi.fn(),
+});
 
 const item = (n) => `<div id="pdk-order-list-item-${n}" data-pdk-component="OrderListItem"></div>`;
 
@@ -121,6 +126,20 @@ describe('order-list-controller', () => {
         await controller.refresh([]);
 
         expect(openSession).not.toHaveBeenCalled();
+    });
+
+    it('leaves out a bulk action that the session does not know', async () => {
+        const session = makeSession();
+        const known = {action: 'action_export', label: 'Export'};
+        openSession.mockResolvedValue({session, data: makeData({}, [known, {action: 'action_new', label: 'New'}])});
+        cells = [];
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const controller = create();
+
+        await controller.refresh(['aa']);
+
+        expect(controller.bulkActions).toEqual([known]);
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('action_new'));
     });
 
     it('loads the bulk actions while the column is hidden', async () => {
