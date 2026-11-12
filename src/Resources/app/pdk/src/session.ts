@@ -61,6 +61,12 @@ export interface PdkSession {
   getChangedFormValues(): Promise<Record<string, unknown> | null>;
 
   /**
+   * True when a PDK form has changes that are not saved. Use it where Shopware
+   * asks for unsaved changes without waiting, for example on a language change.
+   */
+  hasChanges(): boolean;
+
+  /**
    * Adds PDK notifications from a response that the PDK admin did not request
    * itself, for example the error of a product settings save. With onNotification
    * they show in Shopware, the same as the notifications of the PDK's own requests.
@@ -105,6 +111,12 @@ const renderElements = async (
 
   return apps;
 };
+
+// The forms registry is reactive and unwraps the refs of a form, which its own
+// methods then fail to write. So use the form itself.
+const getDirtyForms = () => Object.values(useFormBuilder().forms.value)
+  .map((form) => toRaw(form))
+  .filter((form) => form.isDirty.value);
 
 /**
  * Starts one PDK admin and renders the PDK components in the HTML that the
@@ -202,11 +214,7 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
     },
 
     async getChangedFormValues() {
-      // The forms registry is reactive and unwraps the refs of a form, which its own
-      // methods then fail to write. So use the form itself.
-      const dirtyForms = Object.values(useFormBuilder().forms.value)
-        .map((form) => toRaw(form))
-        .filter((form) => form.isDirty.value);
+      const dirtyForms = getDirtyForms();
 
       if (!dirtyForms.length) {
         return null;
@@ -219,6 +227,10 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
       }
 
       return Object.assign({}, ...dirtyForms.map((form) => form.getValues()));
+    },
+
+    hasChanges() {
+      return getDirtyForms().length > 0;
     },
 
     addNotifications(notifications) {

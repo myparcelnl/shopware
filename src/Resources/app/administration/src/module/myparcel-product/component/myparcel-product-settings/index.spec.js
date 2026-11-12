@@ -13,11 +13,12 @@ vi.mock('../../../../service/pdk-loader', () => ({
 describe('myparcel-product-settings', () => {
     let component;
     let productLoading;
+    let rulesLoading;
 
     beforeAll(async () => {
         globalThis.Shopware = {
             Mixin: {getByName: () => ({})},
-            Store: {get: () => ({isLoading: productLoading})},
+            Store: {get: () => ({loading: {product: productLoading, rules: rulesLoading}})},
         };
         ({default: component} = await import('./index'));
     });
@@ -39,6 +40,7 @@ describe('myparcel-product-settings', () => {
 
     beforeEach(() => {
         productLoading = false;
+        rulesLoading = false;
         loader.load.mockReset();
         loader.close.mockReset();
         loader.session = null;
@@ -70,6 +72,28 @@ describe('myparcel-product-settings', () => {
         loader.load.mockResolvedValue({});
         component.watch.isProductLoading.call(settings, false);
         expect(loader.load).toHaveBeenCalledOnce();
+    });
+
+    it('does not load again when another loading key of the product page changes', () => {
+        const settings = createSettings({load: vi.fn()});
+
+        rulesLoading = true;
+        expect(settings.isProductLoading).toBe(false);
+        rulesLoading = false;
+
+        productLoading = true;
+        expect(settings.isProductLoading).toBe(true);
+    });
+
+    it('keeps the changes of a failed save until the next save or another product', () => {
+        const settings = createSettings({load: vi.fn(), keepChanges: true});
+
+        component.watch.isProductLoading.call(settings, false);
+        expect(settings.load).not.toHaveBeenCalled();
+
+        component.watch['$route.params.id'].call(settings, 'ccdd');
+        expect(settings.keepChanges).toBe(false);
+        expect(settings.load).toHaveBeenCalledOnce();
     });
 
     it('loads for another product only while the product page is not loading', () => {
@@ -111,9 +135,12 @@ describe('myparcel-product-settings', () => {
         const settings = createSettings({loader});
         loader.session = {getChangedFormValues: vi.fn().mockResolvedValue({fitInMailbox: 2})};
 
-        await component.methods.submit.call(settings);
+        settings.keepChanges = true;
+
+        await expect(component.methods.submit.call(settings)).resolves.toBe(true);
 
         expect(saveProductSettings).toHaveBeenCalledWith('aabb', {fitInMailbox: 2});
+        expect(settings.keepChanges).toBe(false);
     });
 
     it('gives the notifications of a failed save to the pdk, without a second error', async () => {
@@ -125,9 +152,10 @@ describe('myparcel-product-settings', () => {
         };
         saveProductSettings.mockRejectedValue({response: {data: {notifications}}});
 
-        await component.methods.submit.call(settings);
+        await expect(component.methods.submit.call(settings)).resolves.toBe(false);
 
         expect(loader.session.addNotifications).toHaveBeenCalledWith(notifications);
+        expect(settings.keepChanges).toBe(true);
     });
 
     it('rejects a failed save that has no notifications', async () => {
@@ -140,14 +168,30 @@ describe('myparcel-product-settings', () => {
 
         await expect(component.methods.submit.call(settings)).rejects.toThrow('network');
         expect(loader.session.addNotifications).not.toHaveBeenCalled();
+        expect(settings.keepChanges).toBe(true);
+    });
+
+    it('rejects and keeps the changes when a changed form is not valid', async () => {
+        const settings = createSettings({loader});
+        loader.session = {getChangedFormValues: vi.fn().mockRejectedValue(new Error('not valid'))};
+
+        await expect(component.methods.submit.call(settings)).rejects.toThrow('not valid');
+        expect(settings.keepChanges).toBe(true);
+    });
+
+    it('knows when the settings have unsaved changes', () => {
+        expect(component.methods.hasChanges.call(createSettings())).toBe(false);
+
+        loader.session = {hasChanges: () => true};
+        expect(component.methods.hasChanges.call(createSettings({loader}))).toBe(true);
     });
 
     it('saves nothing without changes or without a session', async () => {
         const settings = createSettings({loader});
 
-        await component.methods.submit.call(settings);
+        await expect(component.methods.submit.call(settings)).resolves.toBe(true);
         loader.session = {getChangedFormValues: vi.fn().mockResolvedValue(null)};
-        await component.methods.submit.call(settings);
+        await expect(component.methods.submit.call(settings)).resolves.toBe(true);
 
         expect(saveProductSettings).not.toHaveBeenCalled();
     });

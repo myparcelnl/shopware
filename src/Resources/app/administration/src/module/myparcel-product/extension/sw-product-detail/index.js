@@ -18,6 +18,8 @@ Shopware.Component.override('sw-product-detail', {
         return {
             // The settings load when the MyParcel tab opens for the first time, then stay.
             myparcelSettingsOpened: false,
+            // The MyParcel settings of the last Save did not save.
+            myparcelSaveFailed: false,
         };
     },
 
@@ -55,10 +57,16 @@ Shopware.Component.override('sw-product-detail', {
          * save loads the product again, and the MyParcel settings with it.
          */
         async saveProduct() {
+            // Disables the Save button during the MyParcel save. The core sets it again in
+            // saveProduct() and sets it back after the save. A Save without product changes
+            // then also loads the MyParcel settings again, because this tick has already ended.
+            Shopware.Store.get('swProductDetail').setLoading(['product', true]);
+
             try {
-                await this.$refs.myparcelProductSettings?.submit();
+                this.myparcelSaveFailed = (await this.$refs.myparcelProductSettings?.submit()) === false;
             } catch (error) {
                 console.error(error);
+                this.myparcelSaveFailed = true;
                 this.createNotificationError({message: this.$tc('myparcel.shopware_admin_product_save_error')});
             }
 
@@ -71,6 +79,26 @@ Shopware.Component.override('sw-product-detail', {
             removeMyparcelFields(this.product?.getOrigin?.().customFields);
 
             return this.$super('saveProduct');
+        },
+
+        /**
+         * Shows the result of the Save. A Save without product changes whose MyParcel
+         * settings did not save shows no success: the error of the MyParcel save shows.
+         */
+        onSaveFinished(response) {
+            if (this.myparcelSaveFailed && response === 'empty') {
+                return;
+            }
+
+            this.$super('onSaveFinished', response);
+        },
+
+        /**
+         * True when the product or the MyParcel settings have unsaved changes. The
+         * core asks it before the content language changes, and then offers to save.
+         */
+        abortOnLanguageChange() {
+            return this.$super('abortOnLanguageChange') || (this.$refs.myparcelProductSettings?.hasChanges() ?? false);
         },
     },
 });
