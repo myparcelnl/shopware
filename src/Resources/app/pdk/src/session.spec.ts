@@ -228,6 +228,11 @@ describe('createSession', () => {
     await expect(session.getChangedFormValues()).resolves.toBeNull();
   });
 
+  it('knows when a form has changes', async () => {
+    expect((await sessionWithForms({changed: new FakeForm(true), unchanged: new FakeForm(false)})).hasChanges()).toBe(true);
+    expect((await sessionWithForms({unchanged: new FakeForm(false)})).hasChanges()).toBe(false);
+  });
+
   it('rejects when a changed form is not valid', async () => {
     const session = await sessionWithForms({invalid: new FakeForm(true, {}, false)});
 
