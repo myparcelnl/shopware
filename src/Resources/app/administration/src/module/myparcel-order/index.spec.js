@@ -1,6 +1,5 @@
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 
-vi.mock('./extension/sw-bulk-edit-modal', () => ({}));
 vi.mock('./extension/sw-order-list', () => ({}));
 vi.mock('./extension/sw-order-detail', () => ({}));
 
