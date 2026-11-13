@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Tests\Support;
 
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Http\PdkHttpBridge;
@@ -32,6 +33,9 @@ final class HttpBridgeFactory
             new ProductSettingsWriter(FakeEntityRepository::with()),
             new ViewService(new RequestStack()),
             new FixedOrderStatusService(),
+            FakeEntityRepository::with(),
+            new SalesChannelContextHolder(),
+            new FixedCartLoader(),
             '0.0.0-test',
             'https://shop.test',
             true

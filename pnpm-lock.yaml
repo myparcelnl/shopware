@@ -175,6 +175,9 @@ importers:
       '@myparcel-dev/pdk-app-builder':
         specifier: ^4.1.3
         version: 4.1.4
+      '@myparcel-dev/pdk-checkout':
+        specifier: ^2.2.3
+        version: 2.2.3(typescript@5.9.3)
       '@vitejs/plugin-vue':
         specifier: ^6.0.9
         version: 6.0.9(vite@8.3.3(@types/node@26.6.4)(jiti@1.21.7)(sass@1.105.1))(vue@3.4.31(typescript@5.9.3))
@@ -271,6 +274,26 @@ packages:
     resolution: {integrity: sha512-mMl7cfSv+iOU4ZXWCGu3+X7oTSEJUqdE/n4GdDCuUQIZFZ3BuaKD57HUnkNHLoysLj2D8AWXxPpK7m7AbUI3FA==}
     engines: {node: '>=20'}
     hasBin: true
+
+  '@myparcel-dev/pdk-checkout-common@2.2.3':
+    resolution: {integrity: sha512-TYdmeS589maM+nnlU5l1QXBw9X8kzqvUPWD87Xx+nSXXChowken1cgmLrAjIB+pB36VV90ZJTScBXxecxES/Zw==}
+    engines: {node: '>=20'}
+
+  '@myparcel-dev/pdk-checkout-delivery-options@2.2.3':
+    resolution: {integrity: sha512-Fqqgq73qj6Gtj/UG+8PrSglqzvtcGkuG81Uqqavy8Zom713nZQNWXcmgqY/1A/+i2qZ7BC8dttWgi3w9RRf16w==}
+    engines: {node: '>=20'}
+
+  '@myparcel-dev/pdk-checkout-separate-address-fields@2.2.3':
+    resolution: {integrity: sha512-mxkRt6i0cNMX3uKcVOU2ev9TmSVtVrRBMKSLh2kWMiqBLJjorYoTjZtHjE7WRXsGM/mNjmFRGUYBMm/kjLOhkg==}
+    engines: {node: '>=20'}
+
+  '@myparcel-dev/pdk-checkout-tax-fields@2.2.3':
+    resolution: {integrity: sha512-xNwEoqrInYX8e3taFwX80vquGRRS5i52Du0lBpDpBkPU42lBDKGtWVNGK1/uDwPAY7Vq3bZFVJp91E0aqW/lxw==}
+    engines: {node: '>=20'}
+
+  '@myparcel-dev/pdk-checkout@2.2.3':
+    resolution: {integrity: sha512-4MdOW8nnVw+RjpPuW2gdIB1SjUBclufnrg6/+UhNhBpZQ7AqHcLqlwcceq5N6ltMXOlFLwbvYEO5bIgiH5q8xw==}
+    engines: {node: '>=20'}
 
   '@myparcel-dev/pdk-common@2.3.1':
     resolution: {integrity: sha512-8FIVIXLkN7NchVYk0L+bds4CsM7E8cUYllhIUugebQNdiKalZnMBnCNSeD79LDsIC2dJ6iH+bgKQBd/dcsF+5g==}
@@ -1679,6 +1702,50 @@ snapshots:
       radash: 12.1.1
     transitivePeerDependencies:
       - supports-color
+
+  '@myparcel-dev/pdk-checkout-common@2.2.3(typescript@5.9.3)':
+    dependencies:
+      '@myparcel-dev/constants': 2.10.4
+      '@myparcel-dev/delivery-options': 7.5.5(typescript@5.9.3)
+      '@myparcel-dev/pdk-common': 2.3.1(typescript@5.9.3)
+      radash: 12.1.1
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+
+  '@myparcel-dev/pdk-checkout-delivery-options@2.2.3(typescript@5.9.3)':
+    dependencies:
+      '@myparcel-dev/delivery-options': 7.5.5(typescript@5.9.3)
+      '@myparcel-dev/pdk-checkout-common': 2.2.3(typescript@5.9.3)
+      '@myparcel-dev/ts-utils': 1.15.3
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+
+  '@myparcel-dev/pdk-checkout-separate-address-fields@2.2.3(typescript@5.9.3)':
+    dependencies:
+      '@myparcel-dev/pdk-checkout-common': 2.2.3(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+
+  '@myparcel-dev/pdk-checkout-tax-fields@2.2.3(typescript@5.9.3)':
+    dependencies:
+      '@myparcel-dev/constants': 2.10.4
+      '@myparcel-dev/pdk-checkout-common': 2.2.3(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+
+  '@myparcel-dev/pdk-checkout@2.2.3(typescript@5.9.3)':
+    dependencies:
+      '@myparcel-dev/pdk-checkout-common': 2.2.3(typescript@5.9.3)
+      '@myparcel-dev/pdk-checkout-delivery-options': 2.2.3(typescript@5.9.3)
+      '@myparcel-dev/pdk-checkout-separate-address-fields': 2.2.3(typescript@5.9.3)
+      '@myparcel-dev/pdk-checkout-tax-fields': 2.2.3(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
 
   '@myparcel-dev/pdk-common@2.3.1(typescript@5.9.3)':
     dependencies:

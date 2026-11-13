@@ -82,12 +82,15 @@ spl_autoload_register(static function (string $class) use ($pdkTestsDir): void {
  * Only the namespaces that the tests need and the development install does not
  * have are mapped, so its Symfony 6 classes stay the ones in use:
  * - Shopware\Core: the entities, the DAL classes and the state machine.
+ * - Shopware\Storefront: the confirm page and its event.
+ * - Symfony\Component\EventDispatcher: the subscriber interface of the plugin's
+ *   event subscribers.
  * - Doctrine\DBAL: the Connection that OrderDataWriter and ProductCustomFieldSet take.
  * - Symfony\Component\VarExporter: EntityRepository uses its LazyGhostTrait.
+ * - Ramsey\Uuid and Brick\Math: Uuid::randomHex(), which a cart LineItem calls
+ *   in its constructor.
  * symfony/polyfill-php85 is loaded by hand: Shopware's code calls PHP 8.5
  * functions, and the development install does not have that polyfill.
- * ramsey/uuid is not mapped, so Uuid::randomHex() fails in a test: use
- * Entities::id().
  */
 $shopwareVendorDir = dirname(__DIR__) . '/.tmp/shopware/vendor';
 
@@ -101,8 +104,12 @@ require_once $shopwareVendorDir . '/symfony/polyfill-php85/bootstrap.php';
 spl_autoload_register(static function (string $class) use ($shopwareVendorDir): void {
     $directories = [
         'Shopware\\Core\\'                  => $shopwareVendorDir . '/shopware/core/',
+        'Shopware\\Storefront\\'            => $shopwareVendorDir . '/shopware/storefront/',
         'Doctrine\\DBAL\\'                  => $shopwareVendorDir . '/doctrine/dbal/src/',
         'Symfony\\Component\\VarExporter\\' => $shopwareVendorDir . '/symfony/var-exporter/',
+        'Symfony\\Component\\EventDispatcher\\' => $shopwareVendorDir . '/symfony/event-dispatcher/',
+        'Ramsey\\Uuid\\'                    => $shopwareVendorDir . '/ramsey/uuid/src/',
+        'Brick\\Math\\'                     => $shopwareVendorDir . '/brick/math/src/',
     ];
 
     foreach ($directories as $prefix => $directory) {
