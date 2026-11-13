@@ -53,6 +53,31 @@ describe('sw-product-detail override', () => {
         await expect(saveProduct(page)).resolves.toBe('saved');
     });
 
+    it('keeps the MyParcel value that the PDK saved when the merchant also changes another custom field', async () => {
+        // The product as loaded: an old MyParcel value and another custom field.
+        const page = createPage({myparcel_fit_in_mailbox: 2, other_field: 'old'});
+        const saved = {};
+
+        page.product.customFields.other_field = 'new';
+        page.$refs.myparcelProductSettings.submit = vi.fn(() => {
+            // The PDK writes the new MyParcel value directly.
+            saved.myparcel_fit_in_mailbox = 5;
+
+            return Promise.resolve(true);
+        });
+        page.$super.mockImplementation(() => {
+            // Shopware writes each custom field key on its own: a key that is not in the save keeps its value.
+            Object.assign(saved, page.product.customFields);
+
+            return Promise.resolve('saved');
+        });
+
+        await saveProduct(page);
+
+        expect(page.origin.customFields).toEqual({other_field: 'old'});
+        expect(saved).toEqual({myparcel_fit_in_mailbox: 5, other_field: 'new'});
+    });
+
     it('disables the Save button before the MyParcel save starts', async () => {
         const page = createPage({}, {submit: vi.fn(() => {
             expect(setLoading).toHaveBeenCalledWith(['product', true]);
