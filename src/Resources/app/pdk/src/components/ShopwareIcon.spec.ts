@@ -40,6 +40,10 @@ describe('ShopwareIcon', () => {
     expect(svg?.querySelector('path')?.getAttribute('d')).toMatch(/^M9 9V1C9/);
   });
 
+  it.each(Object.values(AdminIcon))('leaves out the id of the icon kit for the icon %s', (icon) => {
+    expect(render(icon).querySelector('svg')?.hasAttribute('id')).toBe(false);
+  });
+
   it('lets only the spinner spin', () => {
     expect(render(AdminIcon.Spinner).querySelector('.mypa-icon')?.classList.contains('mypa-icon--spin')).toBe(true);
     expect(render(AdminIcon.Save).querySelector('.mypa-icon')?.classList.contains('mypa-icon--spin')).toBe(false);

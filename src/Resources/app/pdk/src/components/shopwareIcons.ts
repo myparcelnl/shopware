@@ -38,13 +38,20 @@ const SHOPWARE_ICONS: Partial<Record<AdminIcon, string>> = {
   [AdminIcon.Yes]: checkmark,
 };
 
+// The admin CSS of Shopware gives each icon a fixed size by its id, which wins from the size of
+// .mypa-icon. An id must also be unique on the page, and the order list shows the same icon many
+// times. Each file of the icon kit has one id, on its svg element.
+const withoutId = (svg: string): string => svg.replace(/ id="[^"]*"/, '');
+
 /**
- * Get the SVG markup of a Shopware icon, as the icon kit ships it. The PDK also
- * asks for package and delivery types, which have no icon.
+ * Get the SVG markup of a Shopware icon, as the icon kit ships it but without
+ * its id. The PDK also asks for package and delivery types, which have no icon.
  *
  * @returns undefined for a name without an icon
  */
 export const getIconSvg = (icon: string): string | undefined => {
   // Own keys only: a name like "constructor" must not find a member of Object.prototype.
-  return Object.hasOwn(SHOPWARE_ICONS, icon) ? SHOPWARE_ICONS[icon as AdminIcon] : undefined;
+  const svg = Object.hasOwn(SHOPWARE_ICONS, icon) ? SHOPWARE_ICONS[icon as AdminIcon] : undefined;
+
+  return svg && withoutId(svg);
 };
