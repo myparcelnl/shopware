@@ -33,7 +33,6 @@
     }
   }
 
-  // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
   .mypa-modal::backdrop {
     background: rgb(0 0 0 / 40%);
   }
@@ -51,6 +50,7 @@
     }
   }
 
+  // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
   .mypa-dropdown-menu__item {
     @apply mypa-flex mypa-w-full mypa-items-center mypa-gap-2 mypa-whitespace-nowrap mypa-rounded-none mypa-border-0 mypa-bg-transparent mypa-px-3 mypa-py-1.5 mypa-text-left;
     font-size: var(--font-size-xs, 0.75rem);

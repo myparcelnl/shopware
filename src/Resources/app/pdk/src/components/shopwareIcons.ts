@@ -1,5 +1,6 @@
-// The Regular icons of @shopware-ag/meteor-icon-kit, the set of the Shopware admin. Keep its
-// version in package.json the same as in the Shopware administration package.
+// The Regular icons of @shopware-ag/meteor-icon-kit, the set of the Shopware admin. The plug-in
+// pins one version for all supported Shopware versions, and the admin of each Shopware version has
+// its own. An icon can therefore look a little different from the same icon in the Shopware admin.
 import ban from '@shopware-ag/meteor-icon-kit/icons/regular/ban.svg?raw';
 import checkmark from '@shopware-ag/meteor-icon-kit/icons/regular/checkmark.svg?raw';
 import chevronDown from '@shopware-ag/meteor-icon-kit/icons/regular/chevron-down.svg?raw';
