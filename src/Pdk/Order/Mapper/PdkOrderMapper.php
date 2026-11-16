@@ -103,9 +103,10 @@ final class PdkOrderMapper
      * The delivery that the shipping address and costs come from. Only the checkout
      * sets the primary delivery in Shopware 6.7, so for an order written through the
      * DAL or the Admin API (an import), take the delivery with the highest shipping
-     * costs, the rule of Shopware 6.8's backfill (ties go to the lowest id).
+     * costs, the rule of Shopware 6.8's backfill (ties go to the lowest id). Use it
+     * where the plugin writes to that delivery, so it picks the same one.
      */
-    private static function findShippingDelivery(OrderEntity $order): ?OrderDeliveryEntity
+    public static function findShippingDelivery(OrderEntity $order): ?OrderDeliveryEntity
     {
         $primary = $order->getPrimaryOrderDelivery();
 

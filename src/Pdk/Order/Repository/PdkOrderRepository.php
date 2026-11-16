@@ -9,6 +9,7 @@ use MyParcel\Shopware\Entity\OrderShipment\OrderShipmentCollection;
 use MyParcel\Shopware\Entity\OrderShipment\OrderShipmentEntity;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Order\Mapper\PdkOrderMapper;
+use MyParcel\Shopware\Pdk\Order\TrackingCodes;
 use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcelNL\Pdk\App\Order\Collection\PdkOrderCollection;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
@@ -152,17 +153,20 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     }
 
     /**
-     * Stores the order data and the shipments. Stored shipments that the order no
-     * longer carries stay; incoming shipments replace stored ones with the same id.
+     * Stores the order data and the shipments, and puts the barcodes in the
+     * tracking codes of the shipping delivery. Stored shipments that the order no
+     * longer carries stay; see mergeShipments() for a shipment that both carry.
      */
     public function update(PdkOrder $order): PdkOrder
     {
         $orderId = (string) $order->externalIdentifier;
+        $stored  = $this->readStoredOrder($orderId);
 
-        $order->shipments = $this->mergeShipments($this->readStoredShipments($orderId), $order->shipments);
+        $order->shipments = $this->mergeShipments(self::getStoredShipments($stored), $order->shipments);
 
         $this->orderDataWriter->saveOrderData($orderId, $order->toStorableArray());
         $this->orderDataWriter->saveShipments($orderId, $order->shipments);
+        $this->saveTrackingCodes($stored, $order->shipments);
 
         return $this->save($orderId, $order);
     }
@@ -227,21 +231,29 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     }
 
     /**
-     * The shipments that are stored now, not those of the cached order: another
-     * request can have added one since.
+     * The order as it is stored now, not the cached order: another request can
+     * have added a shipment or a tracking code since.
      */
-    private function readStoredShipments(string $orderId): ShipmentCollection
+    private function readStoredOrder(string $orderId): ?OrderEntity
     {
         if (! Uuid::isValid($orderId)) {
-            return new ShipmentCollection();
+            return null;
         }
 
-        $criteria = (new Criteria([$orderId]))->addAssociation(OrderExtension::SHIPMENTS);
+        $criteria = (new Criteria([$orderId]))
+            ->addAssociation(OrderExtension::SHIPMENTS)
+            ->addAssociation('primaryOrderDelivery')
+            ->addAssociation('deliveries');
         $criteria->getAssociation(OrderExtension::SHIPMENTS)->addSorting(new FieldSorting('position'));
 
         /** @var null|OrderEntity $order */
         $order = $this->orderRepository->search($criteria, Context::createDefaultContext())->first();
 
+        return $order;
+    }
+
+    private static function getStoredShipments(?OrderEntity $order): ShipmentCollection
+    {
         /** @var null|OrderShipmentCollection $shipments */
         $shipments = $order?->getExtension(OrderExtension::SHIPMENTS);
 
@@ -251,14 +263,36 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     }
 
     /**
+     * Writes only when the codes change, so a save without a new or deleted
+     * barcode does not write the order.
+     */
+    private function saveTrackingCodes(?OrderEntity $order, ShipmentCollection $shipments): void
+    {
+        $delivery = null === $order ? null : PdkOrderMapper::findShippingDelivery($order);
+
+        if (null === $delivery) {
+            return;
+        }
+
+        $codes = TrackingCodes::merge($delivery->getTrackingCodes(), $shipments);
+
+        if ($codes === $delivery->getTrackingCodes()) {
+            return;
+        }
+
+        $this->orderRepository->update([[
+            'id'         => $order->getId(),
+            'deliveries' => [['id' => $delivery->getId(), 'trackingCodes' => $codes]],
+        ]], Context::createDefaultContext());
+    }
+
+    /**
      * A shipment without an id cannot be matched. The incoming one is the current
      * one, so stored shipments without an id are dropped and incoming ones kept.
      * Incoming shipments that the PDK marked deleted stay in the list, so
-     * OrderDataWriter deletes their rows. An incoming copy wins over the stored copy
-     * by id, so a request with an older copy of a shipment overwrites what another
-     * request (for example a shipment webhook) stored in the meantime.
-     *
-     * @TODO INT-1962: keep the stored copy of a shipment when it is newer than the incoming one, so shipment webhooks do not lose updates.
+     * OrderDataWriter deletes their rows. An incoming copy replaces the stored copy
+     * with the same id, unless the stored copy is newer: another request (for
+     * example a shipment webhook) can have saved it after this request read it.
      */
     private function mergeShipments(ShipmentCollection $stored, ShipmentCollection $incoming): ShipmentCollection
     {
@@ -276,12 +310,28 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
         foreach ($incoming as $shipment) {
             if (null === $shipment->id) {
                 $withoutId[] = $shipment;
-            } else {
+            } elseif (! isset($byId[$shipment->id]) || ! self::isNewer($byId[$shipment->id], $shipment)) {
                 $byId[$shipment->id] = $shipment;
             }
         }
 
         return new ShipmentCollection(array_merge(array_values($byId), $withoutId));
+    }
+
+    /**
+     * Whether $stored is newer than $incoming. `modified` is the time of the last
+     * change in the API, `updated` the time the plugin saved the shipment. A copy
+     * fresh from the API has no `updated` yet, so it is never older by that field.
+     */
+    private static function isNewer(Shipment $stored, Shipment $incoming): bool
+    {
+        foreach (['modified', 'updated'] as $field) {
+            if (null !== $stored->{$field} && null !== $incoming->{$field} && $stored->{$field} > $incoming->{$field}) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -165,6 +165,81 @@ it('merges stored shipments with the incoming ones by id and keeps new ones with
         ->and($updated->shipments)->toHaveCount(3);
 });
 
+/**
+ * Stores an order whose stored copy of shipment 101 is $stored, and updates it with
+ * $incoming as the copy that the request carries. Returns the stored barcode.
+ */
+function mergeOneShipment(array $stored, array $incoming): ?string
+{
+    $shipments  = FakeEntityRepository::with();
+    $orders     = FakeEntityRepository::with(Entities::order([
+        'shipments' => [['id' => 101, 'carrier' => 'POSTNL'] + $stored],
+    ]));
+    $repository = orderRepository($orders, null, $shipments);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL'] + $incoming]);
+    $repository->update($order);
+
+    return array_column($shipments->upserts, 'data')[0]['barcode'] ?? null;
+}
+
+it('keeps the stored copy of a shipment that another request saved later', function () {
+    expect(mergeOneShipment(
+        ['barcode' => 'STORED', 'updated' => '2026-11-09 10:05:00'],
+        ['barcode' => 'INCOMING', 'updated' => '2026-11-09 10:00:00']
+    ))->toBe('STORED');
+});
+
+it('keeps the stored copy of a shipment that the api changed later', function () {
+    expect(mergeOneShipment(
+        ['barcode' => 'STORED', 'modified' => '2026-11-09 10:05:00'],
+        ['barcode' => 'INCOMING', 'modified' => '2026-11-09 10:00:00']
+    ))->toBe('STORED');
+});
+
+it('takes the incoming copy of a shipment that is as new or newer', function (array $stored, array $incoming) {
+    expect(mergeOneShipment(['barcode' => 'STORED'] + $stored, ['barcode' => 'INCOMING'] + $incoming))->toBe('INCOMING');
+})->with([
+    'fresh from the api, not saved yet' => [['updated' => '2026-11-09 10:05:00'], []],
+    'saved later'                       => [['updated' => '2026-11-09 10:00:00'], ['updated' => '2026-11-09 10:05:00']],
+    'saved at the same time'            => [['updated' => '2026-11-09 10:00:00'], ['updated' => '2026-11-09 10:00:00']],
+    'changed later in the api'          => [['modified' => '2026-11-09 10:00:00'], ['modified' => '2026-11-09 10:05:00']],
+    'no timestamps'                     => [[], []],
+]);
+
+/**
+ * Updates an order whose shipping delivery has $trackingCodes with shipment 101,
+ * barcode 3SA. Returns the writes to the order repository.
+ *
+ * @param  list<string> $trackingCodes
+ *
+ * @return list<array<string, mixed>>
+ */
+function updateWithBarcode(array $trackingCodes): array
+{
+    $delivery   = Entities::delivery(Entities::address(), Entities::price(4.95, 1, 0.86), Entities::DELIVERY_ID, $trackingCodes);
+    $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => $delivery]));
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL', 'barcode' => '3SA']]);
+    $repository->update($order);
+
+    return $orders->updates;
+}
+
+it('adds the barcodes to the tracking codes of the shipping delivery', function () {
+    expect(updateWithBarcode(['OWN-1']))->toBe([[
+        'id'         => Entities::ORDER_ID,
+        'deliveries' => [['id' => Entities::DELIVERY_ID, 'trackingCodes' => ['OWN-1', '3SA']]],
+    ]]);
+});
+
+it('does not write the tracking codes when they stay the same', function () {
+    expect(updateWithBarcode(['3SA']))->toBe([]);
+});
+
 it('returns the updated order from the cache afterwards', function () {
     $orders     = FakeEntityRepository::with(Entities::order());
     $repository = orderRepository($orders);
