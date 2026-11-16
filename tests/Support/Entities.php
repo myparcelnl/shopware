@@ -27,6 +27,7 @@ use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\Pricing\Price;
 use Shopware\Core\Framework\DataAbstractionLayer\Pricing\PriceCollection;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\Aggregate\CountryState\CountryStateEntity;
 use Shopware\Core\System\Country\CountryEntity;
 use Shopware\Core\System\Currency\CurrencyEntity;
@@ -251,8 +252,10 @@ final class Entities
 
         $shipments = [];
 
+        // The row ids follow OrderDataWriter, so the writer finds these rows.
         foreach (array_values($values['shipments']) as $position => $data) {
-            $shipments[] = self::shipment($id, $position, $data);
+            $rowId       = null === ($data['id'] ?? null) ? "$id.new.$position" : "$id.{$data['id']}";
+            $shipments[] = self::shipment($id, $position, $data, Uuid::fromStringToHex($rowId));
         }
 
         $order->addExtension(OrderExtension::SHIPMENTS, new OrderShipmentCollection($shipments));
