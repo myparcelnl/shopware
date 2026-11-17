@@ -12,7 +12,6 @@ import {
   DefaultNumberInput,
   DefaultRow,
   DefaultShippingMethodsInput,
-  DefaultTable,
   DefaultTableCol,
   DefaultTableRow,
   DefaultTextArea,
@@ -35,6 +34,7 @@ import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareSettingsDivider from './components/ShopwareSettingsDivider.vue';
 import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
+import ShopwareTable from './components/ShopwareTable.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
 import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
 import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
@@ -92,7 +92,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.TabNavButton]: ShopwareTabNavButton,
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
-    [AdminComponent.Table]: DefaultTable,
+    [AdminComponent.Table]: ShopwareTable,
     [AdminComponent.TextArea]: DefaultTextArea,
     [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
