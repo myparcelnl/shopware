@@ -24,10 +24,6 @@
     @apply mypa-cursor-pointer mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-px-3 mypa-py-1;
   }
 
-  table {
-    @apply mypa-w-full;
-  }
-
   @include button.button;
   @include field.field;
   @include choice.choice;
