@@ -5,7 +5,6 @@ import {
   DefaultCodeEditor,
   DefaultCol,
   DefaultCurrencyInput,
-  DefaultDropOffInput,
   DefaultImage,
   DefaultMultiDateInput,
   DefaultMultiSelectInput,
@@ -14,13 +13,13 @@ import {
   DefaultShippingMethodsInput,
   DefaultTableCol,
   DefaultTableRow,
-  DefaultTextArea,
   DefaultTimeInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
 import ShopwareBadge from './components/ShopwareBadge.vue';
 import ShopwareBox from './components/ShopwareBox.vue';
 import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
+import ShopwareDropOffInput from './components/ShopwareDropOffInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
 import ShopwareHeading from './components/ShopwareHeading.vue';
@@ -35,6 +34,7 @@ import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareSettingsDivider from './components/ShopwareSettingsDivider.vue';
 import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
 import ShopwareTable from './components/ShopwareTable.vue';
+import ShopwareTextArea from './components/ShopwareTextArea.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
 import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
 import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
@@ -47,8 +47,8 @@ const FADE = 'mypa-fade';
  * Create the PDK admin configuration with the components of preset-default and
  * the request headers of the Shopware admin.
  *
- * The components render plain HTML, except the ones with a Shopware version.
- * The Shopware* components have the look of the Shopware admin.
+ * The Shopware* components have the look of the Shopware admin. The components of preset-default
+ * that are left only render other PDK components or plain layout, so they get the same look.
  * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
@@ -70,7 +70,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.CodeEditor]: DefaultCodeEditor,
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
-    [AdminComponent.DropOffInput]: DefaultDropOffInput,
+    [AdminComponent.DropOffInput]: ShopwareDropOffInput,
     [AdminComponent.DropdownButton]: ShopwareDropdownButton,
     [AdminComponent.FormGroup]: ShopwareFormGroup,
     [AdminComponent.Heading]: ShopwareHeading,
@@ -93,7 +93,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
     [AdminComponent.Table]: ShopwareTable,
-    [AdminComponent.TextArea]: DefaultTextArea,
+    [AdminComponent.TextArea]: ShopwareTextArea,
     [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
     [AdminComponent.ToggleInput]: ShopwareToggleInput,
