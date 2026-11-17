@@ -1,5 +1,5 @@
 import template from './myparcel-settings-index.html.twig';
-import {mountView} from '../../../../service/pdk-loader';
+import {createSessionLoader} from '../../../../service/session-loader';
 
 export default {
     template,
@@ -12,7 +12,7 @@ export default {
         return {
             isLoading: true,
             isActive: true,
-            unmount: null,
+            loader: null,
         };
     },
 
@@ -23,27 +23,26 @@ export default {
     },
 
     async mounted() {
-        try {
-            const unmount = await mountView('pluginSettings', this.$refs.pdkRoot, () => this.isActive);
+        // No onNotification: this page shows the PDK notifications in the PDK itself.
+        this.loader = createSessionLoader({root: this.$refs.pdkRoot, isActive: () => this.isActive});
 
-            // The page can close while the view loads.
-            if (this.isActive) {
-                this.unmount = unmount;
-            } else {
-                unmount();
+        try {
+            // null: the page closed while the view loaded.
+            if (!(await this.loader.load('pluginSettings', {}))) {
+                return;
             }
         } catch (error) {
             console.error(error);
             this.createNotificationError({
-                message: this.$tc('myparcel-settings.index.loadError'),
+                message: this.$tc('myparcel.shopware_admin_settings_load_error'),
             });
-        } finally {
-            this.isLoading = false;
         }
+
+        this.isLoading = false;
     },
 
     beforeUnmount() {
         this.isActive = false;
-        this.unmount?.();
+        this.loader?.close();
     },
 };

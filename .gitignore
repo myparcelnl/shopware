@@ -8,6 +8,8 @@
 /.phpunit.result.cache
 /clover.xml
 /junit.xml
+/coverage/
+/junit/
 
 ###
 # Plans and specs — never committed
@@ -22,7 +24,13 @@ node_modules/
 
 ###
 # Built admin bundles. The plug-in build in CI makes them (INT-1963); build
-# them locally with the commands in the README.
+# them locally with the commands in CONTRIBUTING.md.
 ###
 /src/Resources/public/administration/
 /src/Resources/public/pdk/
+
+###
+# Admin snippets, built from the PDK translations sheet by
+# bin/build-admin-snippets.mjs (pnpm translations:import).
+###
+/src/Resources/app/administration/src/module/*/snippet/

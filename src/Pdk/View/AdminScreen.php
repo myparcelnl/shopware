@@ -9,8 +9,6 @@ namespace MyParcel\Shopware\Pdk\View;
  * names the components themselves. Each screen is one ViewService page:
  * PluginSettings makes isPluginSettingsPage() true. The admin app asks for a
  * screen by its value.
- *
- * @TODO INT-1960: add the order list, the order detail and the product.
  */
 enum AdminScreen: string
 {
@@ -20,4 +18,17 @@ enum AdminScreen: string
     public const REQUEST_ATTRIBUTE = 'myparcel_admin_screen';
 
     case PluginSettings = 'pluginSettings';
+    case OrderList = 'orderList';
+    case Order = 'order';
+    case Product = 'product';
+    case ChildProduct = 'childProduct';
+
+    /**
+     * Tell if the admin app may ask for this screen by its value. The child
+     * product is not requestable: the server picks it for a variant itself.
+     */
+    public function isRequestable(): bool
+    {
+        return self::ChildProduct !== $this;
+    }
 }

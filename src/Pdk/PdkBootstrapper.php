@@ -211,7 +211,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             'settingKeyPrefix'                          => \_MyParcel\DI\value(''),
 
             // The PDK's own migrations of plugin data go here, apart from the
-            // Shopware migrations in src/Migration (see "Migrations" in README.md).
+            // Shopware migrations in src/Migration (see "Migrations" in CONTRIBUTING.md).
             // @TODO INT-2154: run the PDK installer from the plugin lifecycle, so the
             // migrations in this directory run.
             'migrationDirectory'                        => \_MyParcel\DI\value(rtrim($path, '/') . '/src/Pdk/Migration'),
@@ -241,6 +241,8 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
                 ->constructorParameter('orderRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getOrderRepository'])),
             PdkProductRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkProductRepository::class)
                 ->constructorParameter('productRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getProductRepository'])),
+            // The admin view renders a product with find(), which is not in the PDK contract.
+            PdkProductRepository::class                 => \_MyParcel\DI\get(PdkProductRepositoryInterface::class),
             PdkAuditRepositoryInterface::class          => \_MyParcel\DI\autowire(NoopAuditRepository::class),
             PdkAccountRepositoryInterface::class        => \_MyParcel\DI\autowire(PdkAccountRepository::class),
             LanguageServiceInterface::class             => \_MyParcel\DI\autowire(LanguageService::class),

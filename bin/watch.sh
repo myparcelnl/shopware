@@ -45,7 +45,7 @@ if [[ -z "${PDK_DIR}" ]] || [[ ! -d "${PDK_DIR}" ]]; then
 No linked PDK found.
 
 Add a path repository to composer.json and install it, then start the watch again.
-See "Working on the PDK" in the README.
+See "Working on the PDK" in CONTRIBUTING.md.
 MESSAGE
   exit 1
 fi
