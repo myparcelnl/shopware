@@ -23,11 +23,13 @@
       v-if="notification.loading"
       v-text="translate('loading')" />
 
+    <!-- The PDK translates the label of the action. As the label prop, the button translates it again. -->
     <PdkButton
       v-if="notification.action"
-      :label="notification.action.label"
       :size="Size.Small"
-      @click="notification.action.onClick()" />
+      @click="notification.action.onClick()">
+      {{ notification.action.label }}
+    </PdkButton>
   </div>
 </template>
 

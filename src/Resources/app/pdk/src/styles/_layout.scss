@@ -64,9 +64,7 @@
     line-height: var(--font-line-height-xs);
   }
 
-  // The full width, also when a form group puts it in a column that does not stretch.
   .mypa-settings-divider {
-    align-self: stretch;
     margin: var(--scale-size-24) 0 var(--scale-size-16);
     padding-top: var(--scale-size-24);
     border-top: 1px solid var(--color-border-secondary-default);
