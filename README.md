@@ -1,5 +1,7 @@
 # MyParcel for Shopware
 
+[![Latest stable release](https://img.shields.io/github/v/release/myparcelnl/shopware?labelColor=white&label=Latest%20release)](https://github.com/myparcelnl/shopware/releases/latest)
+
 MyParcel plug-in for Shopware 6.7 and up, built on the
 [MyParcel PDK](https://github.com/myparcelnl/pdk).
 
