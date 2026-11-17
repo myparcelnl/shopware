@@ -1,4 +1,5 @@
 @use 'button';
+@use 'choice';
 @use 'field';
 
 @tailwind base;
@@ -28,6 +29,7 @@
 
   @include button.button;
   @include field.field;
+  @include choice.choice;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {

@@ -4,7 +4,6 @@ import {
   DefaultBox,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
-  DefaultCheckboxInput,
   DefaultCodeEditor,
   DefaultCol,
   DefaultCurrencyInput,
@@ -29,15 +28,16 @@ import {
   DefaultTableRow,
   DefaultTextArea,
   DefaultTimeInput,
-  DefaultToggleInput,
   DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
 import ShopwareButton from './components/ShopwareButton.vue';
+import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
+import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -48,7 +48,8 @@ const FADE = 'mypa-fade';
  * the request headers of the Shopware admin.
  *
  * The components render plain HTML, except the ones with a Shopware version.
- * ShopwareButton, ShopwareTextInput and ShopwareSelectInput have the look of the Shopware admin.
+ * ShopwareButton, ShopwareTextInput, ShopwareSelectInput, ShopwareCheckboxInput and ShopwareToggleInput
+ * have the look of the Shopware admin.
  * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
@@ -66,7 +67,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.ButtonGroup]: DefaultButtonGroup,
     [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
-    [AdminComponent.CheckboxInput]: DefaultCheckboxInput,
+    [AdminComponent.CheckboxInput]: ShopwareCheckboxInput,
     [AdminComponent.CodeEditor]: DefaultCodeEditor,
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
@@ -96,7 +97,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.TextArea]: DefaultTextArea,
     [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
-    [AdminComponent.ToggleInput]: DefaultToggleInput,
+    [AdminComponent.ToggleInput]: ShopwareToggleInput,
     [AdminComponent.TriStateInput]: DefaultTriStateInput,
   },
 
