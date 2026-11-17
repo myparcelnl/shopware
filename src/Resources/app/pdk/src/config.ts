@@ -16,8 +16,6 @@ import {
   DefaultMultiSelectInput,
   DefaultNotification,
   DefaultNumberInput,
-  DefaultRadioGroup,
-  DefaultRadioInput,
   DefaultRow,
   DefaultSettingsDivider,
   DefaultShippingMethodsInput,
@@ -27,7 +25,6 @@ import {
   DefaultTableRow,
   DefaultTextArea,
   DefaultTimeInput,
-  DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
 import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
@@ -35,9 +32,12 @@ import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
+import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
 import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
+import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -83,8 +83,8 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
     [AdminComponent.Notification]: DefaultNotification,
     [AdminComponent.NumberInput]: DefaultNumberInput,
-    [AdminComponent.RadioGroup]: DefaultRadioGroup,
-    [AdminComponent.RadioInput]: DefaultRadioInput,
+    [AdminComponent.RadioGroup]: ShopwareRadioGroup,
+    [AdminComponent.RadioInput]: ShopwareRadioInput,
     [AdminComponent.Row]: DefaultRow,
     [AdminComponent.SelectInput]: ShopwareSelectInput,
     [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
@@ -97,7 +97,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
     [AdminComponent.ToggleInput]: ShopwareToggleInput,
-    [AdminComponent.TriStateInput]: DefaultTriStateInput,
+    [AdminComponent.TriStateInput]: ShopwareTriStateInput,
   },
 
   cssUtilities: {
