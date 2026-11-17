@@ -21,7 +21,6 @@ import {
   DefaultRadioGroup,
   DefaultRadioInput,
   DefaultRow,
-  DefaultSelectInput,
   DefaultSettingsDivider,
   DefaultShippingMethodsInput,
   DefaultTabNavButton,
@@ -37,6 +36,7 @@ import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
@@ -48,7 +48,7 @@ const FADE = 'mypa-fade';
  * the request headers of the Shopware admin.
  *
  * The components render plain HTML, except the ones with a Shopware version.
- * ShopwareButton and ShopwareTextInput have the look of the Shopware admin.
+ * ShopwareButton, ShopwareTextInput and ShopwareSelectInput have the look of the Shopware admin.
  * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
@@ -86,7 +86,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.RadioGroup]: DefaultRadioGroup,
     [AdminComponent.RadioInput]: DefaultRadioInput,
     [AdminComponent.Row]: DefaultRow,
-    [AdminComponent.SelectInput]: DefaultSelectInput,
+    [AdminComponent.SelectInput]: ShopwareSelectInput,
     [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
     [AdminComponent.TabNavButton]: DefaultTabNavButton,
