@@ -8,11 +8,6 @@
     align-items: flex-start;
     gap: var(--scale-size-4);
     margin-bottom: var(--scale-size-24);
-
-    // The field takes the full width of the group, up to its own max-width.
-    > :not(label, small, ul) {
-      align-self: stretch;
-    }
   }
 
   .mypa-form-group__label {
