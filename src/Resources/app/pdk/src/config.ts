@@ -1,14 +1,12 @@
 import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from '@myparcel-dev/pdk-admin';
 import {
   DefaultBadge,
-  DefaultBox,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
   DefaultCodeEditor,
   DefaultCol,
   DefaultCurrencyInput,
   DefaultDropOffInput,
-  DefaultHeading,
   DefaultImage,
   DefaultLink,
   DefaultLoader,
@@ -17,24 +15,26 @@ import {
   DefaultNotification,
   DefaultNumberInput,
   DefaultRow,
-  DefaultSettingsDivider,
   DefaultShippingMethodsInput,
-  DefaultTabNavButton,
   DefaultTable,
   DefaultTableCol,
   DefaultTableRow,
   DefaultTextArea,
   DefaultTimeInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareBox from './components/ShopwareBox.vue';
 import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
+import ShopwareHeading from './components/ShopwareHeading.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
 import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
 import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
+import ShopwareSettingsDivider from './components/ShopwareSettingsDivider.vue';
+import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
 import ShopwareTextInput from './components/ShopwareTextInput.vue';
 import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
 import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
@@ -62,7 +62,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
 
   components: {
     [AdminComponent.Badge]: DefaultBadge,
-    [AdminComponent.Box]: DefaultBox,
+    [AdminComponent.Box]: ShopwareBox,
     [AdminComponent.ButtonGroup]: DefaultButtonGroup,
     [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
@@ -73,7 +73,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.DropOffInput]: DefaultDropOffInput,
     [AdminComponent.DropdownButton]: ShopwareDropdownButton,
     [AdminComponent.FormGroup]: ShopwareFormGroup,
-    [AdminComponent.Heading]: DefaultHeading,
+    [AdminComponent.Heading]: ShopwareHeading,
     [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
     [AdminComponent.Link]: DefaultLink,
@@ -87,9 +87,9 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.RadioInput]: ShopwareRadioInput,
     [AdminComponent.Row]: DefaultRow,
     [AdminComponent.SelectInput]: ShopwareSelectInput,
-    [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
+    [AdminComponent.SettingsDivider]: ShopwareSettingsDivider,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
-    [AdminComponent.TabNavButton]: DefaultTabNavButton,
+    [AdminComponent.TabNavButton]: ShopwareTabNavButton,
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
     [AdminComponent.Table]: DefaultTable,
