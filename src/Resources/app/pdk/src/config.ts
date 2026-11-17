@@ -2,7 +2,6 @@ import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from
 import {
   DefaultBadge,
   DefaultBox,
-  DefaultButton,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
   DefaultCheckboxInput,
@@ -35,6 +34,7 @@ import {
   DefaultToggleInput,
   DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
@@ -47,7 +47,8 @@ const FADE = 'mypa-fade';
  * Create the PDK admin configuration with the components of preset-default and
  * the request headers of the Shopware admin.
  *
- * The components render plain HTML, except the icons: the preset icon only prints the name, so ShopwareIcon draws them.
+ * The components render plain HTML, except the ones with a Shopware version. ShopwareButton has the look of the
+ * Shopware admin. The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
@@ -62,7 +63,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.Badge]: DefaultBadge,
     [AdminComponent.Box]: DefaultBox,
     [AdminComponent.ButtonGroup]: DefaultButtonGroup,
-    [AdminComponent.Button]: DefaultButton,
+    [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
     [AdminComponent.CheckboxInput]: DefaultCheckboxInput,
     [AdminComponent.CodeEditor]: DefaultCodeEditor,
