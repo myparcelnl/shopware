@@ -29,7 +29,6 @@ import {
   DefaultTableCol,
   DefaultTableRow,
   DefaultTextArea,
-  DefaultTextInput,
   DefaultTimeInput,
   DefaultToggleInput,
   DefaultTriStateInput,
@@ -38,6 +37,7 @@ import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareTextInput from './components/ShopwareTextInput.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -47,8 +47,9 @@ const FADE = 'mypa-fade';
  * Create the PDK admin configuration with the components of preset-default and
  * the request headers of the Shopware admin.
  *
- * The components render plain HTML, except the ones with a Shopware version. ShopwareButton has the look of the
- * Shopware admin. The preset icon only prints the name, so ShopwareIcon draws them.
+ * The components render plain HTML, except the ones with a Shopware version.
+ * ShopwareButton and ShopwareTextInput have the look of the Shopware admin.
+ * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
@@ -93,7 +94,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.TableRow]: DefaultTableRow,
     [AdminComponent.Table]: DefaultTable,
     [AdminComponent.TextArea]: DefaultTextArea,
-    [AdminComponent.TextInput]: DefaultTextInput,
+    [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
     [AdminComponent.ToggleInput]: DefaultToggleInput,
     [AdminComponent.TriStateInput]: DefaultTriStateInput,

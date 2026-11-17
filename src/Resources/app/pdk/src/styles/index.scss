@@ -1,4 +1,5 @@
 @use 'button';
+@use 'field';
 
 @tailwind base;
 @tailwind components;
@@ -8,10 +9,11 @@
 // inside the Shopware admin, not the Shopware look and feel.
 // @TODO INT-2073: replace this minimal styling with the Shopware look and feel.
 .myparcel-pdk {
-  input[type='text'],
-  input[type='number'],
+  // Not on .mypa-field: the Shopware components have their own field look.
+  input[type='text']:not(.mypa-field),
+  input[type='number']:not(.mypa-field),
   input[type='password'],
-  select,
+  select:not(.mypa-field),
   textarea {
     @apply mypa-w-full mypa-max-w-md mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-px-2 mypa-py-1;
   }
@@ -25,6 +27,7 @@
   }
 
   @include button.button;
+  @include field.field;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {
