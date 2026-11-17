@@ -39,4 +39,21 @@
       cursor: not-allowed;
     }
   }
+
+  // A select of one line has the chevron of the icon kit at the right, as mt-select. Its fill is
+  // the value of --color-icon-primary-default; a CSS variable cannot reach into a background image.
+  .mypa-field--select:not([multiple]) {
+    padding-right: calc(var(--scale-size-16) * 2 + 10px);
+    background-image: url('@shopware-ag/meteor-icon-kit/icons/regular/chevron-down-xs.svg');
+    background-position: right var(--scale-size-16) center;
+    background-repeat: no-repeat;
+    background-size: 10px 7px;
+    cursor: pointer;
+    appearance: none;
+  }
+
+  .mypa-field--select[multiple] {
+    min-height: 0;
+    padding: var(--scale-size-4);
+  }
 }
