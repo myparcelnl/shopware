@@ -13,7 +13,7 @@ jobs:
   # The specs of the PDK admin app and the admin module, with their coverage under
   # the flag frontend.
   test-frontend:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
