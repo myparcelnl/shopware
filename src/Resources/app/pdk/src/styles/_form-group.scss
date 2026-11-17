@@ -1,0 +1,44 @@
+// The label, the help text and the error of a Meteor field (mt-field-label.css and
+// mt-field-error.css of @shopware-ag/meteor-component-library 5.2.0, MIT), built with the Meteor
+// tokens that the Shopware admin sets on :root.
+@mixin form-group {
+  .mypa-form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--scale-size-4);
+    margin-bottom: var(--scale-size-24);
+
+    // The field takes the full width of the group, up to its own max-width.
+    > :not(label, small, ul) {
+      align-self: stretch;
+    }
+  }
+
+  .mypa-form-group__label {
+    display: flex;
+    column-gap: var(--scale-size-4);
+    align-items: center;
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--font-line-height-xs);
+  }
+
+  .mypa-form-group__optional,
+  .mypa-form-group__description {
+    color: var(--color-text-secondary-default);
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-line-height-2xs);
+  }
+
+  .mypa-form-group__errors {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-text-critical-default);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-line-height-xs);
+  }
+}
