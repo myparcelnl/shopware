@@ -38,6 +38,21 @@
             border: 0;
             border-radius: 0;
             background: none;
+            // The focus ring of a link or a button may go past the edge of the block.
+            overflow: visible;
+        }
+
+        // A shipment that loads shows the small spinner, so the row keeps its height.
+        .mypa-loader {
+            display: inline-flex;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .mypa-loader__spinner {
+            width: var(--scale-size-16);
+            height: var(--scale-size-16);
+            border-width: 2px;
         }
 
         > * + * {

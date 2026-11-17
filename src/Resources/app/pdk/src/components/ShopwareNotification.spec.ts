@@ -27,7 +27,8 @@ const mount = (notification: Record<string, unknown>) => {
     defineComponent({
       props: ['label', 'size'],
       emits: ['click'],
-      setup: (p, {emit}) => () => h('button', {'data-size': p.size, onClick: () => emit('click')}, p.label),
+      setup: (p, {emit, slots}) => () =>
+        h('button', {'data-size': p.size, 'data-label': p.label, onClick: () => emit('click')}, slots.default?.()),
     }),
   );
   app.mount(container);
@@ -96,6 +97,8 @@ describe('ShopwareNotification', () => {
 
     expect(button.textContent).toBe('Retry');
     expect(button.getAttribute('data-size')).toBe('sm');
+    // The PDK translates the label of the action. As the label prop, the button would translate it again.
+    expect(button.hasAttribute('data-label')).toBe(false);
 
     button.click();
 

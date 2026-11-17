@@ -2,16 +2,15 @@
 // mt-field-error.css of @shopware-ag/meteor-component-library 5.2.0, MIT), built with the Meteor
 // tokens that the Shopware admin sets on :root.
 @mixin form-group {
+  // A plain block: a field takes its own width (100% up to its max-width), a button keeps its width,
+  // and a block such as the shipping methods takes the full width.
   .mypa-form-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--scale-size-4);
     margin-bottom: var(--scale-size-24);
   }
 
   .mypa-form-group__label {
     display: flex;
+    margin-bottom: var(--scale-size-4);
     column-gap: var(--scale-size-4);
     align-items: center;
     color: var(--color-text-primary-default);
@@ -19,6 +18,11 @@
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-regular);
     line-height: var(--font-line-height-xs);
+  }
+
+  .mypa-form-group__description {
+    display: block;
+    margin-bottom: var(--scale-size-4);
   }
 
   .mypa-form-group__optional,
@@ -29,7 +33,7 @@
   }
 
   .mypa-form-group__errors {
-    margin: 0;
+    margin: var(--scale-size-4) 0 0;
     padding: 0;
     list-style: none;
     color: var(--color-text-critical-default);
