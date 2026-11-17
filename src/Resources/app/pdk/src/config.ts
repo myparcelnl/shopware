@@ -1,6 +1,5 @@
 import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from '@myparcel-dev/pdk-admin';
 import {
-  DefaultBadge,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
   DefaultCodeEditor,
@@ -8,11 +7,8 @@ import {
   DefaultCurrencyInput,
   DefaultDropOffInput,
   DefaultImage,
-  DefaultLink,
-  DefaultLoader,
   DefaultMultiDateInput,
   DefaultMultiSelectInput,
-  DefaultNotification,
   DefaultNumberInput,
   DefaultRow,
   DefaultShippingMethodsInput,
@@ -22,6 +18,7 @@ import {
   DefaultTextArea,
   DefaultTimeInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareBadge from './components/ShopwareBadge.vue';
 import ShopwareBox from './components/ShopwareBox.vue';
 import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
@@ -29,7 +26,10 @@ import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
 import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
 import ShopwareHeading from './components/ShopwareHeading.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
+import ShopwareLink from './components/ShopwareLink.vue';
+import ShopwareLoader from './components/ShopwareLoader.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareNotification from './components/ShopwareNotification.vue';
 import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
 import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
@@ -61,7 +61,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
   useLocationHash: false,
 
   components: {
-    [AdminComponent.Badge]: DefaultBadge,
+    [AdminComponent.Badge]: ShopwareBadge,
     [AdminComponent.Box]: ShopwareBox,
     [AdminComponent.ButtonGroup]: DefaultButtonGroup,
     [AdminComponent.Button]: ShopwareButton,
@@ -76,12 +76,12 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.Heading]: ShopwareHeading,
     [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
-    [AdminComponent.Link]: DefaultLink,
-    [AdminComponent.Loader]: DefaultLoader,
+    [AdminComponent.Link]: ShopwareLink,
+    [AdminComponent.Loader]: ShopwareLoader,
     [AdminComponent.Modal]: ShopwareModal,
     [AdminComponent.MultiDateInput]: DefaultMultiDateInput,
     [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
-    [AdminComponent.Notification]: DefaultNotification,
+    [AdminComponent.Notification]: ShopwareNotification,
     [AdminComponent.NumberInput]: DefaultNumberInput,
     [AdminComponent.RadioGroup]: ShopwareRadioGroup,
     [AdminComponent.RadioInput]: ShopwareRadioInput,

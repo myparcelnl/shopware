@@ -1,5 +1,6 @@
 @use 'button';
 @use 'choice';
+@use 'feedback';
 @use 'field';
 @use 'form-group';
 @use 'layout';
@@ -32,6 +33,7 @@
   @include choice.choice;
   @include form-group.form-group;
   @include layout.layout;
+  @include feedback.feedback;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {
