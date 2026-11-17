@@ -1,6 +1,7 @@
 @use 'button';
 @use 'choice';
 @use 'field';
+@use 'form-group';
 
 @tailwind base;
 @tailwind components;
@@ -28,6 +29,7 @@
   @include button.button;
   @include field.field;
   @include choice.choice;
+  @include form-group.form-group;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {

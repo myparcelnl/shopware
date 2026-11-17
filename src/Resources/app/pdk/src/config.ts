@@ -8,7 +8,6 @@ import {
   DefaultCol,
   DefaultCurrencyInput,
   DefaultDropOffInput,
-  DefaultFormGroup,
   DefaultHeading,
   DefaultImage,
   DefaultLink,
@@ -33,6 +32,7 @@ import {
 import ShopwareButton from './components/ShopwareButton.vue';
 import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
+import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
@@ -48,8 +48,7 @@ const FADE = 'mypa-fade';
  * the request headers of the Shopware admin.
  *
  * The components render plain HTML, except the ones with a Shopware version.
- * ShopwareButton, ShopwareTextInput, ShopwareSelectInput, ShopwareCheckboxInput and ShopwareToggleInput
- * have the look of the Shopware admin.
+ * The Shopware* components have the look of the Shopware admin.
  * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
@@ -73,7 +72,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
     [AdminComponent.DropOffInput]: DefaultDropOffInput,
     [AdminComponent.DropdownButton]: ShopwareDropdownButton,
-    [AdminComponent.FormGroup]: DefaultFormGroup,
+    [AdminComponent.FormGroup]: ShopwareFormGroup,
     [AdminComponent.Heading]: DefaultHeading,
     [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
