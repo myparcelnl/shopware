@@ -30,7 +30,7 @@ jobs:
       # its own vendor/ and discards what this step installs. The install still
       # runs, so it needs COMPOSER_IGNORE_PLATFORM_REQ too: without it, the
       # install fails on ext-zip and ext-gd before the image tag comes out.
-      - uses: myparcelnl/actions/composer-install@v5
+      - uses: myparcelnl/actions/composer-install@v6
         id: setup
         env:
           COMPOSER_IGNORE_PLATFORM_REQ: 'ext-*,lib-*'

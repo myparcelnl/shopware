@@ -4,3 +4,14 @@ allowBuilds:
   vue-demi: true
   '@parcel/watcher': false
 
+autoDedupe: true
+
+lockfile:
+  includeResolutionSettings: true
+
+# Our own packages, so a new release of them installs at once.
+minimumReleaseAgeExclude:
+  - '@myparcel/*'
+  - '@myparcel-dev/*'
+  - '@myparcel-eslint/*'
+  - '@myparcel-pdk/*'
