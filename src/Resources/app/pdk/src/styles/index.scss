@@ -2,6 +2,7 @@
 @use 'choice';
 @use 'field';
 @use 'form-group';
+@use 'layout';
 
 @tailwind base;
 @tailwind components;
@@ -18,7 +19,7 @@
     @apply mypa-w-full mypa-max-w-md mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-px-2 mypa-py-1;
   }
 
-  button:not(.mypa-button) {
+  button:not(.mypa-button, .mypa-tab) {
     @apply mypa-cursor-pointer mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-px-3 mypa-py-1;
   }
 
@@ -30,6 +31,7 @@
   @include field.field;
   @include choice.choice;
   @include form-group.form-group;
+  @include layout.layout;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {
