@@ -1,0 +1,42 @@
+// The input field of Meteor (mt-base-field.css of @shopware-ag/meteor-component-library 5.2.0, MIT),
+// built with the Meteor tokens that the Shopware admin sets on :root. Meteor puts the border on a
+// wrapper block. The PDK inputs have no wrapper, so the input itself has the border.
+@mixin field {
+  .mypa-field {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 28rem;
+    min-width: 0;
+    min-height: var(--scale-size-48);
+    margin: 0;
+    padding: 13px var(--scale-size-16);
+    border: 1px solid var(--color-border-primary-default);
+    border-radius: var(--border-radius-xs);
+    background: var(--color-background-primary-default);
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-xs);
+    line-height: 1;
+    outline: none;
+    transition: border-color 0.3s ease-out, background 0.3s ease;
+
+    &:focus-visible {
+      outline: var(--scale-size-2) solid var(--color-border-brand-default);
+      outline-offset: var(--scale-size-2);
+    }
+
+    &::placeholder {
+      color: var(--color-text-secondary-default);
+    }
+
+    &:disabled,
+    &[readonly] {
+      background: var(--color-background-tertiary-default);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
