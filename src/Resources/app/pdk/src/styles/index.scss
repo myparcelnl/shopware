@@ -9,21 +9,7 @@
 @tailwind components;
 @tailwind utilities;
 
-// The components of preset-default without a Shopware version render plain HTML, for example the
-// text area, the tab buttons and the date picker. This is the minimum to make them usable inside
-// the Shopware admin. The Shopware components (.mypa-field, .mypa-button) have their own look.
-// @TODO INT-2073: replace this minimal styling with the Shopware look and feel.
 .myparcel-pdk {
-  input[type='text']:not(.mypa-field),
-  input[type='password'],
-  textarea {
-    @apply mypa-w-full mypa-max-w-md mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-px-2 mypa-py-1;
-  }
-
-  button:not(.mypa-button, .mypa-tab) {
-    @apply mypa-cursor-pointer mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-px-3 mypa-py-1;
-  }
-
   @include button.button;
   @include field.field;
   @include choice.choice;

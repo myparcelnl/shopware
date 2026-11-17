@@ -56,4 +56,47 @@
     min-height: 0;
     padding: var(--scale-size-4);
   }
+
+  // The text area of Meteor (mt-textarea.css): the same field, higher, and only the height changes.
+  .mypa-field--textarea {
+    min-height: 8rem;
+    line-height: var(--font-line-height-xs);
+    resize: vertical;
+  }
+
+  .mypa-drop-off {
+    display: flex;
+    flex-direction: column;
+    gap: var(--scale-size-8);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mypa-drop-off__day {
+    display: grid;
+    grid-template-columns: 8rem auto minmax(0, 12rem);
+    gap: var(--scale-size-16);
+    align-items: center;
+    min-height: var(--scale-size-48);
+    font-size: var(--font-size-xs);
+  }
+
+  // The date picker of preset-default (@vuepic/vue-datepicker) with the Meteor colours.
+  .dp__theme_light {
+    --dp-font-family: var(--font-family-body);
+    --dp-border-radius: var(--border-radius-xs);
+    --dp-background-color: var(--color-background-primary-default);
+    --dp-text-color: var(--color-text-primary-default);
+    --dp-hover-color: var(--color-background-tertiary-default);
+    --dp-hover-text-color: var(--color-text-primary-default);
+    --dp-primary-color: var(--color-interaction-primary-default);
+    --dp-primary-text-color: var(--color-static-white);
+    --dp-border-color: var(--color-border-primary-default);
+    --dp-menu-border-color: var(--color-border-primary-default);
+    --dp-border-color-hover: var(--color-border-primary-default);
+    --dp-border-color-focus: var(--color-border-brand-default);
+    --dp-disabled-color: var(--color-background-tertiary-default);
+    --dp-disabled-color-text: var(--color-text-primary-disabled);
+  }
 }
