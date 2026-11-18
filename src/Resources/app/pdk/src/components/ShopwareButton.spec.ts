@@ -45,6 +45,13 @@ describe('ShopwareButton', () => {
     expect(button().textContent?.trim()).toBe('Content');
   });
 
+  // The toggle of a dropdown has only an icon. A default label would show "Save" there.
+  it('renders no text without a label', () => {
+    mount({icon: 'arrow_down'});
+
+    expect(button().textContent?.trim()).toBe('');
+  });
+
   it('is a button that does not submit a form', () => {
     mount();
 
