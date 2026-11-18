@@ -45,12 +45,13 @@ final class ProductCustomFields
      * fails when this copy differs from the PDK.
      */
     private const CASTS = [
-        ProductSettings::COUNTRY_OF_ORIGIN    => TriStateService::TYPE_COERCED,
-        ProductSettings::CUSTOMS_CODE         => TriStateService::TYPE_COERCED,
-        ProductSettings::DROP_OFF_DELAY       => 'int',
-        ProductSettings::FIT_IN_DIGITAL_STAMP => 'int',
-        ProductSettings::FIT_IN_MAILBOX       => 'int',
-        ProductSettings::PACKAGE_TYPE         => TriStateService::TYPE_COERCED,
+        ProductSettings::COUNTRY_OF_ORIGIN          => TriStateService::TYPE_COERCED,
+        ProductSettings::CUSTOMS_CODE               => TriStateService::TYPE_COERCED,
+        ProductSettings::DROP_OFF_DELAY             => 'int',
+        ProductSettings::EXTERNAL_PRODUCT_REFERENCE => TriStateService::TYPE_COERCED,
+        ProductSettings::FIT_IN_DIGITAL_STAMP       => 'int',
+        ProductSettings::FIT_IN_MAILBOX             => 'int',
+        ProductSettings::PACKAGE_TYPE               => TriStateService::TYPE_COERCED,
     ];
 
     /**
