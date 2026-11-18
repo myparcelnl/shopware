@@ -9,7 +9,7 @@
       v-if="icon"
       :icon="icon" />
     <slot>
-      {{ translate(label) }}
+      <template v-if="label">{{ translate(label) }}</template>
     </slot>
   </button>
 </template>
@@ -31,8 +31,9 @@ import {
 } from '@myparcel-dev/pdk-admin';
 
 // ActionButton and ResetButton also pass a variant, which ButtonProps does not have.
+// There is no default label, as in WooCommerce: the toggle of a dropdown has only an icon.
 const props = withDefaults(defineProps<ButtonProps & {variant?: Variant}>(), {
-  label: 'action_save',
+  label: undefined,
   size: Size.Medium,
   variant: undefined,
 });
