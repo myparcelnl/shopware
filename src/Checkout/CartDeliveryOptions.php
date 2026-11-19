@@ -15,9 +15,9 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
  * recalculated cart. The choice is an ArrayStruct, not a class of the plugin, so
  * a saved cart can still be read when the plugin is uninstalled.
  *
- * The choice remembers the shipping method and the country it was made for. A
- * choice for another method or country no longer applies: the widget showed
- * other options there.
+ * The choice remembers the shipping method, the country and the postal code it
+ * was made for. A choice for another method or address no longer applies: the
+ * widget showed other options, dates and pickup points there.
  */
 final class CartDeliveryOptions
 {
@@ -26,10 +26,11 @@ final class CartDeliveryOptions
     private const KEY_DELIVERY_OPTIONS  = 'deliveryOptions';
     private const KEY_SHIPPING_METHOD   = 'shippingMethodId';
     private const KEY_COUNTRY           = 'countryIso';
+    private const KEY_POSTAL_CODE       = 'postalCode';
 
     /**
-     * Stores the choice on the cart, for the shipping method and the country of
-     * the context.
+     * Stores the choice on the cart, for the shipping method, the country and
+     * the postal code of the context.
      *
      * @param  array<string, mixed> $deliveryOptions DeliveryOptions::toStorableArray()
      */
@@ -39,6 +40,7 @@ final class CartDeliveryOptions
             self::KEY_DELIVERY_OPTIONS => $deliveryOptions,
             self::KEY_SHIPPING_METHOD  => $context->getShippingMethod()->getId(),
             self::KEY_COUNTRY          => self::countryIso($context),
+            self::KEY_POSTAL_CODE      => self::postalCode($context),
         ]));
     }
 
@@ -59,8 +61,8 @@ final class CartDeliveryOptions
     }
 
     /**
-     * Tells if the stored choice was made for the shipping method and the country
-     * of the context.
+     * Tells if the stored choice was made for the shipping method, the country and
+     * the postal code of the context.
      */
     public static function matches(Cart $cart, SalesChannelContext $context): bool
     {
@@ -68,7 +70,8 @@ final class CartDeliveryOptions
 
         return $extension instanceof ArrayStruct
             && $extension->get(self::KEY_SHIPPING_METHOD) === $context->getShippingMethod()->getId()
-            && $extension->get(self::KEY_COUNTRY) === self::countryIso($context);
+            && $extension->get(self::KEY_COUNTRY) === self::countryIso($context)
+            && $extension->get(self::KEY_POSTAL_CODE) === self::postalCode($context);
     }
 
     /**
@@ -84,5 +87,15 @@ final class CartDeliveryOptions
         $iso = $context->getShippingLocation()->getCountry()->getIso();
 
         return null === $iso ? null : strtoupper($iso);
+    }
+
+    /**
+     * Upper case and without spaces, so "2132 je" and "2132JE" are the same.
+     */
+    private static function postalCode(SalesChannelContext $context): ?string
+    {
+        $zipcode = $context->getShippingLocation()->getAddress()?->getZipcode();
+
+        return null === $zipcode ? null : strtoupper(str_replace(' ', '', $zipcode));
     }
 }

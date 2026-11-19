@@ -198,6 +198,16 @@ it('forgets a choice made for another country, and charges nothing for it', func
         ->and(feeLines($cart))->toBe([]);
 });
 
+it('forgets a choice made for another postal code, and charges nothing for it', function () {
+    $cart = Checkout::cart();
+    CartDeliveryOptions::store($cart, EVENING, Checkout::context(['zipcode' => '1012AB']));
+
+    processFees(EVENING, Checkout::context(), $cart);
+
+    expect(CartDeliveryOptions::read($cart))->toBeNull()
+        ->and(feeLines($cart))->toBe([]);
+});
+
 it('forgets the choice when the cart no longer gets delivery options, so the order does not get it', function () {
     factory(CheckoutSettings::class)->withEnableDeliveryOptions(false)->store();
 

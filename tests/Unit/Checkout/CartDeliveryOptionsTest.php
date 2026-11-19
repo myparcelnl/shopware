@@ -36,6 +36,14 @@ it('matches the shipping method and the country it was made for', function () {
         ->and(CartDeliveryOptions::matches($cart, Checkout::context(['countryIso' => 'BE'])))->toBeFalse();
 });
 
+it('does not match another postal code in the same country', function () {
+    $cart = new Cart(Checkout::TOKEN);
+    CartDeliveryOptions::store($cart, ['carrier' => 'POSTNL'], Checkout::context(['zipcode' => '2132WT']));
+
+    expect(CartDeliveryOptions::matches($cart, Checkout::context(['zipcode' => '1012AB'])))->toBeFalse()
+        ->and(CartDeliveryOptions::matches($cart, Checkout::context(['zipcode' => '2132 wt'])))->toBeTrue();
+});
+
 it('does not match another shipping method', function () {
     $cart = new Cart(Checkout::TOKEN);
     CartDeliveryOptions::store($cart, ['carrier' => 'POSTNL'], Checkout::context());
