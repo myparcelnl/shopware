@@ -123,13 +123,17 @@ it('fails clearly when no storefront entry point set the context', function () {
         ->toThrow(LogicException::class, 'no sales channel context');
 });
 
-it('maps a cart that changes within the request again', function () {
+it('maps a cart again after a change, also while Shopware calculates it and its total is still 0', function () {
     $repository = cartRepository(Checkout::context());
-    $cart       = Checkout::cart();
 
-    $first = $repository->get($cart);
-    $cart->setPrice(new CartPrice(0, 99.0, 99.0, $cart->getPrice()->getCalculatedTaxes(), $cart->getPrice()->getTaxRules(), CartPrice::TAX_STATE_GROSS));
+    // Shopware's Processor calculates a new Cart with the same token and a total of 0.
+    $calculating = static function (int $quantity): Cart {
+        $cart = Checkout::cart(['lines' => [[Entities::PRODUCT_ID, $quantity, 12.10, 2.10]]]);
+        $cart->setPrice(new CartPrice(0, 0, 0, $cart->getPrice()->getCalculatedTaxes(), $cart->getPrice()->getTaxRules(), CartPrice::TAX_STATE_GROSS));
 
-    expect($repository->get($cart))->not->toBe($first)
-        ->and($repository->get(new Cart('other')))->not->toBe($first);
+        return $cart;
+    };
+
+    expect($repository->get($calculating(2))->lines->first()->quantity)->toBe(2)
+        ->and($repository->get($calculating(5))->lines->first()->quantity)->toBe(5);
 });

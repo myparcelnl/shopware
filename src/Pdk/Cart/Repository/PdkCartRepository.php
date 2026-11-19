@@ -24,10 +24,11 @@ use Shopware\Core\Checkout\Cart\Cart;
  */
 final class PdkCartRepository extends AbstractPdkCartRepository
 {
-    private const KEY_PREFIX = 'cart_';
-
     /**
-     * $storage is the PDK's in-request cache, not a Shopware store.
+     * $storage goes only to the parent, which asks for it. This repository
+     * does not cache: while Shopware calculates a cart, its total is still 0,
+     * and the PDK storage lives as long as the PHP process, so a cache key
+     * cannot tell two versions of a cart apart.
      */
     public function __construct(
         StorageInterface $storage,
@@ -59,12 +60,7 @@ final class PdkCartRepository extends AbstractPdkCartRepository
             ));
         }
 
-        // The cache lives for one request. The key holds the shipping method and the
-        // total, so a cart that changes within the request is mapped again.
-        return $this->retrieve(
-            self::KEY_PREFIX . $cart->getToken() . '_' . $context->getShippingMethod()->getId() . '_' . $cart->getPrice()->getTotalPrice(),
-            fn (): PdkCart => $this->mapper->map($cart, $context, $this->readProducts($cart), $this->euroCurrency->getFactor())
-        );
+        return $this->mapper->map($cart, $context, $this->readProducts($cart), $this->euroCurrency->getFactor());
     }
 
     /**
