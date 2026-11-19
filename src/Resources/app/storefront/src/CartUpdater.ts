@@ -28,11 +28,7 @@ export class CartUpdater {
 
   private submitWasDisabled = false;
 
-  public constructor(
-    private readonly storeUrl: string,
-    private readonly document: Document = window.document,
-    private readonly fetch: typeof window.fetch = window.fetch.bind(window),
-  ) {}
+  public constructor(private readonly storeUrl: string) {}
 
   /**
    * Stores the choice and shows the new cart. While another request runs, it
@@ -75,7 +71,7 @@ export class CartUpdater {
 
   private async store(body: string): Promise<void> {
     try {
-      const response = await this.fetch(this.storeUrl, {
+      const response = await window.fetch(this.storeUrl, {
         method: 'POST',
         body,
         headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
@@ -102,25 +98,25 @@ export class CartUpdater {
    * full reload.
    */
   private async refreshPage(): Promise<void> {
-    const response = await this.fetch(this.document.location.href, {headers: {Accept: 'text/html'}});
+    const response = await window.fetch(document.location.href, {headers: {Accept: 'text/html'}});
     const page = new DOMParser().parseFromString(await response.text(), 'text/html');
     const hash = page.querySelector<HTMLInputElement>(HASH_SELECTOR);
 
     if (!response.ok || null === hash || REPLACED_SELECTORS.some((selector) => null === page.querySelector(selector))) {
-      this.document.location.reload();
+      document.location.reload();
 
       return;
     }
 
     REPLACED_SELECTORS.forEach((selector) => {
-      const current = this.document.querySelector(selector);
+      const current = document.querySelector(selector);
 
       if (current) {
         current.innerHTML = (page.querySelector(selector) as Element).innerHTML;
       }
     });
 
-    const currentHash = this.document.querySelector<HTMLInputElement>(HASH_SELECTOR);
+    const currentHash = document.querySelector<HTMLInputElement>(HASH_SELECTOR);
 
     if (currentHash) {
       currentHash.value = hash.value;
@@ -128,7 +124,7 @@ export class CartUpdater {
   }
 
   private lockSubmit(): void {
-    const submit = this.document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
+    const submit = document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
 
     this.submitWasDisabled = submit?.disabled ?? false;
 
@@ -138,7 +134,7 @@ export class CartUpdater {
   }
 
   private unlockSubmit(): void {
-    const submit = this.document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
+    const submit = document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
 
     if (submit) {
       submit.disabled = this.submitWasDisabled;

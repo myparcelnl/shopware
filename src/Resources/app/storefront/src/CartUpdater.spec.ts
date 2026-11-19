@@ -12,8 +12,9 @@ const confirmPage = (fees: string, hash: string): string => `
 const response = (status: number, body = ''): Response => new Response(204 === status ? null : body, {status});
 
 /**
- * A fetch that answers the store route with storeStatus and the confirm page
- * with the given page, and records the requests.
+ * Replaces window.fetch with a fetch that answers the store route with
+ * storeStatus and the confirm page with the given page, and records the
+ * requests.
  */
 const createFetch = (page: string, storeStatus = 204) => {
   const requests: {url: string; init?: RequestInit}[] = [];
@@ -23,6 +24,8 @@ const createFetch = (page: string, storeStatus = 204) => {
 
     return url === STORE_URL ? response(storeStatus, '{"message":"no"}') : response(200, page);
   });
+
+  vi.stubGlobal('fetch', fetch);
 
   return {fetch, requests};
 };
@@ -34,12 +37,13 @@ describe('CartUpdater', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('stores the choice and shows the new fee lines, total and hash', async () => {
-    const {fetch, requests} = createFetch(confirmPage('Evening delivery 1.82', 'new-hash'));
+    const {requests} = createFetch(confirmPage('Evening delivery 1.82', 'new-hash'));
 
-    await new CartUpdater(STORE_URL, document, fetch as typeof window.fetch).update({deliveryType: 'evening'});
+    await new CartUpdater(STORE_URL).update({deliveryType: 'evening'});
 
     expect(requests[0].url).toBe(STORE_URL);
     expect(requests[0].init?.method).toBe('POST');
@@ -51,7 +55,7 @@ describe('CartUpdater', () => {
 
   it('does not store the same choice twice', async () => {
     const {fetch} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL, document, fetch as typeof window.fetch);
+    const updater = new CartUpdater(STORE_URL);
 
     await updater.update({deliveryType: 'evening'});
     await updater.update({deliveryType: 'evening'});
@@ -60,8 +64,8 @@ describe('CartUpdater', () => {
   });
 
   it('sends only the last of the choices that come in while a request runs', async () => {
-    const {fetch, requests} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL, document, fetch as typeof window.fetch);
+    const {requests} = createFetch(confirmPage('fees', 'hash'));
+    const updater = new CartUpdater(STORE_URL);
 
     const first = updater.update({deliveryType: 'standard'});
     void updater.update({deliveryType: 'morning'});
@@ -75,8 +79,8 @@ describe('CartUpdater', () => {
   });
 
   it('sends a choice again that comes back while another request runs', async () => {
-    const {fetch, requests} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL, document, fetch as typeof window.fetch);
+    const {requests} = createFetch(confirmPage('fees', 'hash'));
+    const updater = new CartUpdater(STORE_URL);
 
     await updater.update({deliveryType: 'evening'});
 
@@ -100,9 +104,10 @@ describe('CartUpdater', () => {
           })
         : Promise.resolve(response(200, confirmPage('fees', 'hash'))),
     );
+    vi.stubGlobal('fetch', fetch);
     const submit = document.querySelector<HTMLButtonElement>('#confirmFormSubmit') as HTMLButtonElement;
 
-    const update = new CartUpdater(STORE_URL, document, fetch as unknown as typeof window.fetch).update({a: 1});
+    const update = new CartUpdater(STORE_URL).update({a: 1});
 
     expect(submit.disabled).toBe(true);
 
@@ -115,18 +120,18 @@ describe('CartUpdater', () => {
   it('keeps an order button off that Shopware turned off', async () => {
     const submit = document.querySelector<HTMLButtonElement>('#confirmFormSubmit') as HTMLButtonElement;
     submit.disabled = true;
-    const {fetch} = createFetch(confirmPage('fees', 'hash'));
+    createFetch(confirmPage('fees', 'hash'));
 
-    await new CartUpdater(STORE_URL, document, fetch as typeof window.fetch).update({a: 1});
+    await new CartUpdater(STORE_URL).update({a: 1});
 
     expect(submit.disabled).toBe(true);
   });
 
   it('warns and keeps the page when the choice is refused', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const {fetch, requests} = createFetch(confirmPage('fees', 'new-hash'), 400);
+    const {requests} = createFetch(confirmPage('fees', 'new-hash'), 400);
 
-    await new CartUpdater(STORE_URL, document, fetch as typeof window.fetch).update({carrier: 'nope'});
+    await new CartUpdater(STORE_URL).update({carrier: 'nope'});
 
     expect(requests).toHaveLength(1);
     expect(warn).toHaveBeenCalled();
@@ -137,9 +142,9 @@ describe('CartUpdater', () => {
   it('reloads the page when the confirm page has no cart parts, for example after a redirect', async () => {
     const reload = vi.fn();
     vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', reload} as unknown as Location);
-    const {fetch} = createFetch('<div>cart page</div>');
+    createFetch('<div>cart page</div>');
 
-    await new CartUpdater(STORE_URL, document, fetch as typeof window.fetch).update({a: 1});
+    await new CartUpdater(STORE_URL).update({a: 1});
 
     expect(reload).toHaveBeenCalled();
   });
