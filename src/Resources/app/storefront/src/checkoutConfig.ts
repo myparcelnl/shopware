@@ -36,7 +36,9 @@ export const createFormData = (options: DeliveryOptionsPluginOptions): PdkFormDa
     [PdkField.ShippingMethod]: options.shippingMethodId,
     ...Object.fromEntries(
       [AddressType.Billing, AddressType.Shipping].flatMap((type) =>
-        Object.entries(address).map(([field, value]) => [`${type}_${field}`, value]),
+        Object.entries(createAddressKeys(type))
+          .filter(([field]) => field in address)
+          .map(([field, key]) => [key, address[field as keyof typeof address]]),
       ),
     ),
   };
