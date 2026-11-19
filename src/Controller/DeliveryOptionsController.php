@@ -6,8 +6,10 @@ namespace MyParcel\Shopware\Controller;
 
 use MyParcel\Shopware\Checkout\CartDeliveryOptions;
 use MyParcel\Shopware\Checkout\CartLoaderInterface;
-use MyParcel\Shopware\Checkout\DeliveryOptionsGatewayInterface;
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Routing\RouteName;
+use MyParcelNL\Pdk\Shipment\Model\DeliveryOptions;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,7 +27,8 @@ use Throwable;
 final class DeliveryOptionsController
 {
     public function __construct(
-        private readonly DeliveryOptionsGatewayInterface $gateway,
+        private readonly PdkInitializer $pdkInitializer,
+        private readonly SalesChannelContextHolder $contextHolder,
         private readonly CartLoaderInterface $cartLoader,
         private readonly LoggerInterface $logger
     ) {
@@ -57,7 +60,7 @@ final class DeliveryOptionsController
         }
 
         try {
-            $deliveryOptions = $this->gateway->normalize($input, $context);
+            $deliveryOptions = $this->normalize($input, $context);
         } catch (Throwable $exception) {
             $this->logger->warning('MyParcel: the checkout sent delivery options that the PDK cannot read', ['exception' => $exception]);
 
@@ -71,6 +74,28 @@ final class DeliveryOptionsController
         $this->cartLoader->recalculate($cart, $context);
 
         return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Turns the output of the widget into the form that the PDK stores on an
+     * order, as the WooCommerce plugin does.
+     *
+     * @param  array<string, mixed> $input
+     *
+     * @return array<string, mixed>
+     */
+    private function normalize(array $input, SalesChannelContext $context): array
+    {
+        $this->contextHolder->set($context);
+        $this->pdkInitializer->boot();
+
+        $deliveryOptions = new DeliveryOptions($input);
+
+        // Reading the carrier resolves it through the carrier repository, which
+        // throws for a carrier the account does not have.
+        $deliveryOptions->getCarrierAttribute();
+
+        return $deliveryOptions->toStorableArray();
     }
 
     private static function badRequest(string $message): JsonResponse

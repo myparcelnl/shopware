@@ -8,8 +8,10 @@ use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 /**
- * Loads and saves the calculated cart of a sales channel context. Shopware's
- * CartService is final, so the plugin services depend on this interface instead.
+ * Loads and saves the calculated cart of a sales channel context. Shopware marks
+ * CartService as @final, so a test cannot replace it with a class of its own,
+ * and a real CartService needs the whole cart pipeline. The plugin services
+ * depend on this interface instead.
  */
 interface CartLoaderInterface
 {

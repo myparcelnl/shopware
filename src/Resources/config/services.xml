@@ -122,25 +122,17 @@
             <tag name="controller.service_arguments"/>
         </service>
 
-        <service id="MyParcel\Shopware\Checkout\DeliveryOptionsRenderer">
+        <service id="MyParcel\Shopware\Checkout\Subscriber\CheckoutConfirmPageSubscriber">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
-        </service>
-
-        <service id="MyParcel\Shopware\Checkout\Subscriber\CheckoutConfirmPageSubscriber">
-            <argument type="service" id="MyParcel\Shopware\Checkout\DeliveryOptionsRenderer"/>
             <argument type="service" id="monolog.logger.myparcel"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 
-        <service id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway">
-            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
-            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
-        </service>
-
         <!-- After the shipping discounts of promotions (-5100): the pickup cap needs the final shipping costs. -->
         <service id="MyParcel\Shopware\Checkout\Cart\DeliveryOptionsFeeProcessor">
-            <argument type="service" id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
             <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
             <argument type="service" id="monolog.logger.myparcel"/>
@@ -152,7 +144,8 @@
         </service>
 
         <service id="MyParcel\Shopware\Controller\DeliveryOptionsController" public="true">
-            <argument type="service" id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway"/>
+            <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
+            <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
             <argument type="service" id="MyParcel\Shopware\Checkout\ShopwareCartLoader"/>
             <argument type="service" id="monolog.logger.myparcel"/>
             <tag name="controller.service_arguments"/>

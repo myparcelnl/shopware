@@ -3,22 +3,14 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
-use MyParcel\Shopware\Pdk\Cart\Mapper\PdkCartMapper;
 use MyParcel\Shopware\Pdk\Cart\Repository\PdkCartRepository;
-use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
-use MyParcel\Shopware\Pdk\Order\Mapper\MoneyConverter;
-use MyParcel\Shopware\Pdk\Product\Mapper\PdkProductMapper;
-use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
-use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
 use MyParcel\Shopware\Tests\Support\Checkout;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
 use MyParcel\Shopware\Tests\Support\FixedCartLoader;
+use MyParcel\Shopware\Tests\Support\PdkServices;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Cart\Repository\AbstractPdkCartRepository;
-use MyParcelNL\Pdk\Base\Service\CurrencyService;
-use MyParcelNL\Pdk\Base\Service\WeightService;
-use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -36,22 +28,7 @@ function cartRepository(
         $holder->set($context);
     }
 
-    $euroCurrency = new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0)));
-
-    return new PdkCartRepository(
-        new MemoryCacheStorage(),
-        $holder,
-        $loader ?? new FixedCartLoader(Checkout::cart()),
-        new PdkProductRepository(
-            new MemoryCacheStorage(),
-            $products ?? FakeEntityRepository::with(Entities::product()),
-            $euroCurrency,
-            new PdkProductMapper(new CurrencyService(), new WeightService()),
-            new ProductSettingsWriter(FakeEntityRepository::with())
-        ),
-        $euroCurrency,
-        new PdkCartMapper(new MoneyConverter(new CurrencyService()))
-    );
+    return PdkServices::cartRepository($holder, $loader, $products);
 }
 
 it('is a pdk cart repository', function () {

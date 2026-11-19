@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Checkout\Subscriber;
 
-use MyParcel\Shopware\Checkout\DeliveryOptionsRendererInterface;
 use MyParcel\Shopware\Checkout\DeliveryOptionsView;
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Pdk\PdkInitializer;
+use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
+use MyParcelNL\Pdk\Facade\Frontend;
+use MyParcelNL\Pdk\Facade\Pdk;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Cart\Cart;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Throwable;
@@ -22,7 +28,8 @@ use Throwable;
 final class CheckoutConfirmPageSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly DeliveryOptionsRendererInterface $renderer,
+        private readonly PdkInitializer $pdkInitializer,
+        private readonly SalesChannelContextHolder $contextHolder,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -41,7 +48,7 @@ final class CheckoutConfirmPageSubscriber implements EventSubscriberInterface
         $page = $event->getPage();
 
         try {
-            $view = $this->renderer->render($page->getCart(), $event->getSalesChannelContext());
+            $view = $this->render($page->getCart(), $event->getSalesChannelContext());
         } catch (Throwable $exception) {
             $this->logger->error('MyParcel: could not render the delivery options on the confirm page', ['exception' => $exception]);
 
@@ -51,5 +58,27 @@ final class CheckoutConfirmPageSubscriber implements EventSubscriberInterface
         if (null !== $view) {
             $page->addExtension(DeliveryOptionsView::EXTENSION_NAME, $view);
         }
+    }
+
+    /**
+     * Null when the PDK renders nothing: delivery options off, or a cart
+     * without delivery options.
+     */
+    private function render(Cart $cart, SalesChannelContext $context): ?DeliveryOptionsView
+    {
+        // The PDK cart repository and the tax service read the context in the holder.
+        $this->contextHolder->set($context);
+        $this->pdkInitializer->boot();
+
+        /** @var PdkCartRepositoryInterface $cartRepository */
+        $cartRepository = Pdk::get(PdkCartRepositoryInterface::class);
+
+        $html = Frontend::renderDeliveryOptions($cartRepository->get($cart));
+
+        if ('' === $html) {
+            return null;
+        }
+
+        return new DeliveryOptionsView($html, Pdk::get('deliveryOptionsCdnUrlJs'), Pdk::get('deliveryOptionsCdnUrlCss'));
     }
 }
