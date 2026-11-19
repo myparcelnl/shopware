@@ -26,6 +26,11 @@ final class TaxService implements TaxServiceInterface
     ) {
     }
 
+    /**
+     * The shipping price that the delivery options show. Adds the tax of the
+     * cart's shipping costs in a gross context. Returns the base price without
+     * a sales channel context, and in a net or tax-free context.
+     */
     public function getShippingDisplayPrice(float $basePrice): float
     {
         if (!$this->contextHolder->has()) {
