@@ -122,6 +122,9 @@ final class PdkCartMapper
                 $this->moneyConverter->toUnitCents($price, $currencyFactor, $euroFactor, $taxStatus),
                 [
                     'quantity' => $lineItem->getQuantity(),
+                    // A product that is gone has no PdkProduct, and so no weight.
+                    // Shopware's ProductCartProcessor removes its line when it
+                    // calculates the cart, so only a cart from before that gets here.
                     'product'  => $products[$productId] ?? [
                         'externalIdentifier' => $productId,
                         'name'               => $lineItem->getLabel(),
