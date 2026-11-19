@@ -115,6 +115,27 @@ it('never lets the pickup discount make the shipping costs negative', function (
     expect($line->getPrice()->getTotalPrice())->toBe(-6.05);
 });
 
+it('gives no pickup discount after a free-shipping promotion', function () {
+    // The promotion ran first and set the shipping costs to 0.
+    $cart = processFees(
+        new FixedDeliveryOptionsGateway([new DeliveryOptionsFee(DeliveryOptionsFee::PICKUP_ID, 'Pickup', -2.00)]),
+        null,
+        Checkout::cart(['shippingCosts' => 0.0, 'shippingTax' => 0.0])
+    );
+
+    expect(feeLines($cart))->toBe([]);
+});
+
+it('runs after the shipping discounts of promotions', function () {
+    $services = file_get_contents(__DIR__ . '/../../../../src/Resources/config/services.xml');
+
+    preg_match('/DeliveryOptionsFeeProcessor">.*?shopware\.cart\.processor" priority="(-?\d+)"/s', $services, $match);
+
+    // Shopware runs the processors from high to low; PromotionDeliveryProcessor has -5100.
+    expect((int) $match[1])->toBe(DeliveryOptionsFeeProcessor::PRIORITY)
+        ->and(DeliveryOptionsFeeProcessor::PRIORITY)->toBeLessThan(-5100);
+});
+
 it('gives the full pickup discount when it is smaller than the shipping costs', function () {
     $line = feeLines(processFees(new FixedDeliveryOptionsGateway([new DeliveryOptionsFee(DeliveryOptionsFee::PICKUP_ID, 'Pickup', -1.00)])))[0];
 

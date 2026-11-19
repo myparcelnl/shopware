@@ -138,13 +138,13 @@
             <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
         </service>
 
-        <!-- After DeliveryProcessor (-5000), before the shipping discounts of promotions (-5100). -->
+        <!-- After the shipping discounts of promotions (-5100): the pickup cap needs the final shipping costs. -->
         <service id="MyParcel\Shopware\Checkout\Cart\DeliveryOptionsFeeProcessor">
             <argument type="service" id="MyParcel\Shopware\Checkout\PdkDeliveryOptionsGateway"/>
             <argument type="service" id="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Currency\EuroCurrency"/>
             <argument type="service" id="monolog.logger.myparcel"/>
-            <tag name="shopware.cart.processor" priority="-5050"/>
+            <tag name="shopware.cart.processor" priority="-5150"/>
         </service>
 
         <service id="MyParcel\Shopware\Checkout\Subscriber\CartConvertedSubscriber">

@@ -27,10 +27,11 @@ use Throwable;
  * Adds the fees of the chosen delivery options to the cart, one line per fee,
  * as the WooCommerce plugin does.
  *
- * It runs after Shopware's DeliveryProcessor (-5000), so the shipping costs are
- * known, and before the shipping discounts of promotions (-5100). A fee is net
+ * It runs after Shopware's DeliveryProcessor (-5000) and after the shipping
+ * discounts of promotions (-5100), so the shipping costs are final. A fee is net
  * and in euro; the line gets the tax rules of the shipping costs. The pickup
- * discount never makes the shipping costs negative.
+ * discount never makes the shipping costs negative, also not after a
+ * free-shipping promotion.
  *
  * Shopware calculates a cart from the start on every change, so every run adds
  * the lines again. When the admin recalculates an order, Shopware keeps the
@@ -40,7 +41,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
 {
     public const LINE_ITEM_TYPE = 'myparcel_fee';
 
-    public const PRIORITY = -5050;
+    public const PRIORITY = -5150;
 
     public function __construct(
         private readonly DeliveryOptionsGatewayInterface $gateway,
