@@ -25,7 +25,7 @@ const createAddressKeys = (addressType: AddressType): AddressFields =>
 export const createFormData = (options: DeliveryOptionsPluginOptions): PdkFormData => {
   const address = {
     [AddressField.Address1]: options.address.street,
-    [AddressField.Address2]: '',
+    [AddressField.Address2]: options.address.address2,
     [AddressField.City]: options.address.city,
     [AddressField.Country]: options.address.cc,
     [AddressField.PostalCode]: options.address.postalCode,

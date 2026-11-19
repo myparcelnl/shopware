@@ -13,6 +13,8 @@ export interface DeliveryOptionsPluginOptions {
     postalCode: string;
     city: string;
     street: string;
+    /** The additional address line, only when the street has no house number. */
+    address2: string;
   };
 }
 

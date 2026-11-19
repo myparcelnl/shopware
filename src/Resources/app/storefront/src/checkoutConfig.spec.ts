@@ -6,7 +6,7 @@ import {type DeliveryOptionsPluginOptions} from './types';
 const options: DeliveryOptionsPluginOptions = {
   shippingMethodId: '0190a1b2c3d4e5f60718293a4b5c5001',
   storeUrl: '/myparcel/delivery-options',
-  address: {cc: 'NL', postalCode: '2132JE', city: 'Hoofddorp', street: 'Antareslaan 31'},
+  address: {cc: 'NL', postalCode: '2132JE', city: 'Hoofddorp', street: 'Antareslaan', address2: '31'},
 };
 
 describe('createFormData', () => {
@@ -17,7 +17,8 @@ describe('createFormData', () => {
     expect(formData[PdkField.AddressType]).toBe(AddressType.Shipping);
     expect(formData.shipping_country).toBe('NL');
     expect(formData.shipping_postalCode).toBe('2132JE');
-    expect(formData.shipping_address1).toBe('Antareslaan 31');
+    expect(formData.shipping_address1).toBe('Antareslaan');
+    expect(formData.shipping_address2).toBe('31');
     expect(formData.billing_city).toBe('Hoofddorp');
   });
 });
