@@ -1,43 +1,43 @@
 import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from '@myparcel-dev/pdk-admin';
 import {
-  DefaultBadge,
-  DefaultBox,
-  DefaultButton,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
-  DefaultCheckboxInput,
   DefaultCodeEditor,
   DefaultCol,
   DefaultCurrencyInput,
-  DefaultDropOffInput,
-  DefaultFormGroup,
-  DefaultHeading,
   DefaultImage,
-  DefaultLink,
-  DefaultLoader,
   DefaultMultiDateInput,
   DefaultMultiSelectInput,
-  DefaultNotification,
   DefaultNumberInput,
-  DefaultRadioGroup,
-  DefaultRadioInput,
   DefaultRow,
-  DefaultSelectInput,
-  DefaultSettingsDivider,
   DefaultShippingMethodsInput,
-  DefaultTabNavButton,
-  DefaultTable,
   DefaultTableCol,
   DefaultTableRow,
-  DefaultTextArea,
-  DefaultTextInput,
   DefaultTimeInput,
-  DefaultToggleInput,
-  DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareBadge from './components/ShopwareBadge.vue';
+import ShopwareBox from './components/ShopwareBox.vue';
+import ShopwareButton from './components/ShopwareButton.vue';
+import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
+import ShopwareDropOffInput from './components/ShopwareDropOffInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
+import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
+import ShopwareHeading from './components/ShopwareHeading.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
+import ShopwareLink from './components/ShopwareLink.vue';
+import ShopwareLoader from './components/ShopwareLoader.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareNotification from './components/ShopwareNotification.vue';
+import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
+import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
+import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
+import ShopwareSettingsDivider from './components/ShopwareSettingsDivider.vue';
+import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
+import ShopwareTable from './components/ShopwareTable.vue';
+import ShopwareTextArea from './components/ShopwareTextArea.vue';
+import ShopwareTextInput from './components/ShopwareTextInput.vue';
+import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
+import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -47,7 +47,9 @@ const FADE = 'mypa-fade';
  * Create the PDK admin configuration with the components of preset-default and
  * the request headers of the Shopware admin.
  *
- * The components render plain HTML, except the icons: the preset icon only prints the name, so ShopwareIcon draws them.
+ * The Shopware* components have the look of the Shopware admin. The components of preset-default
+ * that are left only render other PDK components or plain layout, so they get the same look.
+ * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
@@ -59,43 +61,43 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
   useLocationHash: false,
 
   components: {
-    [AdminComponent.Badge]: DefaultBadge,
-    [AdminComponent.Box]: DefaultBox,
+    [AdminComponent.Badge]: ShopwareBadge,
+    [AdminComponent.Box]: ShopwareBox,
     [AdminComponent.ButtonGroup]: DefaultButtonGroup,
-    [AdminComponent.Button]: DefaultButton,
+    [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
-    [AdminComponent.CheckboxInput]: DefaultCheckboxInput,
+    [AdminComponent.CheckboxInput]: ShopwareCheckboxInput,
     [AdminComponent.CodeEditor]: DefaultCodeEditor,
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
-    [AdminComponent.DropOffInput]: DefaultDropOffInput,
+    [AdminComponent.DropOffInput]: ShopwareDropOffInput,
     [AdminComponent.DropdownButton]: ShopwareDropdownButton,
-    [AdminComponent.FormGroup]: DefaultFormGroup,
-    [AdminComponent.Heading]: DefaultHeading,
+    [AdminComponent.FormGroup]: ShopwareFormGroup,
+    [AdminComponent.Heading]: ShopwareHeading,
     [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
-    [AdminComponent.Link]: DefaultLink,
-    [AdminComponent.Loader]: DefaultLoader,
+    [AdminComponent.Link]: ShopwareLink,
+    [AdminComponent.Loader]: ShopwareLoader,
     [AdminComponent.Modal]: ShopwareModal,
     [AdminComponent.MultiDateInput]: DefaultMultiDateInput,
     [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
-    [AdminComponent.Notification]: DefaultNotification,
+    [AdminComponent.Notification]: ShopwareNotification,
     [AdminComponent.NumberInput]: DefaultNumberInput,
-    [AdminComponent.RadioGroup]: DefaultRadioGroup,
-    [AdminComponent.RadioInput]: DefaultRadioInput,
+    [AdminComponent.RadioGroup]: ShopwareRadioGroup,
+    [AdminComponent.RadioInput]: ShopwareRadioInput,
     [AdminComponent.Row]: DefaultRow,
-    [AdminComponent.SelectInput]: DefaultSelectInput,
-    [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
+    [AdminComponent.SelectInput]: ShopwareSelectInput,
+    [AdminComponent.SettingsDivider]: ShopwareSettingsDivider,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
-    [AdminComponent.TabNavButton]: DefaultTabNavButton,
+    [AdminComponent.TabNavButton]: ShopwareTabNavButton,
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
-    [AdminComponent.Table]: DefaultTable,
-    [AdminComponent.TextArea]: DefaultTextArea,
-    [AdminComponent.TextInput]: DefaultTextInput,
+    [AdminComponent.Table]: ShopwareTable,
+    [AdminComponent.TextArea]: ShopwareTextArea,
+    [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
-    [AdminComponent.ToggleInput]: DefaultToggleInput,
-    [AdminComponent.TriStateInput]: DefaultTriStateInput,
+    [AdminComponent.ToggleInput]: ShopwareToggleInput,
+    [AdminComponent.TriStateInput]: ShopwareTriStateInput,
   },
 
   cssUtilities: {

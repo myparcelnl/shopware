@@ -1,26 +1,21 @@
+@use 'button';
+@use 'choice';
+@use 'feedback';
+@use 'field';
+@use 'form-group';
+@use 'layout';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// preset-default renders plain HTML. This is the minimum to make it usable
-// inside the Shopware admin, not the Shopware look and feel.
-// @TODO INT-2073: replace this minimal styling with the Shopware look and feel.
 .myparcel-pdk {
-  input[type='text'],
-  input[type='number'],
-  input[type='password'],
-  select,
-  textarea {
-    @apply mypa-w-full mypa-max-w-md mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-px-2 mypa-py-1;
-  }
-
-  button {
-    @apply mypa-cursor-pointer mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-px-3 mypa-py-1;
-  }
-
-  table {
-    @apply mypa-w-full;
-  }
+  @include button.button;
+  @include field.field;
+  @include choice.choice;
+  @include form-group.form-group;
+  @include layout.layout;
+  @include feedback.feedback;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {
@@ -51,9 +46,12 @@
   }
 
   // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
-  .mypa-dropdown-menu__item {
-    @apply mypa-flex mypa-w-full mypa-items-center mypa-gap-2 mypa-whitespace-nowrap mypa-rounded-none mypa-border-0 mypa-bg-transparent mypa-px-3 mypa-py-1.5 mypa-text-left;
+  // An item is a PdkButton, so it also has .mypa-button. The menu in the selector makes these rules win.
+  .mypa-dropdown-menu .mypa-dropdown-menu__item {
+    @apply mypa-flex mypa-w-full mypa-items-center mypa-justify-start mypa-gap-2 mypa-whitespace-nowrap mypa-rounded-none mypa-border-0 mypa-bg-transparent mypa-px-3 mypa-py-1.5 mypa-text-left;
+    min-height: 0;
     font-size: var(--font-size-xs, 0.75rem);
+    font-weight: inherit;
     color: var(--color-text-primary-default, inherit);
 
     &:hover:not(:disabled),
@@ -66,7 +64,7 @@
     }
   }
 
-  .mypa-dropdown-menu__item--danger {
+  .mypa-dropdown-menu .mypa-dropdown-menu__item--danger {
     color: var(--color-text-critical-default, theme('colors.red.500'));
   }
 
