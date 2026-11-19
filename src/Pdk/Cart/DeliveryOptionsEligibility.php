@@ -16,8 +16,8 @@ use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
 final class DeliveryOptionsEligibility
 {
     /**
-     * False when the merchant turned the delivery options off, when a product
-     * is not deliverable or has the delivery options disabled, or when the
+     * False when the merchant turned the delivery options off, when no product
+     * is deliverable, when a product has the delivery options disabled, or when the
      * merchant linked no package type to the chosen shipping method.
      */
     public static function isEligible(PdkCart $cart): bool
