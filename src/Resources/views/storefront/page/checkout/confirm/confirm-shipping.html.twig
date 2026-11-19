@@ -18,7 +18,7 @@
             {# The storefront plugin reads these: the confirm page has no address form. #}
             {% set myparcelOptions = {
                 shippingMethodId: context.shippingMethod.id,
-                storeUrl: path('frontend.myparcel.delivery-options'),
+                storeUrl: path(constant('MyParcel\\Shopware\\Pdk\\Routing\\RouteName::STOREFRONT_DELIVERY_OPTIONS')),
                 address: {
                     cc: context.shippingLocation.country.iso,
                     postalCode: shippingAddress ? shippingAddress.zipcode : '',
