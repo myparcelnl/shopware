@@ -6,7 +6,8 @@ const root = import.meta.dirname;
 /**
  * The checkout script as one IIFE, at the path where Shopware finds the script
  * of a plugin without building it (StorefrontPluginConfigurationFactory). The
- * plugin has no src/main.js, so Shopware's own webpack build skips it.
+ * entry is src/index.ts, not main.js or main.ts: Shopware takes those as the
+ * entry of its own webpack build (BundleConfigGenerator), so it skips this one.
  */
 export default defineConfig({
   root,
@@ -18,7 +19,7 @@ export default defineConfig({
     outDir: resolve(root, 'dist/storefront/js/my-parcel-shopware'),
     emptyOutDir: true,
     lib: {
-      entry: resolve(root, 'src/main.ts'),
+      entry: resolve(root, 'src/index.ts'),
       name: 'MyParcelShopwareCheckout',
       formats: ['iife'],
       fileName: () => 'my-parcel-shopware.js',

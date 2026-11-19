@@ -60,7 +60,9 @@ directory name.
    ```
 
    Vite builds the script to the path where Shopware finds the script of a
-   plug-in without building it.
+   plug-in without building it. Its entry is
+   `src/Resources/app/storefront/src/index.ts`, not `main.js` or `main.ts`, so
+   `bin/build-storefront.sh` skips it.
 
 After each build of a bundle, run `bin/console assets:install` from the shop root.
 The shop serves the copy in `public/bundles`, not the build output.
