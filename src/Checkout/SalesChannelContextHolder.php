@@ -8,8 +8,9 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
- * Keeps the sales channel context of the current storefront request for the
- * PDK services.
+ * Keeps the Shopware SalesChannelContext of the current storefront request for
+ * the PDK services. A Shopware sales channel is a storefront or API channel of
+ * the shop; it has no relation to the sales channels of MyParcel's Order v2.
  *
  * The PDK asks for the cart without saying whose cart: FetchCheckoutContextAction
  * passes the `cart` parameter of the request, which the checkout script never
