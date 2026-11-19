@@ -18,9 +18,10 @@ use Shopware\Core\Checkout\Cart\Cart;
 /**
  * Gives the PDK the consumer's cart.
  *
- * The PDK calls get(null) from the checkout context action: null means the cart
- * of the current storefront request, which SalesChannelContextHolder knows. A
- * Shopware Cart is mapped with the same context.
+ * The PDK calls get() with the `cart` parameter of the checkout context request.
+ * The checkout script never sends it, so it is null: the cart of the current
+ * storefront request, which SalesChannelContextHolder knows. A Shopware Cart is
+ * mapped with the same context. Any other value throws, and the request gets 400.
  */
 final class PdkCartRepository extends AbstractPdkCartRepository
 {

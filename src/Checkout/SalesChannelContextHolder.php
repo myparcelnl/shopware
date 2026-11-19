@@ -11,11 +11,12 @@ use Symfony\Contracts\Service\ResetInterface;
  * Keeps the sales channel context of the current storefront request for the
  * PDK services.
  *
- * The PDK asks for the cart without saying whose cart (FetchCheckoutContextAction
- * calls PdkCartRepositoryInterface::get(null)), and PdkHttpBridge does not pass
- * the Shopware request attributes to the PDK. The storefront entry points put the
- * context here before they call the PDK. The kernel.reset tag clears it between
- * requests on a long-running worker.
+ * The PDK asks for the cart without saying whose cart: FetchCheckoutContextAction
+ * passes the `cart` parameter of the request, which the checkout script never
+ * sends, so it is null. PdkHttpBridge does not pass the Shopware request
+ * attributes to the PDK. The storefront entry points put the context here before
+ * they call the PDK. The kernel.reset tag clears it between requests on a
+ * long-running worker.
  */
 final class SalesChannelContextHolder implements ResetInterface
 {
