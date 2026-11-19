@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Frontend;
 
 use InvalidArgumentException;
-use MyParcel\Shopware\Pdk\Cart\DeliveryOptionsEligibility;
+use MyParcel\Shopware\Pdk\Cart\CartHasDeliveryOptions;
 use MyParcelNL\Pdk\App\Cart\Model\PdkCart;
 use MyParcelNL\Pdk\App\Order\Model\PdkProduct;
 use MyParcelNL\Pdk\Context\Context;
@@ -55,14 +55,14 @@ final class FrontendRenderService extends PdkFrontendRenderService
     /**
      * Renders the wrapper of the delivery options widget with the checkout
      * context. Gives an empty string outside the checkout and when the cart gets
-     * no delivery options (DeliveryOptionsEligibility). The shipping method only
+     * no delivery options (CartHasDeliveryOptions). The shipping method only
      * changes with a page reload, so the page never needs a hidden widget.
      * Building the context calls the MyParcel API and can throw: the caller
      * catches that, so the checkout keeps working.
      */
     public function renderDeliveryOptions(PdkCart $cart): string
     {
-        if (!$this->shouldRender(self::COMPONENT_DELIVERY_OPTIONS) || !DeliveryOptionsEligibility::isEligible($cart)) {
+        if (!$this->shouldRender(self::COMPONENT_DELIVERY_OPTIONS) || !CartHasDeliveryOptions::check($cart)) {
             return '';
         }
 

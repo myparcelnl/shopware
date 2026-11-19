@@ -6,7 +6,7 @@ namespace MyParcel\Shopware\Checkout\Cart;
 
 use MyParcel\Shopware\Checkout\CartDeliveryOptions;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
-use MyParcel\Shopware\Pdk\Cart\DeliveryOptionsEligibility;
+use MyParcel\Shopware\Pdk\Cart\CartHasDeliveryOptions;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Tax\ShippingTaxRate;
@@ -140,7 +140,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
         /** @var PdkCartRepositoryInterface $cartRepository */
         $cartRepository = Pdk::get(PdkCartRepositoryInterface::class);
 
-        if (!DeliveryOptionsEligibility::isEligible($cartRepository->get($cart))) {
+        if (!CartHasDeliveryOptions::check($cartRepository->get($cart))) {
             return null;
         }
 

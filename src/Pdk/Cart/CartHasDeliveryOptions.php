@@ -13,14 +13,14 @@ use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
  * page shows the widget, and the cart charges the fees, only when this is true,
  * so the fees always match what the consumer saw (as in the WooCommerce plugin).
  */
-final class DeliveryOptionsEligibility
+final class CartHasDeliveryOptions
 {
     /**
      * False when the merchant turned the delivery options off, when no product
      * is deliverable, when a product has the delivery options disabled, or when the
      * merchant linked no package type to the chosen shipping method.
      */
-    public static function isEligible(PdkCart $cart): bool
+    public static function check(PdkCart $cart): bool
     {
         // A setting that was never saved is null. Its default is on, so only an
         // explicit false turns the delivery options off.
