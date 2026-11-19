@@ -9,6 +9,7 @@ use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
+use Shopware\Core\Checkout\Cart\Tax\TaxCalculator;
 
 /**
  * Gives the PDK the price of a delivery option as the consumer sees it.
@@ -22,7 +23,8 @@ final class TaxService implements TaxServiceInterface
 {
     public function __construct(
         private readonly SalesChannelContextHolder $contextHolder,
-        private readonly CartLoaderInterface $cartLoader
+        private readonly CartLoaderInterface $cartLoader,
+        private readonly TaxCalculator $taxCalculator
     ) {
     }
 
@@ -45,6 +47,6 @@ final class TaxService implements TaxServiceInterface
 
         $taxRules = $this->cartLoader->load($context)->getDeliveries()->first()?->getShippingCosts()->getTaxRules();
 
-        return round($basePrice * (1 + ShippingTaxRate::of($taxRules ?? new TaxRuleCollection())), 2);
+        return round($this->taxCalculator->calculateGross($basePrice, $taxRules ?? new TaxRuleCollection()), 2);
     }
 }

@@ -9,7 +9,6 @@ use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Cart\CartHasDeliveryOptions;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\PdkInitializer;
-use MyParcel\Shopware\Pdk\Tax\ShippingTaxRate;
 use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\App\Cart\Model\PdkCartFee;
 use MyParcelNL\Pdk\App\DeliveryOptions\Contract\DeliveryOptionsFeesServiceInterface;
@@ -26,6 +25,7 @@ use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
+use Shopware\Core\Checkout\Cart\Tax\TaxCalculator;
 use Shopware\Core\Checkout\CheckoutPermissions;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Throwable;
@@ -59,6 +59,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
         private readonly PdkInitializer $pdkInitializer,
         private readonly SalesChannelContextHolder $contextHolder,
         private readonly QuantityPriceCalculator $priceCalculator,
+        private readonly TaxCalculator $taxCalculator,
         private readonly EuroCurrency $euroCurrency,
         private readonly LoggerInterface $logger
     ) {
@@ -163,7 +164,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
         $price = (float) $fee->amount * $factor;
 
         if (CartPrice::TAX_STATE_GROSS === $context->getTaxState()) {
-            $price *= 1 + ShippingTaxRate::of($taxRules);
+            $price = $this->taxCalculator->calculateGross($price, $taxRules);
         }
 
         if (self::PICKUP_FEE_ID === $fee->id) {

@@ -10,6 +10,7 @@ use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRule;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
+use Shopware\Core\Checkout\Cart\Tax\TaxCalculator;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 function taxService(?SalesChannelContext $context, ?Cart $cart = null): TaxService
@@ -20,7 +21,7 @@ function taxService(?SalesChannelContext $context, ?Cart $cart = null): TaxServi
         $holder->set($context);
     }
 
-    return new TaxService($holder, new FixedCartLoader($cart ?? Checkout::cart()));
+    return new TaxService($holder, new FixedCartLoader($cart ?? Checkout::cart()), new TaxCalculator());
 }
 
 it('adds the tax of the shipping costs for a gross context', function () {

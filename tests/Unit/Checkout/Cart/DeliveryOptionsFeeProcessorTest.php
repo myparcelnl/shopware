@@ -76,6 +76,7 @@ function feeProcessor(?RecordingLogger $logger = null): DeliveryOptionsFeeProces
             new GrossPriceCalculator(new TaxCalculator(), new CashRounding()),
             new NetPriceCalculator(new TaxCalculator(), new CashRounding())
         ),
+        new TaxCalculator(),
         new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0))),
         $logger
     );
