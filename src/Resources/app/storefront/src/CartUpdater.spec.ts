@@ -74,6 +74,23 @@ describe('CartUpdater', () => {
     ]);
   });
 
+  it('sends a choice again that comes back while another request runs', async () => {
+    const {fetch, requests} = createFetch(confirmPage('fees', 'hash'));
+    const updater = new CartUpdater(STORE_URL, document, fetch as typeof window.fetch);
+
+    await updater.update({deliveryType: 'evening'});
+
+    const running = updater.update({deliveryType: 'morning'});
+    void updater.update({deliveryType: 'evening'});
+    await running;
+
+    expect(requests.filter(({url}) => url === STORE_URL).map(({init}) => init?.body)).toEqual([
+      '{"deliveryOptions":{"deliveryType":"evening"}}',
+      '{"deliveryOptions":{"deliveryType":"morning"}}',
+      '{"deliveryOptions":{"deliveryType":"evening"}}',
+    ]);
+  });
+
   it('turns the order button off while a request runs, and back on after', async () => {
     let resolveStore: (value: Response) => void = () => undefined;
     const fetch = vi.fn((url: string) =>

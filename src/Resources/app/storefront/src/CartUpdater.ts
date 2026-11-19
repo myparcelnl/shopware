@@ -12,15 +12,17 @@ const SUBMIT_SELECTOR = '#confirmFormSubmit';
  * totals and hash of the confirm page.
  *
  * One request runs at a time. A choice that comes in meanwhile waits, and only
- * the last one is sent. A choice that is the same as the last stored one is not
- * sent again: the widget reports the same choice more than once. The order
- * button is off while a request runs, so the consumer cannot order with an old
- * hash.
+ * the last one is sent. A choice that is the same as the one the cart will have
+ * after the waiting and running requests is not sent again: the widget reports
+ * the same choice more than once. The order button is off while a request
+ * runs, so the consumer cannot order with an old hash.
  */
 export class CartUpdater {
   private lastStored?: string;
 
   private pending?: string;
+
+  private inFlight?: string;
 
   private running = false;
 
@@ -39,7 +41,7 @@ export class CartUpdater {
   public async update(deliveryOptions: unknown): Promise<void> {
     const body = JSON.stringify({deliveryOptions});
 
-    if (body === (this.pending ?? this.lastStored)) {
+    if (body === (this.pending ?? this.inFlight ?? this.lastStored)) {
       return;
     }
 
@@ -57,7 +59,13 @@ export class CartUpdater {
         const next = this.pending;
 
         this.pending = undefined;
-        await this.store(next);
+        this.inFlight = next;
+
+        try {
+          await this.store(next);
+        } finally {
+          this.inFlight = undefined;
+        }
       }
     } finally {
       this.running = false;
