@@ -31,6 +31,7 @@ use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
 use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use MyParcelNL\Pdk\Facade\Pdk;
+use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /*
@@ -111,4 +112,18 @@ it('gives the product repository class the same instance as its pdk contract', f
 it('binds the checkout contracts to the shopware implementations', function () {
     expect(Pdk::get(PdkCartRepositoryInterface::class))->toBeInstanceOf(PdkCartRepository::class)
         ->and(Pdk::get(TaxServiceInterface::class))->toBeInstanceOf(TaxService::class);
+});
+
+it('hides the checkout settings that do nothing in shopware, and keeps the ones it reads', function () {
+    TestPdk::boot(bootstrapperDefinitions(['disabledSettings']));
+
+    $hidden = Pdk::get('disabledSettings')[CheckoutSettings::ID];
+
+    expect($hidden)->toBe([
+        CheckoutSettings::DELIVERY_OPTIONS_POSITION,
+        CheckoutSettings::USE_SEPARATE_ADDRESS_FIELDS,
+        CheckoutSettings::ENABLE_ADDRESS_WIDGET,
+    ])
+        ->and($hidden)->not->toContain(CheckoutSettings::DELIVERY_OPTIONS_CUSTOM_CSS)
+        ->and($hidden)->not->toContain(CheckoutSettings::ALLOWED_SHIPPING_METHODS);
 });

@@ -51,6 +51,7 @@ use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Language\Contract\LanguageServiceInterface;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
 use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
+use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Shopware\Core\Checkout\Order\OrderCollection;
@@ -247,6 +248,18 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // @TODO INT-2154: run the PDK installer from the plugin lifecycle, so the
             // migrations in this directory run.
             'migrationDirectory'                        => \_MyParcel\DI\value(rtrim($path, '/') . '/src/Pdk/Migration'),
+
+            // Settings that do nothing in Shopware, so the admin does not show
+            // them. The widget has one place, below the shipping methods on the
+            // confirm page. Shopware has one street field, which AddressMapper
+            // splits, and the plug-in has no address widget.
+            'disabledSettings'                          => \_MyParcel\DI\value([
+                CheckoutSettings::ID => [
+                    CheckoutSettings::DELIVERY_OPTIONS_POSITION,
+                    CheckoutSettings::USE_SEPARATE_ADDRESS_FIELDS,
+                    CheckoutSettings::ENABLE_ADDRESS_WIDGET,
+                ],
+            ]),
 
             PdkCartRepositoryInterface::class           => \_MyParcel\DI\autowire(PdkCartRepository::class),
             PdkShippingMethodRepositoryInterface::class => \_MyParcel\DI\autowire(PdkShippingMethodRepository::class)
