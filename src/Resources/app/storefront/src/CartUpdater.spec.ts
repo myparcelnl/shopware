@@ -31,8 +31,13 @@ const createFetch = (page: string, storeStatus = 204) => {
 };
 
 describe('CartUpdater', () => {
+  let initializePlugins: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     document.body.innerHTML = confirmPage('no fees', 'old-hash');
+    window.sessionStorage.clear();
+    initializePlugins = vi.fn();
+    vi.stubGlobal('PluginManager', {initializePlugins, register: vi.fn()});
   });
 
   afterEach(() => {
@@ -51,6 +56,14 @@ describe('CartUpdater', () => {
     expect(document.querySelector('.confirm-product')?.innerHTML).toBe('Evening delivery 1.82');
     expect(document.querySelector('.checkout-aside-summary-list-container')?.innerHTML).toBe('total new-hash');
     expect(document.querySelector<HTMLInputElement>('input[name="hash"]')?.value).toBe('new-hash');
+  });
+
+  it('starts the Shopware plugins in the new line items, as FormAutoSubmitPlugin does', async () => {
+    createFetch(confirmPage('Evening delivery 1.82', 'new-hash'));
+
+    await new CartUpdater(STORE_URL).update({deliveryType: 'evening'});
+
+    expect(initializePlugins).toHaveBeenCalledOnce();
   });
 
   it('does not store the same choice twice', async () => {
@@ -146,6 +159,29 @@ describe('CartUpdater', () => {
 
     await new CartUpdater(STORE_URL).update({a: 1});
 
-    expect(reload).toHaveBeenCalled();
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it('does not reload the same page a second time, so the page cannot reload without end', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const reload = vi.fn();
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', reload} as unknown as Location);
+    createFetch('<div>cart page</div>');
+
+    // The reload starts a new updater, and the widget sends its choice again.
+    await new CartUpdater(STORE_URL).update({a: 1});
+    await new CartUpdater(STORE_URL).update({a: 1});
+
+    expect(reload).toHaveBeenCalledOnce();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it('reloads again after a page that it could update', async () => {
+    window.sessionStorage.setItem('myparcel-delivery-options-reload', document.location.href);
+    createFetch(confirmPage('fees', 'new-hash'));
+
+    await new CartUpdater(STORE_URL).update({a: 1});
+
+    expect(window.sessionStorage.getItem('myparcel-delivery-options-reload')).toBeNull();
   });
 });

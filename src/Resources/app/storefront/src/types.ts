@@ -34,6 +34,7 @@ declare global {
     PluginBaseClass: ShopwarePluginClass;
     PluginManager: {
       register(name: string, plugin: ShopwarePluginClass, selector: string): void;
+      initializePlugins(): void;
     };
   }
 }

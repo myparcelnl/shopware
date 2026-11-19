@@ -8,6 +8,13 @@ const HASH_SELECTOR = '#confirmOrderForm input[name="hash"]';
 const SUBMIT_SELECTOR = '#confirmFormSubmit';
 
 /**
+ * The URL that the updater reloaded last. A reload starts the widget again, and
+ * the widget sends its choice again: without this, a confirm page that never has
+ * the cart parts would reload without end.
+ */
+const RELOAD_KEY = 'myparcel-delivery-options-reload';
+
+/**
  * Stores each new choice of the widget on the cart, then shows the new fee lines,
  * totals and hash of the confirm page.
  *
@@ -93,9 +100,10 @@ export class CartUpdater {
   }
 
   /**
-   * Loads the confirm page again and takes the parts that depend on the cart.
+   * Loads the confirm page again and takes the parts that depend on the cart,
+   * then starts the Shopware plugins in them again, as FormAutoSubmitPlugin does.
    * A page without them (Shopware redirected, for example to the cart) needs a
-   * full reload.
+   * full reload, once per URL.
    */
   private async refreshPage(): Promise<void> {
     const response = await window.fetch(document.location.href, {headers: {Accept: 'text/html'}});
@@ -103,7 +111,7 @@ export class CartUpdater {
     const hash = page.querySelector<HTMLInputElement>(HASH_SELECTOR);
 
     if (!response.ok || null === hash || REPLACED_SELECTORS.some((selector) => null === page.querySelector(selector))) {
-      document.location.reload();
+      this.reloadOnce();
 
       return;
     }
@@ -121,6 +129,40 @@ export class CartUpdater {
     if (currentHash) {
       currentHash.value = hash.value;
     }
+
+    // The quantity fields of the line items have plugins of their own.
+    window.PluginManager.initializePlugins();
+
+    try {
+      window.sessionStorage.removeItem(RELOAD_KEY);
+    } catch {
+      // Without session storage there is no reload to forget.
+    }
+  }
+
+  /**
+   * Reloads the page, but not a second time for the same URL. When the page
+   * cannot be reloaded, the old totals stay: Shopware refuses an order with the
+   * old hash and shows the confirm page again, with the new totals.
+   */
+  private reloadOnce(): void {
+    const url = document.location.href;
+
+    try {
+      if (window.sessionStorage.getItem(RELOAD_KEY) === url) {
+        // eslint-disable-next-line no-console
+        console.warn('MyParcel: the confirm page has no cart summary to update.');
+
+        return;
+      }
+
+      window.sessionStorage.setItem(RELOAD_KEY, url);
+    } catch {
+      // Without session storage a reload could loop, so do not reload.
+      return;
+    }
+
+    document.location.reload();
   }
 
   private lockSubmit(): void {
