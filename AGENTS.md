@@ -6,7 +6,7 @@ Read `CONTRIBUTING.md` first: the setup, the checks, where code goes and the cod
 
 - This repository uses release-please to generate changelogs, every commit must be a conventional commit.
 - The repository uses squash commits, with the PR title and body becoming the squash commit that lands on the target branch.
-- The commit subjects and PR titles must be concise and describe the change clearly to a merchant installing the plugin. This is the line that goes in to the changelog.
+- The commit subjects and PR titles must be concise and describe the change clearly to a merchant installing the plugin. This is the line that goes into the changelog.
 - The PR body should provide additional context and explanation for the change, if necessary. These lines do not end up in the changelog, except for the footer lines that are recognized as changelog entries (see below).
 - The PR body can provide additional changelog lines in the PR (commit) footer, by following the conventional commit formats like in the example shown below.
 - For this reason, NEVER put any content that should not be in a CHANGELOG in a commit or PR body footer: no Agent disclaimer, no non-standard notes.
