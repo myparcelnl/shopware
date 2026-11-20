@@ -17,6 +17,7 @@ use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
 use Psr\Log\LogLevel;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\CartBehavior;
+use Shopware\Core\Checkout\Cart\Delivery\Struct\DeliveryCollection;
 use Shopware\Core\Checkout\Cart\LineItem\CartDataCollection;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Price\CashRounding;
@@ -218,12 +219,23 @@ it('forgets the choice when the cart no longer gets delivery options, so the ord
         ->and(feeLines($cart))->toBe([]);
 });
 
-it('logs a failure of the pdk and charges nothing, so the checkout keeps working', function () {
+it('logs a failure of the pdk, charges nothing and forgets the choice, so the checkout keeps working', function () {
     $logger = new RecordingLogger();
     $cart   = processFees(['carrier' => 'NOT_A_CARRIER', 'deliveryType' => 'evening'], null, null, null, null, $logger);
 
     expect(feeLines($cart))->toBe([])
+        ->and(CartDeliveryOptions::read($cart))->toBeNull()
         ->and($logger->records[0]['level'])->toBe(LogLevel::ERROR);
+});
+
+it('forgets the choice of a cart without a delivery', function () {
+    $cart = Checkout::cart();
+    $cart->setDeliveries(new DeliveryCollection());
+
+    $cart = processFees(EVENING, null, $cart);
+
+    expect(feeLines($cart))->toBe([])
+        ->and(CartDeliveryOptions::read($cart))->toBeNull();
 });
 
 it('keeps the fee lines of an order that the admin recalculates', function () {

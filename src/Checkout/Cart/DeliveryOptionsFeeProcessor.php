@@ -67,9 +67,10 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
 
     /**
      * Adds the fee lines for the stored choice. Keeps the fee lines of the
-     * order when the admin recalculates it, forgets a choice for another
-     * shipping method or country, or for a cart without delivery options, and
-     * adds nothing when the PDK fails, so the checkout keeps working.
+     * order when the admin recalculates it. Forgets a choice for another
+     * shipping method, country or postal code, or for a cart without delivery
+     * options, and forgets the choice and adds nothing when the PDK fails, so the
+     * checkout keeps working.
      */
     public function process(CartDataCollection $data, Cart $original, Cart $toCalculate, SalesChannelContext $context, CartBehavior $behavior): void
     {
@@ -96,6 +97,8 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
         $delivery = $toCalculate->getDeliveries()->first();
 
         if (null === $delivery) {
+            CartDeliveryOptions::forget($toCalculate);
+
             return;
         }
 
@@ -103,6 +106,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
             $fees = $this->fees($toCalculate, $context, $deliveryOptions);
         } catch (Throwable $exception) {
             $this->logger->error('MyParcel: could not calculate the delivery option fees', ['exception' => $exception]);
+            CartDeliveryOptions::forget($toCalculate);
 
             return;
         }
