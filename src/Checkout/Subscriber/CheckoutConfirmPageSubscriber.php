@@ -6,6 +6,7 @@ namespace MyParcel\Shopware\Checkout\Subscriber;
 
 use MyParcel\Shopware\Checkout\DeliveryOptionsView;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Pdk\Order\Mapper\AddressMapper;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\Facade\Frontend;
@@ -79,6 +80,31 @@ final class CheckoutConfirmPageSubscriber implements EventSubscriberInterface
             return null;
         }
 
-        return new DeliveryOptionsView($html, Pdk::get('deliveryOptionsCdnUrlJs'), Pdk::get('deliveryOptionsCdnUrlCss'));
+        return new DeliveryOptionsView(
+            $html,
+            Pdk::get('deliveryOptionsCdnUrlJs'),
+            Pdk::get('deliveryOptionsCdnUrlCss'),
+            self::address2($context)
+        );
+    }
+
+    /**
+     * additionalAddressLine1 when it holds the house number, as the order gets it
+     * from AddressMapper. Otherwise empty.
+     */
+    private static function address2(SalesChannelContext $context): string
+    {
+        $address = $context->getShippingLocation()->getAddress();
+        $line1   = (string) $address?->getAdditionalAddressLine1();
+
+        if (null === $address || '' === trim($line1)) {
+            return '';
+        }
+
+        /** @var AddressMapper $addressMapper */
+        $addressMapper = Pdk::get(AddressMapper::class);
+        $cc            = (string) $context->getShippingLocation()->getCountry()->getIso();
+
+        return $addressMapper->houseNumberInLine1($address->getStreet(), $line1, $cc) ? trim($line1) : '';
     }
 }

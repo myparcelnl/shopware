@@ -16,8 +16,7 @@
             {% set shippingAddress = context.shippingLocation.address %}
 
             {# The storefront plugin reads these: the confirm page has no address form.
-               As in AddressMapper, the house number can be in additionalAddressLine1
-               when the street has none. #}
+               CheckoutConfirmPageSubscriber works out address2. #}
             {% set myparcelOptions = {
                 shippingMethodId: context.shippingMethod.id,
                 storeUrl: path(constant('MyParcel\\Shopware\\Pdk\\Routing\\RouteName::STOREFRONT_DELIVERY_OPTIONS')),
@@ -26,7 +25,7 @@
                     postalCode: shippingAddress ? shippingAddress.zipcode : '',
                     city: shippingAddress ? shippingAddress.city : '',
                     street: shippingAddress ? shippingAddress.street : '',
-                    address2: shippingAddress and not (shippingAddress.street matches '/\\d/') ? (shippingAddress.additionalAddressLine1 ?? '') : '',
+                    address2: myparcel.address2,
                 },
             } %}
 

@@ -34,8 +34,8 @@ final class Checkout
 
     /**
      * A sales channel context. Keys: taxState (CartPrice::TAX_STATE_*),
-     * currencyFactor, countryIso, zipcode, city, street, company, withAddress
-     * (false gives a location with only the country).
+     * currencyFactor, countryIso, zipcode, city, street, additionalAddressLine1,
+     * company, withAddress (false gives a location with only the country).
      *
      * @param  array<string, mixed> $values
      */
@@ -54,6 +54,10 @@ final class Checkout
             $address->setCity($values['city'] ?? 'Hoofddorp');
             $address->setStreet($values['street'] ?? 'Antareslaan 31');
             $address->setCountry($country);
+
+            if (isset($values['additionalAddressLine1'])) {
+                $address->setAdditionalAddressLine1($values['additionalAddressLine1']);
+            }
 
             if (isset($values['company'])) {
                 $address->setCompany($values['company']);

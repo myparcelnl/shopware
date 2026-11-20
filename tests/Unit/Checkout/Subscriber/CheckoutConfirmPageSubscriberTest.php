@@ -47,12 +47,15 @@ function bootConfirmPage(SalesChannelContextHolder $holder, ?Throwable $renderFa
     ]);
 }
 
-function confirmPageEvent(): CheckoutConfirmPageLoadedEvent
+/**
+ * @param  array<string, mixed> $contextValues see Checkout::context()
+ */
+function confirmPageEvent(array $contextValues = []): CheckoutConfirmPageLoadedEvent
 {
     $page = new CheckoutConfirmPage();
     $page->setCart(Checkout::cart());
 
-    return new CheckoutConfirmPageLoadedEvent($page, Checkout::context(), new Request());
+    return new CheckoutConfirmPageLoadedEvent($page, Checkout::context($contextValues), new Request());
 }
 
 function confirmPageSubscriber(SalesChannelContextHolder $holder, ?RecordingLogger $logger = null): CheckoutConfirmPageSubscriber
@@ -81,8 +84,31 @@ it('adds the delivery options of the page cart to the page', function () {
         ->and($view->html)->toContain('id="mypa-delivery-options-wrapper"')
         ->and($view->scriptUrl)->toBe(Pdk::get('deliveryOptionsCdnUrlJs'))
         ->and($view->styleUrl)->toBe(Pdk::get('deliveryOptionsCdnUrlCss'))
+        ->and($view->address2)->toBe('')
         ->and($holder->get())->toBe($event->getSalesChannelContext());
 });
+
+dataset('address2', [
+    'number in line 1'            => [['street' => 'Teststraat', 'additionalAddressLine1' => ' 12 '], '12'],
+    'digit in the street name'    => [['street' => '2e Hugo de Grootstraat', 'additionalAddressLine1' => '12'], '12'],
+    'number in the street'        => [['street' => 'Teststraat 12', 'additionalAddressLine1' => '2e etage'], ''],
+    'apartment in line 1'         => [['street' => 'Teststraat', 'additionalAddressLine1' => 'Appartement 3'], ''],
+    'no separate address fields'  => [['street' => 'Hauptstraße', 'additionalAddressLine1' => '5', 'countryIso' => 'DE'], ''],
+    'only a country'              => [['withAddress' => false], ''],
+]);
+
+it('gives the widget line 1 only when it holds the house number of the order', function (array $contextValues, string $address2) {
+    $holder = new SalesChannelContextHolder();
+    bootConfirmPage($holder);
+    $event = confirmPageEvent($contextValues);
+
+    confirmPageSubscriber($holder)->onConfirmPageLoaded($event);
+
+    /** @var DeliveryOptionsView $view */
+    $view = $event->getPage()->getExtension(DeliveryOptionsView::EXTENSION_NAME);
+
+    expect($view->address2)->toBe($address2);
+})->with('address2');
 
 it('adds nothing when the pdk renders nothing', function () {
     $holder = new SalesChannelContextHolder();

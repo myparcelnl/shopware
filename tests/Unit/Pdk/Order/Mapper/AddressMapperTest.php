@@ -107,3 +107,25 @@ it('gives empty contact details for a missing address', function () {
     expect($result->splitFailed)->toBeFalse()
         ->and($result->contactDetails)->toBe(['email' => 'test@example.test']);
 });
+
+dataset('house number in line 1', [
+    'NL number in line 1'          => ['Teststraat', '12', 'NL', true],
+    'NL digit in the street name'  => ['2e Hugo de Grootstraat', '12', 'NL', true],
+    'BE box in line 1'             => ['Kerkstraat', '16 bus 2', 'BE', true],
+    'lower case country'           => ['Teststraat', '12', 'nl', true],
+    'number in the street'         => ['Teststraat 12', '2e etage', 'NL', false],
+    'apartment in line 1'          => ['Teststraat', 'Appartement 3', 'NL', false],
+    'empty line 1'                 => ['Teststraat', '', 'NL', false],
+    'no separate address fields'   => ['Hauptstraße', '5', 'DE', false],
+]);
+
+it('tells if line 1 holds the house number', function (string $street, string $line1, string $cc, bool $expected) {
+    expect(addressMapper()->houseNumberInLine1($street, $line1, $cc))->toBe($expected);
+})->with('house number in line 1');
+
+it('takes the house number from line 1 when the street name has a digit', function () {
+    $result = addressMapper()->map(Entities::address(['street' => '2e Hugo de Grootstraat', 'additionalAddressLine1' => '12']), null);
+
+    expect($result->splitFailed)->toBeFalse()
+        ->and($result->contactDetails)->toMatchArray(['street' => '2e Hugo de Grootstraat', 'number' => '12']);
+});
