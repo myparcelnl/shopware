@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Tests\Support;
 
+use Closure;
+use MyParcelNL\Pdk\Base\Concern\PdkInterface;
 use MyParcelNL\Pdk\Base\Factory\PdkFactory;
+use MyParcelNL\Pdk\Base\PdkBootstrapper;
 use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Facade\Pdk as PdkFacade;
 use MyParcelNL\Pdk\Logger\Contract\PdkLoggerInterface;
@@ -25,8 +28,22 @@ final class TestPdk
     public static function boot(array $definitions = []): void
     {
         PdkFactory::setMode(Pdk::MODE_DEVELOPMENT);
-        MockPdkFactory::create($definitions);
+        $pdk = MockPdkFactory::create($definitions);
         TestBootstrapper::hasAccount();
+
+        self::markBooted($pdk);
+    }
+
+    /**
+     * Makes PdkBootstrapper::boot() return the mock PDK. Without this, a class
+     * that calls PdkInitializer::boot() would build the real PDK over the mock.
+     */
+    private static function markBooted(PdkInterface $pdk): void
+    {
+        Closure::bind(static function () use ($pdk): void {
+            static::$initialized = true;
+            static::$pdk         = $pdk;
+        }, null, PdkBootstrapper::class)();
     }
 
     /**

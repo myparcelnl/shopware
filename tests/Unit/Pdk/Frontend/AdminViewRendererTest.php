@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer;
@@ -21,6 +22,7 @@ use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use MyParcel\Shopware\Tests\Support\FixedLocaleResolver;
 use MyParcel\Shopware\Tests\Support\FixedOrderStatusService;
 use MyParcel\Shopware\Tests\Support\FixedUrlResolver;
@@ -110,6 +112,9 @@ function adminViewRenderer(): array
         new ProductSettingsWriter(FakeEntityRepository::with()),
         $viewService,
         new FixedOrderStatusService(),
+        FakeEntityRepository::with(),
+        new SalesChannelContextHolder(),
+        new FixedCartService(),
         '0.0.0-test',
         'https://shop.test',
         true

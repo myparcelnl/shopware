@@ -69,6 +69,30 @@ another tab. The Shopware Save submits the changed settings to the PDK first, th
 saves the product without the `myparcel_*` fields, so it cannot write old values
 back.
 
+## Checkout
+
+The delivery options show on the checkout confirm page, below the shipping
+methods. The consumer gets them when:
+
+- "Enable delivery options" in the checkout settings is on, or was never saved;
+- the cart has deliverable products, and no product has the delivery options
+  turned off;
+- the merchant linked a package type to the chosen shipping method, in
+  "Allowed shipping methods" of the checkout settings.
+
+The plug-in creates no shipping methods.
+
+Each fee of the chosen delivery options is a separate line in the cart, with the
+tax rules of the shipping costs. The pickup discount never makes the shipping
+costs negative, also not after a free-shipping promotion.
+
+The "Custom CSS" of the checkout settings goes in a `<style>` element in the
+wrapper of the delivery options.
+
+The plug-in stores the choice in `myparcel_order_data` with the order. The
+shipping address of the order stays the consumer's address, also for a pickup
+point.
+
 ## Routes
 
 The plug-in sends several kinds of requests to the PDK:
@@ -78,6 +102,7 @@ The plug-in sends several kinds of requests to the PDK:
 | `/api/_action/myparcel/pdk`    | Admin app        | Admin API token with `myparcel:access`     |
 | `/api/_action/myparcel/view`   | Admin module     | Admin API token with `myparcel:access`     |
 | `/myparcel/pdk`                | Checkout         | Storefront, also via XMLHttpRequest        |
+| `/myparcel/delivery-options`   | Checkout         | Storefront, XMLHttpRequest, POST only      |
 | `/api/myparcel/webhook/{hash}` | MyParcel webhook | Public; only the stored hash is accepted   |
 
 The view route returns the PDK markup of one admin screen (`?view=pluginSettings`)

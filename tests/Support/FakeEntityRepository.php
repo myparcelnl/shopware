@@ -18,8 +18,7 @@ use Shopware\Core\Framework\Event\NestedEventCollection;
 /**
  * An entity repository without a database. search() and searchIds() return what
  * the closure gives for the criteria and the context; writes are recorded, not
- * applied. Shopware's own StaticEntityRepository needs ramsey/uuid for its write
- * results, which the test autoloader does not load.
+ * applied, so a test can check them.
  */
 final class FakeEntityRepository extends EntityRepository
 {
