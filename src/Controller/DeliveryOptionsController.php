@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Controller;
 
 use MyParcel\Shopware\Checkout\CartDeliveryOptions;
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Routing\RouteName;
 use MyParcelNL\Pdk\Shipment\Model\DeliveryOptions;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +29,7 @@ final class DeliveryOptionsController
     public function __construct(
         private readonly PdkInitializer $pdkInitializer,
         private readonly SalesChannelContextHolder $contextHolder,
-        private readonly CartLoaderInterface $cartLoader,
+        private readonly CartService $cartService,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -67,11 +67,11 @@ final class DeliveryOptionsController
             return self::badRequest('The delivery options are not valid.');
         }
 
-        $cart = $this->cartLoader->load($context);
+        $cart = $this->cartService->getCart($context->getToken(), $context);
 
         CartDeliveryOptions::store($cart, $deliveryOptions, $context);
 
-        $this->cartLoader->recalculate($cart, $context);
+        $this->cartService->recalculate($cart, $context);
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }

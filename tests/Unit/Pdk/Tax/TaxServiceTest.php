@@ -5,7 +5,7 @@ declare(strict_types=1);
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Tax\TaxService;
 use MyParcel\Shopware\Tests\Support\Checkout;
-use MyParcel\Shopware\Tests\Support\FixedCartLoader;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRule;
@@ -21,7 +21,7 @@ function taxService(?SalesChannelContext $context, ?Cart $cart = null): TaxServi
         $holder->set($context);
     }
 
-    return new TaxService($holder, new FixedCartLoader($cart ?? Checkout::cart()), new TaxCalculator());
+    return new TaxService($holder, new FixedCartService($cart ?? Checkout::cart()), new TaxCalculator());
 }
 
 it('adds the tax of the shipping costs for a gross context', function () {

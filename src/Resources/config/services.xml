@@ -69,10 +69,6 @@
             <tag name="kernel.reset" method="reset"/>
         </service>
 
-        <service id="MyParcel\Shopware\Checkout\ShopwareCartLoader">
-            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
-        </service>
-
         <service id="MyParcel\Shopware\Pdk\PdkInitializer">
             <argument type="service" id="monolog.logger.myparcel"/>
             <argument type="service" id="MyParcel\Shopware\Pdk\Storage\SystemConfigStorage"/>
@@ -87,7 +83,7 @@
             <argument type="service" id="MyParcel\Shopware\Pdk\Order\OrderStatusService"/>
             <argument type="service" id="shipping_method.repository"/>
             <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
-            <argument type="service" id="MyParcel\Shopware\Checkout\ShopwareCartLoader"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
             <argument>%myparcel.plugin_version%</argument>
             <argument>%env(string:APP_URL)%</argument>
             <argument>%kernel.debug%</argument>
@@ -147,7 +143,7 @@
         <service id="MyParcel\Shopware\Controller\DeliveryOptionsController" public="true">
             <argument type="service" id="MyParcel\Shopware\Pdk\PdkInitializer"/>
             <argument type="service" id="MyParcel\Shopware\Checkout\SalesChannelContextHolder"/>
-            <argument type="service" id="MyParcel\Shopware\Checkout\ShopwareCartLoader"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
             <argument type="service" id="monolog.logger.myparcel"/>
             <tag name="controller.service_arguments"/>
         </service>

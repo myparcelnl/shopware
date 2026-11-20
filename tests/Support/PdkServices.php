@@ -34,7 +34,7 @@ final class PdkServices
     public static function initializer(
         ?RecordingLogger $logger = null,
         ?SalesChannelContextHolder $contextHolder = null,
-        ?FixedCartLoader $cartLoader = null
+        ?FixedCartService $cartService = null
     ): PdkInitializer {
         return new PdkInitializer(
             $logger ?? new RecordingLogger(),
@@ -50,7 +50,7 @@ final class PdkServices
             new FixedOrderStatusService(),
             FakeEntityRepository::with(),
             $contextHolder ?? new SalesChannelContextHolder(),
-            $cartLoader ?? new FixedCartLoader(),
+            $cartService ?? new FixedCartService(),
             '0.0.0-test',
             'https://shop.test',
             true
@@ -62,7 +62,7 @@ final class PdkServices
      */
     public static function cartRepository(
         SalesChannelContextHolder $contextHolder,
-        ?FixedCartLoader $cartLoader = null,
+        ?FixedCartService $cartService = null,
         ?FakeEntityRepository $products = null
     ): PdkCartRepository {
         $euroCurrency = new EuroCurrency(FakeEntityRepository::with(Entities::currency('EUR', 1.0)));
@@ -70,7 +70,7 @@ final class PdkServices
         return new PdkCartRepository(
             new MemoryCacheStorage(),
             $contextHolder,
-            $cartLoader ?? new FixedCartLoader(Checkout::cart()),
+            $cartService ?? new FixedCartService(Checkout::cart()),
             new PdkProductRepository(
                 new MemoryCacheStorage(),
                 $products ?? FakeEntityRepository::with(Entities::product()),

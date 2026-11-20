@@ -7,7 +7,7 @@ use MyParcel\Shopware\Pdk\Cart\Repository\PdkCartRepository;
 use MyParcel\Shopware\Tests\Support\Checkout;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
-use MyParcel\Shopware\Tests\Support\FixedCartLoader;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use MyParcel\Shopware\Tests\Support\PdkServices;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Cart\Repository\AbstractPdkCartRepository;
@@ -19,7 +19,7 @@ beforeEach(fn () => TestPdk::boot());
 
 function cartRepository(
     ?SalesChannelContext $context = null,
-    ?FixedCartLoader $loader = null,
+    ?FixedCartService $cartService = null,
     ?FakeEntityRepository $products = null
 ): PdkCartRepository {
     $holder = new SalesChannelContextHolder();
@@ -28,7 +28,7 @@ function cartRepository(
         $holder->set($context);
     }
 
-    return PdkServices::cartRepository($holder, $loader, $products);
+    return PdkServices::cartRepository($holder, $cartService, $products);
 }
 
 it('is a pdk cart repository', function () {
@@ -37,11 +37,11 @@ it('is a pdk cart repository', function () {
 
 it('reads the cart of the current request for null, as the checkout context action asks', function () {
     $context = Checkout::context();
-    $loader  = new FixedCartLoader(Checkout::cart());
+    $cartService  = new FixedCartService(Checkout::cart());
 
-    $cart = cartRepository($context, $loader)->get(null);
+    $cart = cartRepository($context, $cartService)->get(null);
 
-    expect($loader->contexts)->toBe([$context])
+    expect($cartService->contexts)->toBe([$context])
         ->and($cart->externalIdentifier)->toBe(Checkout::TOKEN);
 });
 
@@ -72,9 +72,9 @@ it('takes the net shipping price, which the pdk adds to the delivery option pric
 });
 
 it('reads the shipping costs as net when the cart is net', function () {
-    $loader = new FixedCartLoader(Checkout::cart(['shippingCosts' => 5.00, 'taxStatus' => CartPrice::TAX_STATE_NET]));
+    $cartService = new FixedCartService(Checkout::cart(['shippingCosts' => 5.00, 'taxStatus' => CartPrice::TAX_STATE_NET]));
 
-    $cart = cartRepository(Checkout::context(['taxState' => CartPrice::TAX_STATE_NET]), $loader)->get(null);
+    $cart = cartRepository(Checkout::context(['taxState' => CartPrice::TAX_STATE_NET]), $cartService)->get(null);
 
     expect($cart->shipmentPrice)->toBe(500)
         ->and($cart->shipmentPriceAfterVat)->toBe(605);
@@ -105,11 +105,11 @@ it('gives only the country before the consumer has an address', function () {
 });
 
 it('maps a given shopware cart without loading the session cart', function () {
-    $loader = new FixedCartLoader();
+    $cartService = new FixedCartService();
 
-    $cart = cartRepository(Checkout::context(), $loader)->get(Checkout::cart(['lines' => []]));
+    $cart = cartRepository(Checkout::context(), $cartService)->get(Checkout::cart(['lines' => []]));
 
-    expect($loader->contexts)->toBe([])
+    expect($cartService->contexts)->toBe([])
         ->and($cart->lines)->toHaveCount(0);
 });
 

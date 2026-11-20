@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Cart\Repository;
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Cart\Mapper\PdkCartMapper;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
@@ -14,6 +13,7 @@ use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Model\PdkProduct;
 use MyParcelNL\Pdk\Storage\Contract\StorageInterface;
 use Shopware\Core\Checkout\Cart\Cart;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 
 /**
  * Gives the PDK the consumer's cart.
@@ -36,7 +36,7 @@ final class PdkCartRepository extends AbstractPdkCartRepository
     public function __construct(
         StorageInterface $storage,
         private readonly SalesChannelContextHolder $contextHolder,
-        private readonly CartLoaderInterface $cartLoader,
+        private readonly CartService $cartService,
         private readonly PdkProductRepositoryInterface $productRepository,
         private readonly EuroCurrency $euroCurrency,
         private readonly PdkCartMapper $mapper
@@ -54,7 +54,7 @@ final class PdkCartRepository extends AbstractPdkCartRepository
     public function get($input): PdkCart
     {
         $context = $this->contextHolder->get();
-        $cart    = $input ?? $this->cartLoader->load($context);
+        $cart    = $input ?? $this->cartService->getCart($context->getToken(), $context);
 
         if (!$cart instanceof Cart) {
             throw new \InvalidArgumentException(sprintf(

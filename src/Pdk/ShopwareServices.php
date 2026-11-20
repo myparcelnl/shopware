@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Language\LocaleResolverInterface;
@@ -14,6 +13,7 @@ use MyParcel\Shopware\Pdk\Routing\UrlResolverInterface;
 use MyParcel\Shopware\Pdk\Storage\ConfigStorageInterface;
 use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Product\ProductCollection;
@@ -43,7 +43,7 @@ final class ShopwareServices
         public readonly OrderStatusServiceInterface $orderStatusService,
         public readonly EntityRepository $shippingMethodRepository,
         public readonly SalesChannelContextHolder $contextHolder,
-        public readonly CartLoaderInterface $cartLoader
+        public readonly CartService $cartService
     ) {
     }
 }

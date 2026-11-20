@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Cache\CacheDirectory;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
@@ -17,6 +16,7 @@ use MyParcelNL\Pdk\App\Order\Contract\OrderStatusServiceInterface;
 use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Product\ProductCollection;
@@ -54,7 +54,7 @@ final class PdkInitializer
         private readonly OrderStatusServiceInterface $orderStatusService,
         private readonly EntityRepository $shippingMethodRepository,
         private readonly SalesChannelContextHolder $contextHolder,
-        private readonly CartLoaderInterface $cartLoader,
+        private readonly CartService $cartService,
         private readonly string $pluginVersion,
         private readonly string $appUrl,
         private readonly bool $debug
@@ -80,7 +80,7 @@ final class PdkInitializer
             $this->orderStatusService,
             $this->shippingMethodRepository,
             $this->contextHolder,
-            $this->cartLoader
+            $this->cartService
         ));
 
         if (!$this->debug && !CacheDirectory::isWritable(Pdk::getCacheDir())) {

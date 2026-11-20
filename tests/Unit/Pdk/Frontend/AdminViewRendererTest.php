@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer;
@@ -21,6 +22,7 @@ use MyParcel\Shopware\Pdk\View\AdminScreen;
 use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use MyParcel\Shopware\Tests\Support\FixedLocaleResolver;
 use MyParcel\Shopware\Tests\Support\FixedOrderStatusService;
 use MyParcel\Shopware\Tests\Support\FixedUrlResolver;
@@ -38,8 +40,6 @@ use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
-use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
-use MyParcel\Shopware\Tests\Support\FixedCartLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -114,7 +114,7 @@ function adminViewRenderer(): array
         new FixedOrderStatusService(),
         FakeEntityRepository::with(),
         new SalesChannelContextHolder(),
-        new FixedCartLoader(),
+        new FixedCartService(),
         '0.0.0-test',
         'https://shop.test',
         true

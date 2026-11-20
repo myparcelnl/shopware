@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Tax;
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
 use Shopware\Core\Checkout\Cart\Tax\TaxCalculator;
 
@@ -23,7 +23,7 @@ final class TaxService implements TaxServiceInterface
 {
     public function __construct(
         private readonly SalesChannelContextHolder $contextHolder,
-        private readonly CartLoaderInterface $cartLoader,
+        private readonly CartService $cartService,
         private readonly TaxCalculator $taxCalculator
     ) {
     }
@@ -45,7 +45,7 @@ final class TaxService implements TaxServiceInterface
             return $basePrice;
         }
 
-        $taxRules = $this->cartLoader->load($context)->getDeliveries()->first()?->getShippingCosts()->getTaxRules();
+        $taxRules = $this->cartService->getCart($context->getToken(), $context)->getDeliveries()->first()?->getShippingCosts()->getTaxRules();
 
         return round($this->taxCalculator->calculateGross($basePrice, $taxRules ?? new TaxRuleCollection()), 2);
     }

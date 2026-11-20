@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Cart\Repository\PdkCartRepository;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
@@ -17,7 +16,7 @@ use MyParcel\Shopware\Pdk\ShippingMethod\Repository\PdkShippingMethodRepository;
 use MyParcel\Shopware\Pdk\ShopwareServices;
 use MyParcel\Shopware\Pdk\Tax\TaxService;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
-use MyParcel\Shopware\Tests\Support\FixedCartLoader;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use MyParcel\Shopware\Tests\Support\FixedLocaleResolver;
 use MyParcel\Shopware\Tests\Support\FixedOrderStatusService;
 use MyParcel\Shopware\Tests\Support\FixedUrlResolver;
@@ -32,6 +31,7 @@ use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterf
 use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /*
@@ -74,7 +74,7 @@ beforeEach(function () {
         new FixedOrderStatusService(),
         $this->shippingMethods,
         new SalesChannelContextHolder(),
-        new FixedCartLoader()
+        new FixedCartService()
     ));
 
     TestPdk::boot(bootstrapperDefinitions([
@@ -89,7 +89,7 @@ beforeEach(function () {
         PdkShippingMethodRepositoryInterface::class,
         TaxServiceInterface::class,
         SalesChannelContextHolder::class,
-        CartLoaderInterface::class,
+        CartService::class,
     ]));
 });
 

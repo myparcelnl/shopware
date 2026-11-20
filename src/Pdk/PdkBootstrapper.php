@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk;
 
-use MyParcel\Shopware\Checkout\CartLoaderInterface;
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
 use MyParcel\Shopware\Pdk\Account\Repository\PdkAccountRepository;
 use MyParcel\Shopware\Pdk\Api\BackendEndpointService;
@@ -54,6 +53,7 @@ use MyParcelNL\Pdk\Settings\Contract\PdkSettingsRepositoryInterface;
 use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Product\ProductCollection;
@@ -167,9 +167,9 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
     /**
      * @internal Only the PDK container calls this.
      */
-    public static function getCartLoader(): CartLoaderInterface
+    public static function getCartService(): CartService
     {
-        return self::getShopwareServices()->cartLoader;
+        return self::getShopwareServices()->cartService;
     }
 
     /**
@@ -266,7 +266,7 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
                 ->constructorParameter('shippingMethodRepository', \_MyParcel\DI\factory([PdkBootstrapper::class, 'getShippingMethodRepository'])),
             TaxServiceInterface::class                  => \_MyParcel\DI\autowire(TaxService::class),
             SalesChannelContextHolder::class            => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getContextHolder']),
-            CartLoaderInterface::class                  => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getCartLoader']),
+            CartService::class                          => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getCartService']),
 
             ConfigStorageInterface::class               => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getConfigStorage']),
             LocaleResolverInterface::class              => \_MyParcel\DI\factory([PdkBootstrapper::class, 'getLocaleResolver']),
