@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - main
-      # @TODO: INT-2331 add the prerelease and maintenance branches with their own config
+      # @TODO INT-2331: add the prerelease and maintenance branches with their own config
       # - alpha
       # - beta
       # - v[0-9]
