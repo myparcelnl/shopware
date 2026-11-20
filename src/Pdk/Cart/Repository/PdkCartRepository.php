@@ -27,9 +27,11 @@ final class PdkCartRepository extends AbstractPdkCartRepository
 {
     /**
      * $storage goes only to the parent, which asks for it. This repository
-     * does not cache: while Shopware calculates a cart, its total is still 0,
-     * and the PDK storage lives as long as the PHP process, so a cache key
-     * cannot tell two versions of a cart apart.
+     * does not cache. The PDK storage lives as long as the PHP process, so on a
+     * long-running worker an entry outlives the request. A key of token,
+     * shipping method and total also stays the same when the shipping address
+     * changes, or when a product is replaced by one with the same price and
+     * another weight.
      */
     public function __construct(
         StorageInterface $storage,
