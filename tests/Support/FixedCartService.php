@@ -26,8 +26,13 @@ final class FixedCartService extends CartService
      */
     public array $recalculated = [];
 
-    public function __construct(private readonly ?Cart $fixedCart = null)
-    {
+    /**
+     * @param  null|\Closure(Cart): void $recalculation changes the cart in recalculate(), as a processor does
+     */
+    public function __construct(
+        private readonly ?Cart $fixedCart = null,
+        private readonly ?\Closure $recalculation = null
+    ) {
     }
 
     public function getCart(string $token, SalesChannelContext $context, bool $caching = true, bool $taxed = false): Cart
@@ -40,6 +45,10 @@ final class FixedCartService extends CartService
     public function recalculate(Cart $cart, SalesChannelContext $context): Cart
     {
         $this->recalculated[] = $cart;
+
+        if (null !== $this->recalculation) {
+            ($this->recalculation)($cart);
+        }
 
         return $cart;
     }

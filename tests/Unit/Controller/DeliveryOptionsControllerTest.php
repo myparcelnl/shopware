@@ -46,6 +46,17 @@ it('stores the normalized choice on the cart and recalculates it', function () {
         ->and($cartService->recalculated)->toBe([$cart]);
 });
 
+it('answers an error when the recalculation forgot the choice', function () {
+    $cart        = new Cart(Checkout::TOKEN);
+    $cartService = new FixedCartService($cart, static fn (Cart $cart) => CartDeliveryOptions::forget($cart));
+
+    $response = deliveryOptionsController($cartService)
+        ->store(jsonRequest('{"deliveryOptions":{"carrier":"POSTNL","deliveryType":"evening"}}'), Checkout::context());
+
+    expect($response->getStatusCode())->toBe(400)
+        ->and($cartService->recalculated)->toBe([$cart]);
+});
+
 it('refuses a body that is not json or has no delivery options', function (string $content) {
     $cartService = new FixedCartService();
 

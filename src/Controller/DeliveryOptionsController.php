@@ -52,7 +52,7 @@ final class DeliveryOptionsController
     /**
      * Takes a JSON body {"deliveryOptions": {...}} with the output of the widget.
      * Answers 204 when the choice is stored, 400 when the body or the choice is
-     * not valid.
+     * not valid, or when the recalculation forgot the choice.
      */
     #[Route(
         path: '/myparcel/delivery-options',
@@ -86,7 +86,13 @@ final class DeliveryOptionsController
 
         CartDeliveryOptions::store($cart, $deliveryOptions, $context);
 
-        $this->cartService->recalculate($cart, $context);
+        $cart = $this->cartService->recalculate($cart, $context);
+
+        // DeliveryOptionsFeeProcessor forgets the choice when the PDK fails or the
+        // cart has no delivery. An error lets the checkout script send it again.
+        if (null === CartDeliveryOptions::read($cart)) {
+            return self::badRequest('The cart does not accept these delivery options.');
+        }
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
