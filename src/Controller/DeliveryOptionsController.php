@@ -30,7 +30,14 @@ final class DeliveryOptionsController
      * The keys of the widget output that the order needs. isPickup follows from
      * deliveryType.
      */
-    private const KEYS = ['carrier', 'date', 'deliveryType', 'packageType', 'pickupLocation', 'shipmentOptions'];
+    private const KEYS = [
+        DeliveryOptions::CARRIER,
+        DeliveryOptions::DATE,
+        DeliveryOptions::DELIVERY_TYPE,
+        DeliveryOptions::PACKAGE_TYPE,
+        DeliveryOptions::PICKUP_LOCATION,
+        DeliveryOptions::SHIPMENT_OPTIONS,
+    ];
 
     /** The name of the pickup delivery type, after the PDK normalized it. */
     private const PICKUP = 'pickup';
