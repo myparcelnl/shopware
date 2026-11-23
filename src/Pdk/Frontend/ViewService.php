@@ -11,19 +11,28 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Tells the PDK which screen it renders for. The Shopware admin is a
  * single-page app, so no PHP page tells the PDK where it is: AdminViewRenderer
- * puts the screen on the request instead.
+ * puts the screen on the request instead. The storefront has real pages, so the
+ * checkout is recognised by its route.
  *
- * @TODO INT-1961: recognise the checkout.
+ * The route is read from the current request, not the main request: when an
+ * order fails, CheckoutController::order() shows the confirm page in a
+ * sub-request of POST /checkout/order.
  */
 final class ViewService extends AbstractViewService
 {
+    public const CHECKOUT_ROUTE = 'frontend.checkout.confirm.page';
+
     public function __construct(private readonly RequestStack $requestStack)
     {
     }
 
+    /**
+     * Tell if the request is the checkout confirm page, where the consumer picks
+     * the shipping method and the delivery options.
+     */
     public function isCheckoutPage(): bool
     {
-        return false;
+        return self::CHECKOUT_ROUTE === $this->requestStack->getCurrentRequest()?->attributes->get('_route');
     }
 
     /**

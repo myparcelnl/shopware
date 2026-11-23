@@ -73,3 +73,36 @@ it('has modals on the order pages only', function (AdminScreen $screen, bool $mo
 it('is never the checkout in the admin', function () {
     expect(viewService(AdminScreen::OrderList)->isCheckoutPage())->toBeFalse();
 });
+
+it('is the checkout page on the confirm page route', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+    $service = new ViewService($requestStack);
+
+    expect($service->isCheckoutPage())->toBeTrue()
+        // The checkout is no admin page, so the admin notifications stay off.
+        ->and($service->isAnyPdkPage())->toBeFalse();
+});
+
+it('is the checkout page when a failed order shows the confirm page in a sub-request', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => 'frontend.checkout.finish.order']));
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeTrue();
+});
+
+it('is no checkout page in a sub-request of another route', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+    $requestStack->push(new Request([], [], ['_route' => 'frontend.checkout.finish.page']));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeFalse();
+});
+
+it('is no checkout page on other storefront routes', function (string $route) {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => $route]));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeFalse();
+})->with(['frontend.checkout.cart.page', 'frontend.checkout.finish.page', 'frontend.myparcel.pdk']);

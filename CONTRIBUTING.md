@@ -51,6 +51,19 @@ directory name.
    cd /var/www/html && bin/console assets:install
    ```
 
+5. Build the checkout script, then compile the theme, which copies the script to
+   the shop:
+
+   ```shell
+   pnpm build:storefront
+   bin/console theme:compile
+   ```
+
+   Vite builds the script to the path where Shopware finds the script of a
+   plug-in without building it. Its entry is
+   `src/Resources/app/storefront/src/index.ts`, not `main.js` or `main.ts`, so
+   `bin/build-storefront.sh` skips it.
+
 After each build of a bundle, run `bin/console assets:install` from the shop root.
 The shop serves the copy in `public/bundles`, not the build output.
 
@@ -60,6 +73,7 @@ The shop serves the copy in `public/bundles`, not the build output.
 composer test
 composer analyse
 pnpm test:pdk
+pnpm test:storefront
 ```
 
 - `composer test` swaps `vendor/` with a development install while it runs. The
@@ -162,7 +176,7 @@ does not run the PDK installer yet.
 - Give every public method a docblock that says what it does and when to use it.
   Add `@param` and `@return` only when the signature does not show the type.
   - A constructor that only takes dependencies needs none.
-  - A method that only fulfils an interface without logic of its own, such as the
-    placeholders in `src/Pdk/Placeholder/`, needs none.
+  - A method that only fulfils an interface without logic of its own, such as
+    `DeliveryOptionsView::getApiAlias()`, needs none.
 - Mark follow-up work with `@TODO INT-<number>: <what to do>`, with the key of a
   real ticket.

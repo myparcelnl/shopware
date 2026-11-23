@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Pdk\Cart\Repository\PdkCartRepository;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\ViewService;
 use MyParcel\Shopware\Pdk\Order\Repository\PdkOrderNoteRepository;
@@ -10,18 +12,26 @@ use MyParcel\Shopware\Pdk\Order\Writer\OrderDataWriter;
 use MyParcel\Shopware\Pdk\PdkBootstrapper;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\Product\Writer\ProductSettingsWriter;
+use MyParcel\Shopware\Pdk\ShippingMethod\Repository\PdkShippingMethodRepository;
 use MyParcel\Shopware\Pdk\ShopwareServices;
+use MyParcel\Shopware\Pdk\Tax\TaxService;
 use MyParcel\Shopware\Tests\Support\FakeEntityRepository;
+use MyParcel\Shopware\Tests\Support\FixedCartService;
 use MyParcel\Shopware\Tests\Support\FixedLocaleResolver;
 use MyParcel\Shopware\Tests\Support\FixedOrderStatusService;
 use MyParcel\Shopware\Tests\Support\FixedUrlResolver;
 use MyParcel\Shopware\Tests\Support\InMemoryConfigStorage;
 use MyParcel\Shopware\Tests\Support\RecordingConnection;
 use MyParcel\Shopware\Tests\Support\TestPdk;
+use MyParcelNL\Pdk\App\Cart\Contract\PdkCartRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderNoteRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
+use MyParcelNL\Pdk\App\ShippingMethod\Contract\PdkShippingMethodRepositoryInterface;
+use MyParcelNL\Pdk\App\Tax\Contract\TaxServiceInterface;
 use MyParcelNL\Pdk\Facade\Pdk;
+use MyParcelNL\Pdk\Settings\Model\CheckoutSettings;
+use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /*
@@ -49,6 +59,7 @@ function bootstrapperDefinitions(array $keys): array
 beforeEach(function () {
     $this->orders   = FakeEntityRepository::with();
     $this->products = FakeEntityRepository::with();
+    $this->shippingMethods = FakeEntityRepository::with();
 
     PdkBootstrapper::setServices(new ShopwareServices(
         new InMemoryConfigStorage(),
@@ -60,7 +71,10 @@ beforeEach(function () {
         new OrderDataWriter(FakeEntityRepository::with(), FakeEntityRepository::with(), new RecordingConnection()),
         new ProductSettingsWriter(FakeEntityRepository::with()),
         new ViewService(new RequestStack()),
-        new FixedOrderStatusService()
+        new FixedOrderStatusService(),
+        $this->shippingMethods,
+        new SalesChannelContextHolder(),
+        new FixedCartService()
     ));
 
     TestPdk::boot(bootstrapperDefinitions([
@@ -71,6 +85,11 @@ beforeEach(function () {
         EuroCurrency::class,
         OrderDataWriter::class,
         ProductSettingsWriter::class,
+        PdkCartRepositoryInterface::class,
+        PdkShippingMethodRepositoryInterface::class,
+        TaxServiceInterface::class,
+        SalesChannelContextHolder::class,
+        CartService::class,
     ]));
 });
 
@@ -83,8 +102,29 @@ it('gives each pdk repository the shopware repository of its entity', function (
     'order'      => [PdkOrderRepositoryInterface::class, PdkOrderRepository::class, 'orderRepository', 'orders'],
     'order note' => [PdkOrderNoteRepositoryInterface::class, PdkOrderNoteRepository::class, 'orderRepository', 'orders'],
     'product'    => [PdkProductRepositoryInterface::class, PdkProductRepository::class, 'productRepository', 'products'],
+    'shipping method' => [PdkShippingMethodRepositoryInterface::class, PdkShippingMethodRepository::class, 'shippingMethodRepository', 'shippingMethods'],
 ]);
 
 it('gives the product repository class the same instance as its pdk contract', function () {
     expect(Pdk::get(PdkProductRepository::class))->toBe(Pdk::get(PdkProductRepositoryInterface::class));
+});
+
+it('binds the checkout contracts to the shopware implementations', function () {
+    expect(Pdk::get(PdkCartRepositoryInterface::class))->toBeInstanceOf(PdkCartRepository::class)
+        ->and(Pdk::get(TaxServiceInterface::class))->toBeInstanceOf(TaxService::class);
+});
+
+it('hides the checkout settings that do nothing in shopware, and keeps the ones it reads', function () {
+    TestPdk::boot(bootstrapperDefinitions(['disabledSettings']));
+
+    $hidden = Pdk::get('disabledSettings')[CheckoutSettings::ID];
+
+    expect($hidden)->toBe([
+        CheckoutSettings::DELIVERY_OPTIONS_POSITION,
+        CheckoutSettings::USE_SEPARATE_ADDRESS_FIELDS,
+        CheckoutSettings::ENABLE_ADDRESS_WIDGET,
+        CheckoutSettings::ENABLE_DELIVERY_OPTIONS_WHEN_NOT_IN_STOCK,
+    ])
+        ->and($hidden)->not->toContain(CheckoutSettings::DELIVERY_OPTIONS_CUSTOM_CSS)
+        ->and($hidden)->not->toContain(CheckoutSettings::ALLOWED_SHIPPING_METHODS);
 });

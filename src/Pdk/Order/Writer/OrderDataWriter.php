@@ -154,7 +154,11 @@ final class OrderDataWriter
         return $staleIds;
     }
 
-    private static function buildOrderDataId(string $orderId): string
+    /**
+     * The fixed id of the order data row of an order. Use it to write that row
+     * together with the order, as the checkout does.
+     */
+    public static function buildOrderDataId(string $orderId): string
     {
         return Uuid::fromStringToHex('myparcel_order_data.' . $orderId);
     }
