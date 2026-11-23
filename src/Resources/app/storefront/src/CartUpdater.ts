@@ -1,11 +1,4 @@
-/**
- * The parts of the confirm page that change when the cart gets other fee lines.
- * The hash goes with the cart total: Shopware refuses an order whose hash does
- * not match the cart.
- */
-const REPLACED_SELECTORS = ['.confirm-product', '.checkout-aside-summary-list-container'];
-const HASH_SELECTOR = '#confirmOrderForm input[name="hash"]';
-const SUBMIT_SELECTOR = '#confirmFormSubmit';
+import {type CheckoutSelectors} from './types';
 
 /**
  * The confirm page URL that the updater opened last. A new page starts the widget again, and
@@ -39,10 +32,14 @@ export class CartUpdater {
    * @param storeUrl   the route that stores the choice on the cart
    * @param confirmUrl the confirm page. Not document.location: after a failed
    *                   order Shopware shows the confirm page at POST /checkout/order.
+   * @param selectors  the parts of the page. The line items and the totals change
+   *                   when the cart gets other fee lines, and the hash goes with the
+   *                   total: Shopware refuses an order whose hash does not match.
    */
   public constructor(
     private readonly storeUrl: string,
     private readonly confirmUrl: string,
+    private readonly selectors: CheckoutSelectors,
   ) {}
 
   /**
@@ -116,15 +113,15 @@ export class CartUpdater {
   private async refreshPage(): Promise<void> {
     const response = await window.fetch(this.confirmUrl, {headers: {Accept: 'text/html'}});
     const page = new DOMParser().parseFromString(await response.text(), 'text/html');
-    const hash = page.querySelector<HTMLInputElement>(HASH_SELECTOR);
+    const hash = page.querySelector<HTMLInputElement>(this.hashSelector());
 
-    if (!response.ok || null === hash || REPLACED_SELECTORS.some((selector) => null === page.querySelector(selector))) {
+    if (!response.ok || null === hash || this.replacedSelectors().some((selector) => null === page.querySelector(selector))) {
       this.reloadOnce();
 
       return;
     }
 
-    REPLACED_SELECTORS.forEach((selector) => {
+    this.replacedSelectors().forEach((selector) => {
       const current = document.querySelector(selector);
 
       if (current) {
@@ -132,7 +129,7 @@ export class CartUpdater {
       }
     });
 
-    const currentHash = document.querySelector<HTMLInputElement>(HASH_SELECTOR);
+    const currentHash = document.querySelector<HTMLInputElement>(this.hashSelector());
 
     if (currentHash) {
       currentHash.value = hash.value;
@@ -175,8 +172,16 @@ export class CartUpdater {
     document.location.assign(url);
   }
 
+  private replacedSelectors(): string[] {
+    return [this.selectors.products, this.selectors.summary];
+  }
+
+  private hashSelector(): string {
+    return `${this.selectors.form} ${this.selectors.hash}`;
+  }
+
   private lockSubmit(): void {
-    const submit = document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
+    const submit = document.querySelector<HTMLButtonElement>(this.selectors.submit);
 
     this.submitWasDisabled = submit?.disabled ?? false;
 
@@ -186,7 +191,7 @@ export class CartUpdater {
   }
 
   private unlockSubmit(): void {
-    const submit = document.querySelector<HTMLButtonElement>(SUBMIT_SELECTOR);
+    const submit = document.querySelector<HTMLButtonElement>(this.selectors.submit);
 
     if (submit) {
       submit.disabled = this.submitWasDisabled;

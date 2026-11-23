@@ -1,12 +1,14 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {AddressType, PdkField} from '@myparcel-dev/pdk-checkout';
 import {createCheckoutConfig, createFormData} from './checkoutConfig';
+import {DEFAULT_SELECTORS} from './selectors';
 import {type DeliveryOptionsPluginOptions} from './types';
 
 const options: DeliveryOptionsPluginOptions = {
   shippingMethodId: '0190a1b2c3d4e5f60718293a4b5c5001',
   storeUrl: '/myparcel/delivery-options',
   confirmUrl: '/checkout/confirm',
+  selectors: DEFAULT_SELECTORS,
   address: {cc: 'NL', postalCode: '2132JE', city: 'Hoofddorp', street: 'Antareslaan', address2: '31'},
 };
 
@@ -61,6 +63,14 @@ describe('createCheckoutConfig', () => {
     await expect(
       createCheckoutConfig(options).doRequest({baseUrl: '/myparcel/pdk', path: '', method: 'GET', parameters: {}} as never),
     ).rejects.toThrow('500');
+  });
+
+  it('finds the order form by the selector of the options', () => {
+    document.body.innerHTML = '<form id="confirmOrderForm"></form><form id="my-theme-order"></form>';
+
+    const form = createCheckoutConfig({...options, selectors: {...DEFAULT_SELECTORS, form: '#my-theme-order'}}).getForm();
+
+    expect(form.id).toBe('my-theme-order');
   });
 
   it('never watches a form: a change reloads the confirm page', () => {

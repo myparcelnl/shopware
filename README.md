@@ -89,6 +89,23 @@ costs negative, also not after a free-shipping promotion.
 The "Custom CSS" of the checkout settings goes in a `<style>` element in the
 wrapper of the delivery options.
 
+The checkout script finds the line items, the totals, the order form, the
+order hash and the order button by the class names and ids of the default
+Storefront theme. A theme that changes them sets its own in Twig, without a new
+build of the script. Give only the selectors that differ:
+
+```twig
+{% sw_extends '@MyParcelShopware/storefront/page/checkout/confirm/confirm-shipping.html.twig' %}
+
+{% block myparcel_checkout_delivery_options %}
+    {% set myparcelSelectors = {summary: '.my-theme-summary', submit: '#my-theme-order-button'} %}
+    {{ parent() }}
+{% endblock %}
+```
+
+The keys are `products`, `summary`, `form`, `hash` (inside the form) and
+`submit`.
+
 The plug-in stores the choice in `myparcel_order_data` with the order. The
 shipping address of the order stays the consumer's address, also for a pickup
 point.

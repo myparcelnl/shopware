@@ -9,8 +9,6 @@ import {
 } from '@myparcel-dev/pdk-checkout';
 import {type DeliveryOptionsPluginOptions} from './types';
 
-const CONFIRM_FORM_SELECTOR = '#confirmOrderForm';
-
 const createAddressKeys = (addressType: AddressType): AddressFields =>
   Object.values(AddressField).reduce(
     (fields, field) => ({...fields, [field]: `${addressType}_${field}`}),
@@ -71,7 +69,7 @@ export const createCheckoutConfig = (options: DeliveryOptionsPluginOptions): Pdk
     [AddressType.Shipping]: createAddressKeys(AddressType.Shipping),
   },
 
-  getForm: () => document.querySelector<HTMLFormElement>(CONFIRM_FORM_SELECTOR) as HTMLFormElement,
+  getForm: () => document.querySelector<HTMLFormElement>(options.selectors.form) as HTMLFormElement,
 
   getFormData: () => createFormData(options),
 

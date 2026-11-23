@@ -8,6 +8,7 @@ import {
 } from '@myparcel-dev/pdk-checkout';
 import {CartUpdater} from './CartUpdater';
 import {createCheckoutConfig} from './checkoutConfig';
+import {DEFAULT_SELECTORS} from './selectors';
 import {type ShopwarePluginClass} from './types';
 
 export const PLUGIN_NAME = 'MyparcelDeliveryOptions';
@@ -33,12 +34,15 @@ export const getProxyCapabilitiesUrl = (): string | undefined => {
 /**
  * The Shopware storefront plugin on the delivery options of the confirm page.
  * Shopware's base class calls init() from its constructor, so the class has no
- * fields of its own.
+ * instance fields of its own. Its static options hold the selectors of the
+ * default theme; Shopware merges them with data-myparcel-delivery-options-options.
  */
 export const createDeliveryOptionsPlugin = (Base: ShopwarePluginClass): ShopwarePluginClass =>
   class DeliveryOptionsPlugin extends Base {
+    public static options = {selectors: DEFAULT_SELECTORS};
+
     public init(): void {
-      const updater = new CartUpdater(this.options.storeUrl, this.options.confirmUrl);
+      const updater = new CartUpdater(this.options.storeUrl, this.options.confirmUrl, this.options.selectors);
 
       createPdkCheckout(createCheckoutConfig(this.options));
 
