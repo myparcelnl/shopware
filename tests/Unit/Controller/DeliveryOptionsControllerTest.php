@@ -117,6 +117,10 @@ it('refuses what the widget does not send', function (array $deliveryOptions) {
 })->with([
     'pickup without a location'      => [['deliveryType' => 'pickup']],
     'pickup with a nested location'  => [['deliveryType' => 'pickup', 'pickupLocation' => ['street' => ['x']]]],
+    'pickup without a location code' => [['deliveryType' => 'pickup', 'pickupLocation' => ['a' => 1]]],
+    'pickup with an empty code'      => [['deliveryType' => 'pickup', 'pickupLocation' => ['locationCode' => '']]],
+    'pickup by its id, no location'  => [['deliveryType' => '4']],
+    'home delivery, nested location' => [['deliveryType' => 'evening', 'pickupLocation' => ['street' => ['x']]]],
     'an unknown shipment option'     => [['shipmentOptions' => ['ageCheck' => true]]],
     'a shipment option not a bool'   => [['shipmentOptions' => ['signature' => 'yes']]],
     'a date that is not a date'      => [['date' => 'no date']],
@@ -125,6 +129,14 @@ it('refuses what the widget does not send', function (array $deliveryOptions) {
 
 it('stores a pickup with its location', function () {
     [$status, $stored] = storeChoice(['carrier' => 'POSTNL', 'deliveryType' => 'pickup', 'isPickup' => true, 'pickupLocation' => PICKUP_LOCATION]);
+
+    expect($status)->toBe(204)
+        ->and($stored['deliveryType'])->toBe('pickup')
+        ->and($stored['pickupLocation']['locationCode'])->toBe('123');
+});
+
+it('reads a pickup by its id as a pickup', function () {
+    [$status, $stored] = storeChoice(['carrier' => 'POSTNL', 'deliveryType' => '4', 'pickupLocation' => PICKUP_LOCATION]);
 
     expect($status)->toBe(204)
         ->and($stored['deliveryType'])->toBe('pickup')

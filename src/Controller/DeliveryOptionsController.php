@@ -32,6 +32,9 @@ final class DeliveryOptionsController
      */
     private const KEYS = ['carrier', 'date', 'deliveryType', 'packageType', 'pickupLocation', 'shipmentOptions'];
 
+    /** The name of the pickup delivery type, after the PDK normalized it. */
+    private const PICKUP = 'pickup';
+
     /**
      * The shipment options that the widget can send. Each one has a price in the
      * carrier settings.
@@ -107,6 +110,14 @@ final class DeliveryOptionsController
         // throws for a carrier the account does not have.
         $deliveryOptions->getCarrierAttribute();
 
+        // The PDK reads a delivery type as a name, an id or a numeric string, so
+        // the pickup check uses the type after the PDK normalized it.
+        if (self::PICKUP !== $deliveryOptions->deliveryType) {
+            $deliveryOptions->pickupLocation = null;
+        } elseif (!$deliveryOptions->pickupLocation?->locationCode) {
+            throw new \InvalidArgumentException('a pickup needs a pickupLocation with a locationCode');
+        }
+
         return $deliveryOptions->toStorableArray();
     }
 
@@ -146,17 +157,11 @@ final class DeliveryOptionsController
             throw new \InvalidArgumentException('shipmentOptions holds an option that the widget does not send');
         }
 
-        if ('pickup' !== ($input['deliveryType'] ?? null)) {
-            unset($input['pickupLocation']);
-
-            return $input;
-        }
-
         $pickupLocation = $input['pickupLocation'] ?? null;
 
-        if (!is_array($pickupLocation) || [] === $pickupLocation
-            || [] !== array_filter($pickupLocation, static fn ($value) => null !== $value && !is_scalar($value))) {
-            throw new \InvalidArgumentException('a pickup needs a pickupLocation');
+        if (null !== $pickupLocation && (!is_array($pickupLocation)
+            || [] !== array_filter($pickupLocation, static fn ($value) => null !== $value && !is_scalar($value)))) {
+            throw new \InvalidArgumentException('pickupLocation is not a flat object');
         }
 
         return $input;
