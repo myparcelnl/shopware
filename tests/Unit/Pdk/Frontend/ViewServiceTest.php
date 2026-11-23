@@ -84,6 +84,22 @@ it('is the checkout page on the confirm page route', function () {
         ->and($service->isAnyPdkPage())->toBeFalse();
 });
 
+it('is the checkout page when a failed order shows the confirm page in a sub-request', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => 'frontend.checkout.finish.order']));
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeTrue();
+});
+
+it('is no checkout page in a sub-request of another route', function () {
+    $requestStack = new RequestStack();
+    $requestStack->push(new Request([], [], ['_route' => ViewService::CHECKOUT_ROUTE]));
+    $requestStack->push(new Request([], [], ['_route' => 'frontend.checkout.finish.page']));
+
+    expect((new ViewService($requestStack))->isCheckoutPage())->toBeFalse();
+});
+
 it('is no checkout page on other storefront routes', function (string $route) {
     $requestStack = new RequestStack();
     $requestStack->push(new Request([], [], ['_route' => $route]));

@@ -13,6 +13,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * single-page app, so no PHP page tells the PDK where it is: AdminViewRenderer
  * puts the screen on the request instead. The storefront has real pages, so the
  * checkout is recognised by its route.
+ *
+ * The route is read from the current request, not the main request: when an
+ * order fails, CheckoutController::order() shows the confirm page in a
+ * sub-request of POST /checkout/order.
  */
 final class ViewService extends AbstractViewService
 {
@@ -28,7 +32,7 @@ final class ViewService extends AbstractViewService
      */
     public function isCheckoutPage(): bool
     {
-        return self::CHECKOUT_ROUTE === $this->requestStack->getMainRequest()?->attributes->get('_route');
+        return self::CHECKOUT_ROUTE === $this->requestStack->getCurrentRequest()?->attributes->get('_route');
     }
 
     /**

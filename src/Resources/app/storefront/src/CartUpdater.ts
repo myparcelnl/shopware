@@ -8,7 +8,7 @@ const HASH_SELECTOR = '#confirmOrderForm input[name="hash"]';
 const SUBMIT_SELECTOR = '#confirmFormSubmit';
 
 /**
- * The URL that the updater reloaded last. A reload starts the widget again, and
+ * The confirm page URL that the updater opened last. A new page starts the widget again, and
  * the widget sends its choice again: without this, a confirm page that never has
  * the cart parts would reload without end.
  */
@@ -35,7 +35,15 @@ export class CartUpdater {
 
   private submitWasDisabled = false;
 
-  public constructor(private readonly storeUrl: string) {}
+  /**
+   * @param storeUrl   the route that stores the choice on the cart
+   * @param confirmUrl the confirm page. Not document.location: after a failed
+   *                   order Shopware shows the confirm page at POST /checkout/order.
+   */
+  public constructor(
+    private readonly storeUrl: string,
+    private readonly confirmUrl: string,
+  ) {}
 
   /**
    * Stores the choice and shows the new cart. While another request runs, it
@@ -102,11 +110,11 @@ export class CartUpdater {
   /**
    * Loads the confirm page again and takes the parts that depend on the cart,
    * then starts the Shopware plugins in them again, as FormAutoSubmitPlugin does.
-   * A page without them (Shopware redirected, for example to the cart) needs a
-   * full reload, once per URL.
+   * A page without them (Shopware redirected, for example to the cart) needs to
+   * be opened again, one time.
    */
   private async refreshPage(): Promise<void> {
-    const response = await window.fetch(document.location.href, {headers: {Accept: 'text/html'}});
+    const response = await window.fetch(this.confirmUrl, {headers: {Accept: 'text/html'}});
     const page = new DOMParser().parseFromString(await response.text(), 'text/html');
     const hash = page.querySelector<HTMLInputElement>(HASH_SELECTOR);
 
@@ -141,12 +149,14 @@ export class CartUpdater {
   }
 
   /**
-   * Reloads the page, but not a second time for the same URL. When the page
-   * cannot be reloaded, the old totals stay: Shopware refuses an order with the
-   * old hash and shows the confirm page again, with the new totals.
+   * Opens the confirm page again, but not a second time in a row. It opens
+   * confirmUrl and does not reload: a reload of a page that Shopware showed after
+   * a failed order would send the order form again. When the page cannot be
+   * opened, the old totals stay: Shopware refuses an order with the old hash and
+   * shows the confirm page again, with the new totals.
    */
   private reloadOnce(): void {
-    const url = document.location.href;
+    const url = this.confirmUrl;
 
     try {
       if (window.sessionStorage.getItem(RELOAD_KEY) === url) {
@@ -162,7 +172,7 @@ export class CartUpdater {
       return;
     }
 
-    document.location.reload();
+    document.location.assign(url);
   }
 
   private lockSubmit(): void {

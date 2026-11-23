@@ -6,6 +6,7 @@ import {type DeliveryOptionsPluginOptions} from './types';
 const options: DeliveryOptionsPluginOptions = {
   shippingMethodId: '0190a1b2c3d4e5f60718293a4b5c5001',
   storeUrl: '/myparcel/delivery-options',
+  confirmUrl: '/checkout/confirm',
   address: {cc: 'NL', postalCode: '2132JE', city: 'Hoofddorp', street: 'Antareslaan', address2: '31'},
 };
 

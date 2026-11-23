@@ -20,6 +20,7 @@
             {% set myparcelOptions = {
                 shippingMethodId: context.shippingMethod.id,
                 storeUrl: path(constant('MyParcel\\Shopware\\Pdk\\Routing\\RouteName::STOREFRONT_DELIVERY_OPTIONS')),
+                confirmUrl: path('frontend.checkout.confirm.page'),
                 address: {
                     cc: context.shippingLocation.country.iso,
                     postalCode: shippingAddress ? shippingAddress.zipcode : '',

@@ -38,7 +38,7 @@ export const getProxyCapabilitiesUrl = (): string | undefined => {
 export const createDeliveryOptionsPlugin = (Base: ShopwarePluginClass): ShopwarePluginClass =>
   class DeliveryOptionsPlugin extends Base {
     public init(): void {
-      const updater = new CartUpdater(this.options.storeUrl);
+      const updater = new CartUpdater(this.options.storeUrl, this.options.confirmUrl);
 
       createPdkCheckout(createCheckoutConfig(this.options));
 

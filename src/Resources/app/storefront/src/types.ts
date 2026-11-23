@@ -8,6 +8,11 @@ export interface DeliveryOptionsPluginOptions {
   shippingMethodId: string;
   /** The URL of the route that stores the choice on the cart. */
   storeUrl: string;
+  /**
+   * The URL of the confirm page. After a failed order Shopware shows the confirm
+   * page at POST /checkout/order, so the page URL cannot be loaded again.
+   */
+  confirmUrl: string;
   address: {
     cc: string;
     postalCode: string;

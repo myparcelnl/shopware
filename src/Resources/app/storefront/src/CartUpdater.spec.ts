@@ -2,6 +2,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {CartUpdater} from './CartUpdater';
 
 const STORE_URL = '/myparcel/delivery-options';
+const CONFIRM_URL = '/checkout/confirm';
 
 const confirmPage = (fees: string, hash: string): string => `
   <div class="confirm-product">${fees}</div>
@@ -48,7 +49,7 @@ describe('CartUpdater', () => {
   it('stores the choice and shows the new fee lines, total and hash', async () => {
     const {requests} = createFetch(confirmPage('Evening delivery 1.82', 'new-hash'));
 
-    await new CartUpdater(STORE_URL).update({deliveryType: 'evening'});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({deliveryType: 'evening'});
 
     expect(requests[0].url).toBe(STORE_URL);
     expect(requests[0].init?.method).toBe('POST');
@@ -61,14 +62,14 @@ describe('CartUpdater', () => {
   it('starts the Shopware plugins in the new line items, as FormAutoSubmitPlugin does', async () => {
     createFetch(confirmPage('Evening delivery 1.82', 'new-hash'));
 
-    await new CartUpdater(STORE_URL).update({deliveryType: 'evening'});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({deliveryType: 'evening'});
 
     expect(initializePlugins).toHaveBeenCalledOnce();
   });
 
   it('does not store the same choice twice', async () => {
     const {fetch} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL);
+    const updater = new CartUpdater(STORE_URL, CONFIRM_URL);
 
     await updater.update({deliveryType: 'evening'});
     await updater.update({deliveryType: 'evening'});
@@ -78,7 +79,7 @@ describe('CartUpdater', () => {
 
   it('sends only the last of the choices that come in while a request runs', async () => {
     const {requests} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL);
+    const updater = new CartUpdater(STORE_URL, CONFIRM_URL);
 
     const first = updater.update({deliveryType: 'standard'});
     void updater.update({deliveryType: 'morning'});
@@ -93,7 +94,7 @@ describe('CartUpdater', () => {
 
   it('sends a choice again that comes back while another request runs', async () => {
     const {requests} = createFetch(confirmPage('fees', 'hash'));
-    const updater = new CartUpdater(STORE_URL);
+    const updater = new CartUpdater(STORE_URL, CONFIRM_URL);
 
     await updater.update({deliveryType: 'evening'});
 
@@ -120,7 +121,7 @@ describe('CartUpdater', () => {
     vi.stubGlobal('fetch', fetch);
     const submit = document.querySelector<HTMLButtonElement>('#confirmFormSubmit') as HTMLButtonElement;
 
-    const update = new CartUpdater(STORE_URL).update({a: 1});
+    const update = new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
 
     expect(submit.disabled).toBe(true);
 
@@ -135,7 +136,7 @@ describe('CartUpdater', () => {
     submit.disabled = true;
     createFetch(confirmPage('fees', 'hash'));
 
-    await new CartUpdater(STORE_URL).update({a: 1});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
 
     expect(submit.disabled).toBe(true);
   });
@@ -144,7 +145,7 @@ describe('CartUpdater', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const {requests} = createFetch(confirmPage('fees', 'new-hash'), 400);
 
-    await new CartUpdater(STORE_URL).update({carrier: 'nope'});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({carrier: 'nope'});
 
     expect(requests).toHaveLength(1);
     expect(warn).toHaveBeenCalled();
@@ -152,35 +153,48 @@ describe('CartUpdater', () => {
     expect(document.querySelector<HTMLButtonElement>('#confirmFormSubmit')?.disabled).toBe(false);
   });
 
-  it('reloads the page when the confirm page has no cart parts, for example after a redirect', async () => {
+  it('opens the confirm page when it has no cart parts, for example after a redirect', async () => {
+    const assign = vi.fn();
     const reload = vi.fn();
-    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', reload} as unknown as Location);
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', assign, reload} as unknown as Location);
     createFetch('<div>cart page</div>');
 
-    await new CartUpdater(STORE_URL).update({a: 1});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
 
-    expect(reload).toHaveBeenCalledOnce();
+    expect(assign).toHaveBeenCalledExactlyOnceWith(CONFIRM_URL);
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('loads the confirm page, not the page url, after a failed order', async () => {
+    // Shopware shows the confirm page of a failed order at POST /checkout/order.
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/order', assign: vi.fn(), reload: vi.fn()} as unknown as Location);
+    const {requests} = createFetch(confirmPage('fees', 'new-hash'));
+
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
+
+    expect(requests.map(({url}) => url)).toEqual([STORE_URL, CONFIRM_URL]);
+    expect(document.querySelector<HTMLInputElement>('input[name="hash"]')?.value).toBe('new-hash');
   });
 
   it('does not reload the same page a second time, so the page cannot reload without end', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const reload = vi.fn();
-    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', reload} as unknown as Location);
+    const assign = vi.fn();
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', assign} as unknown as Location);
     createFetch('<div>cart page</div>');
 
-    // The reload starts a new updater, and the widget sends its choice again.
-    await new CartUpdater(STORE_URL).update({a: 1});
-    await new CartUpdater(STORE_URL).update({a: 1});
+    // The new page starts a new updater, and the widget sends its choice again.
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
 
-    expect(reload).toHaveBeenCalledOnce();
+    expect(assign).toHaveBeenCalledOnce();
     expect(warn).toHaveBeenCalled();
   });
 
   it('reloads again after a page that it could update', async () => {
-    window.sessionStorage.setItem('myparcel-delivery-options-reload', document.location.href);
+    window.sessionStorage.setItem('myparcel-delivery-options-reload', CONFIRM_URL);
     createFetch(confirmPage('fees', 'new-hash'));
 
-    await new CartUpdater(STORE_URL).update({a: 1});
+    await new CartUpdater(STORE_URL, CONFIRM_URL).update({a: 1});
 
     expect(window.sessionStorage.getItem('myparcel-delivery-options-reload')).toBeNull();
   });
