@@ -99,7 +99,8 @@ final class Checkout
     /**
      * A calculated cart. Keys: lines (list of [productId, quantity, unitPrice,
      * unitTax]), shippingCosts (gross), shippingTax, taxRules (TaxRuleCollection
-     * of the shipping costs), taxStatus.
+     * of the shipping costs), shippingDiscount (gross, negative: a second
+     * delivery, as a shipping promotion adds it), taxStatus.
      *
      * @param  array<string, mixed> $values
      */
@@ -125,23 +126,28 @@ final class Checkout
         $shippingTax   = $values['shippingTax'] ?? 1.05;
         $taxRules      = $values['taxRules'] ?? new TaxRuleCollection([new TaxRule(21.0)]);
 
-        $cart->setDeliveries(new DeliveryCollection([
-            new Delivery(
-                new DeliveryPositionCollection(),
-                new DeliveryDate(new \DateTimeImmutable(), new \DateTimeImmutable()),
-                self::shippingMethod(),
-                new ShippingLocation(new CountryEntity()),
-                new CalculatedPrice(
-                    $shippingCosts,
-                    $shippingCosts,
-                    new CalculatedTaxCollection([new CalculatedTax($shippingTax, 21.0, $shippingCosts)]),
-                    $taxRules
-                )
-            ),
-        ]));
+        $deliveries = new DeliveryCollection([self::delivery($shippingCosts, $shippingTax, $taxRules)]);
+
+        if (isset($values['shippingDiscount'])) {
+            $discount = (float) $values['shippingDiscount'];
+            $deliveries->add(self::delivery($discount, round($discount / 121 * 21, 2), $taxRules));
+        }
+
+        $cart->setDeliveries($deliveries);
 
         $cart->setPrice(new CartPrice(0, 30.25, 24.20, new CalculatedTaxCollection(), new TaxRuleCollection(), $values['taxStatus'] ?? CartPrice::TAX_STATE_GROSS));
 
         return $cart;
+    }
+
+    private static function delivery(float $costs, float $tax, TaxRuleCollection $taxRules): Delivery
+    {
+        return new Delivery(
+            new DeliveryPositionCollection(),
+            new DeliveryDate(new \DateTimeImmutable(), new \DateTimeImmutable()),
+            self::shippingMethod(),
+            new ShippingLocation(new CountryEntity()),
+            new CalculatedPrice($costs, $costs, new CalculatedTaxCollection([new CalculatedTax($tax, 21.0, $costs)]), $taxRules)
+        );
     }
 }

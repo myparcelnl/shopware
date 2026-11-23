@@ -119,8 +119,12 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
 
         $factor = $context->getCurrency()->getFactor() / $this->euroCurrency->getFactor();
 
+        // A shipping promotion adds a delivery with a negative price, so the
+        // shipping costs of the cart are the sum of all deliveries.
+        $shippingTotal = $toCalculate->getDeliveries()->getShippingCosts()->getTotalPriceAmount();
+
         foreach ($fees as $fee) {
-            $lineItem = $this->createLineItem($fee, $delivery, $context, $factor);
+            $lineItem = $this->createLineItem($fee, $delivery, $shippingTotal, $context, $factor);
 
             if (null !== $lineItem) {
                 $toCalculate->add($lineItem);
@@ -159,10 +163,9 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
      * Null for a fee of 0: the cart shows no line for it. The fee is the net
      * euro amount that the merchant set.
      */
-    private function createLineItem(PdkCartFee $fee, Delivery $delivery, SalesChannelContext $context, float $factor): ?LineItem
+    private function createLineItem(PdkCartFee $fee, Delivery $delivery, float $shippingTotal, SalesChannelContext $context, float $factor): ?LineItem
     {
-        $shippingCosts = $delivery->getShippingCosts();
-        $taxRules      = $shippingCosts->getTaxRules();
+        $taxRules = $delivery->getShippingCosts()->getTaxRules();
 
         // QuantityPriceCalculator reads the price as gross in a gross context.
         $price = (float) $fee->amount * $factor;
@@ -172,7 +175,7 @@ final class DeliveryOptionsFeeProcessor implements CartProcessorInterface
         }
 
         if (self::PICKUP_FEE_ID === $fee->id) {
-            $price = max(-$shippingCosts->getTotalPrice(), $price);
+            $price = max(-$shippingTotal, $price);
         }
 
         if (0.0 === round($price, 2)) {

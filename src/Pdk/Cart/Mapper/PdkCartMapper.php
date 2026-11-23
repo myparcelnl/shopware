@@ -19,8 +19,9 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
  * address. Only product line items become lines, as in PdkOrderMapper. The cart
  * leaves the order totals at 0: the checkout context does not read them.
  *
- * shipmentPrice is the net shipping price. The PDK adds it to the delivery
- * option prices and then asks TaxService for the display price.
+ * shipmentPrice is the net shipping price of all deliveries: a shipping
+ * promotion adds a delivery with a negative price. The PDK adds it to the
+ * delivery option prices and then asks TaxService for the display price.
  *
  * The PDK computes hasDeliveryOptions, excludeParcelLockers and
  * minimumDropOffDelay of the shipping method from the lines, so the mapper does
@@ -42,10 +43,10 @@ final class PdkCartMapper
     {
         $currencyFactor = $context->getCurrency()->getFactor();
         $taxStatus      = $cart->getPrice()->getTaxStatus();
-        $shippingCosts  = $cart->getDeliveries()->first()?->getShippingCosts();
-        $shipmentPrice  = null === $shippingCosts
+        $deliveries     = $cart->getDeliveries();
+        $shipmentPrice  = 0 === $deliveries->count()
             ? ['price' => 0, 'vat' => 0, 'priceAfterVat' => 0]
-            : $this->moneyConverter->toUnitCents($shippingCosts, $currencyFactor, $euroFactor, $taxStatus);
+            : $this->moneyConverter->toUnitCents($deliveries->getShippingCosts()->sum(), $currencyFactor, $euroFactor, $taxStatus);
         $shippingMethod = $context->getShippingMethod();
 
         return new PdkCart([

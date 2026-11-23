@@ -71,6 +71,15 @@ it('takes the net shipping price, which the pdk adds to the delivery option pric
         ->and($cart->shipmentPriceAfterVat)->toBe(605);
 });
 
+it('subtracts the shipping discount of a promotion from the shipping price', function () {
+    $cartService = new FixedCartService(Checkout::cart(['shippingDiscount' => -6.05]));
+
+    $cart = cartRepository(Checkout::context(), $cartService)->get(null);
+
+    expect($cart->shipmentPrice)->toBe(0)
+        ->and($cart->shipmentPriceAfterVat)->toBe(0);
+});
+
 it('reads the shipping costs as net when the cart is net', function () {
     $cartService = new FixedCartService(Checkout::cart(['shippingCosts' => 5.00, 'taxStatus' => CartPrice::TAX_STATE_NET]));
 

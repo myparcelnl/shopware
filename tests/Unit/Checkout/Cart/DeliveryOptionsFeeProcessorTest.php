@@ -156,10 +156,17 @@ it('never lets the pickup discount make the shipping costs negative', function (
 });
 
 it('gives no pickup discount after a free-shipping promotion', function () {
-    // The promotion ran first and set the shipping costs to 0.
-    $cart = processFees(['carrier' => 'POSTNL', 'deliveryType' => 'pickup'], null, Checkout::cart(['shippingCosts' => 0.0, 'shippingTax' => 0.0]));
+    // The promotion ran first and added a delivery of -6.05 next to the 6.05.
+    $cart = processFees(['carrier' => 'POSTNL', 'deliveryType' => 'pickup'], null, Checkout::cart(['shippingDiscount' => -6.05]));
 
     expect(feeLines($cart))->toBe([]);
+});
+
+it('caps the pickup discount at what is left of the shipping costs after a promotion', function () {
+    // 6.05 - 3.03 leaves 3.02; the pickup discount of the test settings is larger.
+    $cart = processFees(['carrier' => 'POSTNL', 'deliveryType' => 'pickup'], null, Checkout::cart(['shippingDiscount' => -3.03]));
+
+    expect(feeLines($cart)[0]->getPrice()->getTotalPrice())->toBe(-3.02);
 });
 
 it('runs after the shipping discounts of promotions', function () {
