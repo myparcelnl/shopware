@@ -24,7 +24,7 @@ final class DeliveryOptionsView extends Struct
         public readonly string $html,
         public readonly string $scriptUrl,
         public readonly string $styleUrl,
-        public readonly string $address2 = ''
+        public readonly string $address2
     ) {
     }
 
