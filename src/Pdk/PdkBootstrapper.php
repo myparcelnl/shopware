@@ -252,12 +252,14 @@ final class PdkBootstrapper extends AbstractPdkBootstrapper
             // Settings that do nothing in Shopware, so the admin does not show
             // them. The widget has one place, below the shipping methods on the
             // confirm page. Shopware has one street field, which AddressMapper
-            // splits, and the plug-in has no address widget.
+            // splits, and the plug-in has no address widget. No code applies the
+            // setting for a product that is not in stock.
             'disabledSettings'                          => \_MyParcel\DI\value([
                 CheckoutSettings::ID => [
                     CheckoutSettings::DELIVERY_OPTIONS_POSITION,
                     CheckoutSettings::USE_SEPARATE_ADDRESS_FIELDS,
                     CheckoutSettings::ENABLE_ADDRESS_WIDGET,
+                    CheckoutSettings::ENABLE_DELIVERY_OPTIONS_WHEN_NOT_IN_STOCK,
                 ],
             ]),
 

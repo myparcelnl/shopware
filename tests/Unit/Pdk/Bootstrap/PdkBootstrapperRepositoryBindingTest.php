@@ -123,6 +123,7 @@ it('hides the checkout settings that do nothing in shopware, and keeps the ones 
         CheckoutSettings::DELIVERY_OPTIONS_POSITION,
         CheckoutSettings::USE_SEPARATE_ADDRESS_FIELDS,
         CheckoutSettings::ENABLE_ADDRESS_WIDGET,
+        CheckoutSettings::ENABLE_DELIVERY_OPTIONS_WHEN_NOT_IN_STOCK,
     ])
         ->and($hidden)->not->toContain(CheckoutSettings::DELIVERY_OPTIONS_CUSTOM_CSS)
         ->and($hidden)->not->toContain(CheckoutSettings::ALLOWED_SHIPPING_METHODS);
