@@ -26,6 +26,18 @@ use Throwable;
  */
 final class DeliveryOptionsController
 {
+    /**
+     * The keys of the widget output that the order needs. isPickup follows from
+     * deliveryType.
+     */
+    private const KEYS = ['carrier', 'date', 'deliveryType', 'packageType', 'pickupLocation', 'shipmentOptions'];
+
+    /**
+     * The shipment options that the widget can send. Each one has a price in the
+     * carrier settings.
+     */
+    private const SHIPMENT_OPTIONS = ['signature', 'onlyRecipient', 'priorityDelivery', 'sameDayDelivery'];
+
     public function __construct(
         private readonly PdkInitializer $pdkInitializer,
         private readonly SalesChannelContextHolder $contextHolder,
@@ -60,7 +72,7 @@ final class DeliveryOptionsController
         }
 
         try {
-            $deliveryOptions = $this->normalize($input, $context);
+            $deliveryOptions = $this->normalize(self::sanitize($input), $context);
         } catch (Throwable $exception) {
             $this->logger->warning('MyParcel: the checkout sent delivery options that the PDK cannot read', ['exception' => $exception]);
 
@@ -96,6 +108,58 @@ final class DeliveryOptionsController
         $deliveryOptions->getCarrierAttribute();
 
         return $deliveryOptions->toStorableArray();
+    }
+
+    /**
+     * Keeps only what the widget can send, and checks its shape before the PDK
+     * model gets it. The model creates an object of a class whose name is the
+     * value of a class-cast attribute, and it stores every attribute it knows,
+     * also labelAmount and contractId.
+     *
+     * @TODO INT-2353: move this check to the PDK, which the WooCommerce plugin also needs.
+     *
+     * @param  array<mixed> $input
+     *
+     * @return array<string, mixed>
+     *
+     * @throws \InvalidArgumentException when the input is not what the widget sends
+     */
+    private static function sanitize(array $input): array
+    {
+        $input = array_intersect_key($input, array_flip(self::KEYS));
+
+        foreach (['carrier', 'deliveryType', 'packageType'] as $key) {
+            if (isset($input[$key]) && !is_string($input[$key])) {
+                throw new \InvalidArgumentException(sprintf('%s is not a string', $key));
+            }
+        }
+
+        if (isset($input['date']) && !(is_string($input['date']) && false !== strtotime($input['date']))) {
+            throw new \InvalidArgumentException('date is not a date');
+        }
+
+        $shipmentOptions = $input['shipmentOptions'] ?? [];
+
+        if (!is_array($shipmentOptions)
+            || [] !== array_diff(array_keys($shipmentOptions), self::SHIPMENT_OPTIONS)
+            || [] !== array_filter($shipmentOptions, static fn ($value) => !is_bool($value))) {
+            throw new \InvalidArgumentException('shipmentOptions holds an option that the widget does not send');
+        }
+
+        if ('pickup' !== ($input['deliveryType'] ?? null)) {
+            unset($input['pickupLocation']);
+
+            return $input;
+        }
+
+        $pickupLocation = $input['pickupLocation'] ?? null;
+
+        if (!is_array($pickupLocation) || [] === $pickupLocation
+            || [] !== array_filter($pickupLocation, static fn ($value) => null !== $value && !is_scalar($value))) {
+            throw new \InvalidArgumentException('a pickup needs a pickupLocation');
+        }
+
+        return $input;
     }
 
     private static function badRequest(string $message): JsonResponse
