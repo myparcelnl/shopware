@@ -36,7 +36,7 @@ export interface DeliveryOptionsPluginOptions {
     postalCode: string;
     city: string;
     street: string;
-    /** The additional address line, only when the street has no house number. */
+    /** additionalAddressLine1 when it holds the house number, by the rule of AddressMapper. Otherwise empty. */
     address2: string;
   };
 }
