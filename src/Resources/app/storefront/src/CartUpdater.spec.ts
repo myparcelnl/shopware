@@ -155,20 +155,23 @@ describe('CartUpdater', () => {
   });
 
   it('opens the confirm page when it has no cart parts, for example after a redirect', async () => {
+    const replace = vi.fn();
     const assign = vi.fn();
     const reload = vi.fn();
-    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', assign, reload} as unknown as Location);
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', replace, assign, reload} as unknown as Location);
     createFetch('<div>cart page</div>');
 
     await new CartUpdater(STORE_URL, CONFIRM_URL, DEFAULT_SELECTORS).update({a: 1});
 
-    expect(assign).toHaveBeenCalledExactlyOnceWith(CONFIRM_URL);
+    // replace() keeps no history entry for a failed order, so Back does not send the order form again.
+    expect(replace).toHaveBeenCalledExactlyOnceWith(CONFIRM_URL);
+    expect(assign).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
   });
 
   it('loads the confirm page, not the page url, after a failed order', async () => {
     // Shopware shows the confirm page of a failed order at POST /checkout/order.
-    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/order', assign: vi.fn(), reload: vi.fn()} as unknown as Location);
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/order', replace: vi.fn(), reload: vi.fn()} as unknown as Location);
     const {requests} = createFetch(confirmPage('fees', 'new-hash'));
 
     await new CartUpdater(STORE_URL, CONFIRM_URL, DEFAULT_SELECTORS).update({a: 1});
@@ -179,15 +182,15 @@ describe('CartUpdater', () => {
 
   it('does not reload the same page a second time, so the page cannot reload without end', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const assign = vi.fn();
-    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', assign} as unknown as Location);
+    const replace = vi.fn();
+    vi.spyOn(document, 'location', 'get').mockReturnValue({href: 'https://shop.test/checkout/confirm', replace} as unknown as Location);
     createFetch('<div>cart page</div>');
 
     // The new page starts a new updater, and the widget sends its choice again.
     await new CartUpdater(STORE_URL, CONFIRM_URL, DEFAULT_SELECTORS).update({a: 1});
     await new CartUpdater(STORE_URL, CONFIRM_URL, DEFAULT_SELECTORS).update({a: 1});
 
-    expect(assign).toHaveBeenCalledOnce();
+    expect(replace).toHaveBeenCalledOnce();
     expect(warn).toHaveBeenCalled();
   });
 

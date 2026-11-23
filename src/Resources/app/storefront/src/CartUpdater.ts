@@ -148,7 +148,8 @@ export class CartUpdater {
   /**
    * Opens the confirm page again, but not a second time in a row. It opens
    * confirmUrl and does not reload: a reload of a page that Shopware showed after
-   * a failed order would send the order form again. When the page cannot be
+   * a failed order would send the order form again. It uses replace(), so the
+   * history keeps no entry for the failed order. When the page cannot be
    * opened, the old totals stay: Shopware refuses an order with the old hash and
    * shows the confirm page again, with the new totals.
    */
@@ -169,7 +170,7 @@ export class CartUpdater {
       return;
     }
 
-    document.location.assign(url);
+    document.location.replace(url);
   }
 
   private replacedSelectors(): string[] {
