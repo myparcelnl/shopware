@@ -1,9 +1,4 @@
 /**
- * What the confirm page puts in data-myparcel-delivery-options-options. The
- * server renders it, because the confirm page has no address form: a change of
- * the address or the shipping method reloads the page.
- */
-/**
  * The parts of the confirm page that the script reads or replaces.
  */
 export interface CheckoutSelectors {
@@ -19,6 +14,11 @@ export interface CheckoutSelectors {
   submit: string;
 }
 
+/**
+ * What the confirm page puts in data-myparcel-delivery-options-options. The
+ * server renders it, because the confirm page has no address form: a change of
+ * the address or the shipping method reloads the page.
+ */
 export interface DeliveryOptionsPluginOptions {
   /** The id of the chosen Shopware shipping method. */
   shippingMethodId: string;
