@@ -1,0 +1,54 @@
+on:
+  push:
+    branches:
+      - main
+      # @TODO INT-2331: add the prerelease and maintenance branches with their own config
+      # - alpha
+      # - beta
+      # - v[0-9]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: release-please
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          # the org-level myparcel-bot PAT (Personal Access Token)
+          token: ${{ secrets.GH_REPO_TOKEN }}
+          # The short ref name of the branch or tag that triggered
+          #  the workflow run. For example, `main` or `1.x`
+          target-branch: ${{ github.ref_name }}
+
+      # @TODO: Placeholders for T11:
+      # First, write a build step here to create the built zip through `pdk-builder` and/or shopware-cli (INT-1963 T11)
+      # The next steps are placeholders for T11
+
+      #  - uses: actions/checkout@v7
+      #   # these if statements ensure that a publication only occurs when
+      #   # a new release is created:
+      #   if: ${{ steps.release.outputs.release_created }}
+
+      # - name: Validate release package
+      #   run: docker run --rm -v "$GITHUB_WORKSPACE":/ext ghcr.io/shopware/shopware-cli extension validate ext/<zip-path>
+
+      # - name: Upload artifact to github release
+      #   if: ${{ steps.release.outputs.release_created }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: gh release upload ${{ steps.release.outputs.tag_name }} <zip-path>
+
+      # - name: Upload artifact to shopware store
+      #   if: ${{ steps.release.outputs.release_created }}
+      #   run: docker run --rm -v "$GITHUB_WORKSPACE":/ext ghcr.io/shopware/shopware-cli account producer extension upload ext/<zip-path>
