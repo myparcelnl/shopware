@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Frontend;
 
+use MyParcel\Shopware\Pdk\Account\OrderModeNotice;
 use MyParcel\Shopware\Pdk\PdkInitializer;
 use MyParcel\Shopware\Pdk\Product\Repository\PdkProductRepository;
 use MyParcel\Shopware\Pdk\View\AdminScreen;
@@ -11,6 +12,7 @@ use MyParcel\Shopware\Pdk\View\AdminViewRequest;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\Facade\Frontend;
 use MyParcelNL\Pdk\Facade\Language;
+use MyParcelNL\Pdk\Facade\Notifications;
 use MyParcelNL\Pdk\Facade\Pdk;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -39,12 +41,21 @@ final class AdminViewRenderer implements AdminViewRendererInterface
 
         $this->pdkInitializer->boot();
 
-        return match ($request->screen) {
+        if (AdminScreen::PluginSettings === $request->screen) {
+            (new OrderModeNotice())->add();
+        }
+
+        $result = match ($request->screen) {
             AdminScreen::PluginSettings => new AdminViewResult($this->compose($request->screen, Frontend::renderPluginSettings())),
             AdminScreen::OrderList      => $this->renderOrderList($request),
             AdminScreen::Order          => $this->renderOrder($request),
             AdminScreen::Product, AdminScreen::ChildProduct => $this->renderProduct($request),
         };
+
+        // The rendered html holds an empty notification container: the PDK fills it
+        // from its own responses, and this route is not one. So the notifications of
+        // this request travel next to the html, and the admin module shows them.
+        return $result->withNotifications(Notifications::all()->toArrayWithoutNull());
     }
 
     private function compose(AdminScreen $screen, string $component): string

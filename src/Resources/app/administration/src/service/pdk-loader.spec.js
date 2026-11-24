@@ -146,6 +146,19 @@ describe('pdk-loader', () => {
         expect(component.createNotificationInfo).toHaveBeenCalledWith({message: 'm4'});
     });
 
+    it('maps a pdk notification to the shape notifyShopware takes', async () => {
+        const {toForwardedNotification} = await loadModule();
+
+        expect(toForwardedNotification({variant: 'warning', title: 'T', content: ['a', 'b']}))
+            .toEqual({variant: 'warning', title: 'T', message: 'a<br>b'});
+        expect(toForwardedNotification({variant: 'error', content: 'one'}))
+            .toEqual({variant: 'error', message: 'one'});
+        expect(toForwardedNotification({content: ['a']}))
+            .toEqual({variant: 'info', message: 'a'});
+        expect(toForwardedNotification({variant: 'info', title: null}))
+            .toEqual({variant: 'info', message: ''});
+    });
+
     it('unmounts the session when the page closed while it started', async () => {
         const session = {render: vi.fn(), dispatchBulkAction: vi.fn(), unmount: vi.fn()};
         let active = true;

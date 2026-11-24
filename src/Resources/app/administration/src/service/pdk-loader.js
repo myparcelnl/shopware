@@ -131,6 +131,22 @@ export async function openSession(view, params, root, isActive, {onNotification}
 }
 
 /**
+ * Turns a PDK notification from the view route into the shape notifyShopware
+ * takes. A session does this itself; the view route hands over the raw PDK
+ * notification, whose content is a list of lines.
+ *
+ * @param {{variant?: string, title?: string, content?: string[]|string}} notification
+ * @returns {{variant: string, title?: string, message: string}}
+ */
+export function toForwardedNotification({variant, title, content}) {
+    return {
+        variant: variant ?? 'info',
+        ...(title === undefined || title === null ? {} : {title}),
+        message: Array.isArray(content) ? content.join('<br>') : (content ?? ''),
+    };
+}
+
+/**
  * Creates a handler that shows a PDK notification as a Shopware notification.
  * Use it as onNotification for openSession.
  *

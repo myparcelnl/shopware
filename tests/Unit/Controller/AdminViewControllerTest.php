@@ -32,11 +32,12 @@ it('returns the rendered view with its assets', function () {
 
     expect($response->getStatusCode())->toBe(200)
         ->and(json_decode((string) $response->getContent(), true))->toBe([
-            'html'        => '<span id="myparcel-pdk-boot"></span>',
-            'items'       => [],
-            'bulkActions' => [],
-            'scripts'     => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
-            'styles'      => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
+            'html'          => '<span id="myparcel-pdk-boot"></span>',
+            'items'         => [],
+            'bulkActions'   => [],
+            'notifications' => [],
+            'scripts'       => ['https://shop.test/bundles/myparcelshopware/pdk/admin.iife.js?1'],
+            'styles'        => ['https://shop.test/bundles/myparcelshopware/pdk/admin.css?1'],
         ])
         ->and($renderer->rendered)->toEqual([new AdminViewRequest(AdminScreen::PluginSettings, [])]);
 });
