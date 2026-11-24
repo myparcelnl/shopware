@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace MyParcel\Shopware\Pdk\Order;
 
-use MyParcelNL\Pdk\Account\Contract\AccountFeaturesServiceInterface;
 use MyParcelNL\Pdk\App\Api\Backend\PdkBackendActions;
 use MyParcelNL\Pdk\Facade\Actions;
-use MyParcelNL\Pdk\Facade\Logger;
-use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Facade\Settings;
 use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 
@@ -19,6 +16,9 @@ use MyParcelNL\Pdk\Settings\Model\OrderSettings;
  * The PDK does not export an order that it exported automatically before. The
  * export can change the order state itself, which calls this class again in
  * the same request; that call does nothing while the first export runs.
+ *
+ * The export runs in every order mode, the same as the WooCommerce plugin. The
+ * PDK picks the path per mode in ExportOrderAction::export().
  */
 final class AutomaticOrderExport
 {
@@ -28,6 +28,10 @@ final class AutomaticOrderExport
     /**
      * Exports the order when $state is the state set for automatic export. Use
      * it after an order changed state.
+     *
+     * @TODO INT-2218: skip the export when the effective order mode is V2. A
+     *       skip is only correct after that ticket lowers V2 without an active
+     *       sales channel to ORDER_MODE_SHIPMENTS. WooCommerce gets the same skip.
      *
      * @param  string $state the technical name of the new order state
      */
@@ -39,14 +43,6 @@ final class AutomaticOrderExport
             return;
         }
 
-        // @TODO INT-2218: skip V2 only when the account has an active sales channel.
-        // Until then an order landscape can also make a shipment for every V2 order.
-        if (AccountFeaturesServiceInterface::ORDER_MODE_V2 === $this->getEffectiveOrderMode()) {
-            Logger::debug('Automatic export skipped: the effective order mode is V2', ['orderId' => $orderId]);
-
-            return;
-        }
-
         $this->inProgress[$orderId] = true;
 
         try {
@@ -55,13 +51,5 @@ final class AutomaticOrderExport
             // An export that failed must stay possible later in this request.
             unset($this->inProgress[$orderId]);
         }
-    }
-
-    private function getEffectiveOrderMode(): int
-    {
-        /** @var AccountFeaturesServiceInterface $features */
-        $features = Pdk::get(AccountFeaturesServiceInterface::class);
-
-        return (int) $features->getEffectiveOrderMode();
     }
 }

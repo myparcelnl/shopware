@@ -72,19 +72,20 @@ it('does not export when no state is set for automatic export', function () {
     expect($actions->calls)->toBe([]);
 });
 
-it('does not export when the effective order mode is v2', function () {
+it('exports the order when the effective order mode is v2', function () {
     $actions = bootAutomaticExport();
     useOrderModeV2();
 
     (new AutomaticOrderExport())->onOrderState(Entities::ORDER_ID, 'in_progress');
 
-    // The PDK logger puts "[PDK]: " before each message.
-    expect($actions->calls)->toBe([])
-        ->and(TestPdk::logs('debug'))->toContain([
-            'level'   => 'debug',
-            'message' => '[PDK]: Automatic export skipped: the effective order mode is V2',
-            'context' => ['orderId' => Entities::ORDER_ID],
-        ]);
+    // Order mode V2 without an active sales channel behaves as shipments mode
+    // (INT-1594). Shopware has no sales channel, so this export cannot create a
+    // second shipment next to one of an order landscape.
+    expect($actions->calls)->toBe([[
+        'action'     => PdkBackendActions::EXPORT_ORDERS,
+        'parameters' => ['orderIds' => [Entities::ORDER_ID]],
+        'automatic'  => true,
+    ]]);
 });
 
 it('does not export the order again when the export moves it into the same state', function () {
