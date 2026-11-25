@@ -22,7 +22,9 @@ use Throwable;
  * A failed export does not stop the order: the merchant sees the order without
  * a shipment and can export it by hand.
  *
- * @TODO INT-2151: cover the order path with an integration test in a Shopware installation.
+ * @TODO INT-2151: cover this subscriber in a Shopware installation, where
+ *       Shopware itself dispatches the two events. A unit test calls the
+ *       handlers directly and cannot show that they are wired up.
  */
 final class AutomaticOrderExportSubscriber implements EventSubscriberInterface
 {
