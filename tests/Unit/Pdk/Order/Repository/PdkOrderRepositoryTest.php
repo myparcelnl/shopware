@@ -240,6 +240,33 @@ it('does not write the tracking codes when they stay the same', function () {
     expect(updateWithBarcode(['3SA']))->toBe([]);
 });
 
+it('does not write the tracking codes when the order has no shipping delivery', function () {
+    $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => null]));
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL', 'barcode' => '3SA']]);
+    $repository->update($order);
+
+    expect($orders->updates)->toBe([]);
+});
+
+it('does not read the stored order when the external identifier is not a uuid', function () {
+    $orders     = FakeEntityRepository::with(Entities::order());
+    $orderData  = FakeEntityRepository::with();
+    $repository = orderRepository($orders, $orderData);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    // A search on such an id throws in Shopware, so update() stores the order
+    // without the stored shipments and without the tracking codes.
+    $order->externalIdentifier = 'not-a-uuid';
+    $repository->update($order);
+
+    expect($orders->criteria)->toHaveCount(1)
+        ->and($orders->updates)->toBe([])
+        ->and($orderData->upserts)->toHaveCount(1);
+});
+
 it('returns the updated order from the cache afterwards', function () {
     $orders     = FakeEntityRepository::with(Entities::order());
     $repository = orderRepository($orders);
