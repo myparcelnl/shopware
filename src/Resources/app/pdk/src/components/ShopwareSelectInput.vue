@@ -3,7 +3,7 @@
     :id="id"
     v-model="model"
     v-test="AdminComponent.SelectInput"
-    :disabled="options.length === 1 || element.isDisabled || element.isSuspended"
+    :disabled="options.length === 1 || element.isDisabled || element.isSuspended || element.isReadOnly"
     :name="id"
     class="mypa-field mypa-field--select">
     <option

@@ -82,9 +82,11 @@ describe('ShopwareRadioGroup', () => {
     expect(radios().every((radio) => radio.getAttribute('data-disabled') === 'true')).toBe(true);
   });
 
-  it('passes readonly', () => {
+  // A radio ignores the readonly attribute, so a read-only group is disabled.
+  it('disables the radios and passes readonly when the group is read-only', () => {
     mount({isReadOnly: true});
 
     expect(radios()[0].getAttribute('data-readonly')).toBe('true');
+    expect(radios().every((radio) => radio.getAttribute('data-disabled') === 'true')).toBe(true);
   });
 });

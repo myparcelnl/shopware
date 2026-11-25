@@ -95,7 +95,7 @@ describe('ShopwareSelectInput', () => {
     expect(select().disabled).toBe(true);
   });
 
-  it.each([{isDisabled: true}, {isSuspended: true}])('is disabled with %o', (element) => {
+  it.each([{isDisabled: true}, {isSuspended: true}, {isReadOnly: true}])('is disabled with %o', (element) => {
     mount(element);
 
     expect(select().disabled).toBe(true);

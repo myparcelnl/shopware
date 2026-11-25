@@ -6,7 +6,7 @@
       v-for="option in options"
       :key="option.value"
       v-model="model"
-      :disabled="element.isDisabled || element.isSuspended || options.length <= 1"
+      :disabled="element.isDisabled || element.isSuspended || element.isReadOnly || options.length <= 1"
       :readonly="element.isReadOnly"
       :element="elements[option.value]"
       :name="id" />
@@ -16,7 +16,7 @@
 <script generic="T extends RadioGroupModelValue" lang="ts" setup>
 /**
  * The PDK radio group as a row of Shopware radios that wraps. A group with one option is disabled,
- * as in preset-default.
+ * as in preset-default. A read-only group is disabled too, because a radio ignores readonly.
  */
 import {
   AdminComponent,

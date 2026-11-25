@@ -79,7 +79,13 @@ describe('ShopwareRadioInput', () => {
     expect(value.value).toBe('b');
   });
 
-  it.each(['isDisabled', 'isSuspended'])('is disabled when %s', (flag) => {
+  it('stays disabled when the group passes disabled false', () => {
+    mount({isDisabled: true}, {disabled: false});
+
+    expect(input().disabled).toBe(true);
+  });
+
+  it.each(['isDisabled', 'isSuspended', 'isReadOnly'])('is disabled when %s', (flag) => {
     mount({[flag]: true});
 
     expect(input().disabled).toBe(true);
