@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MyParcel\Shopware\Pdk\Account;
 
 use MyParcelNL\Pdk\Account\Contract\AccountFeaturesServiceInterface;
+use MyParcelNL\Pdk\Facade\AccountSettings;
 use MyParcelNL\Pdk\Facade\Language;
 use MyParcelNL\Pdk\Facade\Notifications;
-use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Notification\Model\Notification;
 
 /**
@@ -33,7 +33,7 @@ final class OrderModeNotice
      */
     public function add(): void
     {
-        if (AccountFeaturesServiceInterface::ORDER_MODE_V2 !== $this->getEffectiveOrderMode()) {
+        if (AccountFeaturesServiceInterface::ORDER_MODE_V2 !== AccountSettings::getEffectiveOrderMode()) {
             return;
         }
 
@@ -42,13 +42,5 @@ final class OrderModeNotice
             Language::translate(self::MESSAGE_KEY),
             Notification::CATEGORY_GENERAL
         );
-    }
-
-    private function getEffectiveOrderMode(): int
-    {
-        /** @var AccountFeaturesServiceInterface $features */
-        $features = Pdk::get(AccountFeaturesServiceInterface::class);
-
-        return (int) $features->getEffectiveOrderMode();
     }
 }
