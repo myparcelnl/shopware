@@ -78,9 +78,10 @@ it('exports the order when the effective order mode is v2', function () {
 
     (new AutomaticOrderExport())->onOrderState(Entities::ORDER_ID, 'in_progress');
 
-    // Order mode V2 without an active sales channel behaves as shipments mode
-    // (INT-1594). Shopware has no sales channel, so this export cannot create a
-    // second shipment next to one of an order landscape.
+    // The export runs in every order mode, as in WooCommerce. For V2 the PDK
+    // takes the shipments path in ExportOrderAction::export() (INT-1594). The
+    // skip comes back with INT-2218, once V2 without an active sales channel
+    // drops to ORDER_MODE_SHIPMENTS.
     expect($actions->calls)->toBe([[
         'action'     => PdkBackendActions::EXPORT_ORDERS,
         'parameters' => ['orderIds' => [Entities::ORDER_ID]],
