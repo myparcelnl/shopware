@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Order\AutomaticOrderExport;
-use MyParcel\Shopware\Subscriber\AutomaticOrderExportSubscriber;
+use MyParcel\Shopware\Pdk\Order\Subscriber\AutomaticOrderExportSubscriber;
 use MyParcel\Shopware\Tests\Support\Checkout;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\PdkServices;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyParcel\Shopware\Subscriber;
+namespace MyParcel\Shopware\Pdk\Order\Subscriber;
 
 use MyParcel\Shopware\Pdk\Order\AutomaticOrderExport;
 use MyParcel\Shopware\Pdk\PdkInitializer;
