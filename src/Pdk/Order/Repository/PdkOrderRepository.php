@@ -18,6 +18,8 @@ use MyParcelNL\Pdk\App\Order\Model\PdkProduct;
 use MyParcelNL\Pdk\App\Order\Repository\AbstractPdkOrderRepository;
 use MyParcelNL\Pdk\Base\Exception\ModelNotFoundException;
 use MyParcelNL\Pdk\Base\Support\Utils;
+use MyParcelNL\Pdk\Facade\Settings;
+use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 use MyParcelNL\Pdk\Shipment\Collection\ShipmentCollection;
 use MyParcelNL\Pdk\Shipment\Model\Shipment;
 use MyParcelNL\Pdk\Storage\Contract\StorageInterface;
@@ -263,11 +265,17 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
     }
 
     /**
-     * Writes only when the codes change, so a save without a new or deleted
-     * barcode does not write the order.
+     * Writes the barcodes to the tracking codes of the shipping delivery, but
+     * only when the merchant shows track and trace to the customer. Writes only
+     * when the codes change, so a save without a new or deleted barcode does not
+     * write the order.
      */
     private function saveTrackingCodes(?OrderEntity $order, ShipmentCollection $shipments): void
     {
+        if (! self::showsTrackTrace()) {
+            return;
+        }
+
         $delivery = null === $order ? null : PdkOrderMapper::findShippingDelivery($order);
 
         if (null === $delivery) {
@@ -284,6 +292,20 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
             'id'         => $order->getId(),
             'deliveries' => [['id' => $delivery->getId(), 'trackingCodes' => $codes]],
         ]], Context::createDefaultContext());
+    }
+
+    /**
+     * Whether the merchant shows the tracking code to the customer, in the
+     * customer account or in a mail. Both settings are off by default.
+     *
+     * Shopware has one field for the two: order_delivery.trackingCodes feeds the
+     * customer account and the mail templates alike, so the plugin cannot serve
+     * them apart and one setting is enough to write it.
+     */
+    private static function showsTrackTrace(): bool
+    {
+        return (bool) Settings::get(OrderSettings::TRACK_TRACE_IN_ACCOUNT, OrderSettings::ID)
+            || (bool) Settings::get(OrderSettings::TRACK_TRACE_IN_EMAIL, OrderSettings::ID);
     }
 
     /**

@@ -7,6 +7,7 @@ use MyParcel\Shopware\Tests\Support\PluginOrderPdk;
 use MyParcelNL\Pdk\App\Api\Backend\PdkBackendActions;
 use MyParcelNL\Pdk\Facade\Actions;
 use MyParcelNL\Pdk\Facade\Pdk;
+use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 use MyParcelNL\Pdk\Shipment\Model\Shipment;
 use MyParcelNL\Pdk\Tests\Api\Response\ExampleGetShipmentsResponse;
 use MyParcelNL\Pdk\Tests\Api\Response\ExamplePostIdsResponse;
@@ -14,6 +15,7 @@ use MyParcelNL\Pdk\Tests\Bootstrap\MockApi;
 use MyParcelNL\Pdk\Tests\Bootstrap\MockApiService;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
+use function MyParcelNL\Pdk\Tests\factory as pdkFactory;
 
 /*
  * The delete and return actions of the PDK on the shipments that the plugin
@@ -47,6 +49,12 @@ it('deletes the row of a deleted shipment and keeps the other rows', function ()
 
 it('removes the barcode of a deleted shipment from the tracking codes', function () {
     $pdk = PluginOrderPdk::boot(orderWithTwoShipments(['3STEST0000101', '3STEST0000102']));
+
+    // The plugin writes the codes of the delivery only when the merchant shows
+    // track and trace to the customer.
+    pdkFactory(OrderSettings::class)
+        ->withTrackTraceInAccount(true)
+        ->store();
 
     Actions::execute(PdkBackendActions::DELETE_SHIPMENTS, ['orderIds' => [Entities::ORDER_ID], 'shipmentIds' => [101]]);
 

@@ -22,11 +22,13 @@ use MyParcelNL\Pdk\Base\Exception\ModelNotFoundException;
 use MyParcelNL\Pdk\Base\Service\CurrencyService;
 use MyParcelNL\Pdk\Base\Service\WeightService;
 use MyParcelNL\Pdk\Fulfilment\Collection\OrderNoteCollection;
+use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 use MyParcelNL\Pdk\Shipment\Collection\ShipmentCollection;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use function MyParcelNL\Pdk\Tests\factory as pdkFactory;
 
 beforeEach(fn () => TestPdk::boot());
 
@@ -213,11 +215,16 @@ it('takes the incoming copy of a shipment that is as new or newer', function (ar
  * barcode 3SA. Returns the writes to the order repository.
  *
  * @param  list<string> $trackingCodes
+ * @param  bool         $trackTrace    whether the merchant shows track and trace
  *
  * @return list<array<string, mixed>>
  */
-function updateWithBarcode(array $trackingCodes): array
+function updateWithBarcode(array $trackingCodes, bool $trackTrace = true): array
 {
+    pdkFactory(OrderSettings::class)
+        ->withTrackTraceInAccount($trackTrace)
+        ->store();
+
     $delivery   = Entities::delivery(Entities::address(), Entities::price(4.95, 1, 0.86), Entities::DELIVERY_ID, $trackingCodes);
     $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => $delivery]));
     $repository = orderRepository($orders);
@@ -240,7 +247,17 @@ it('does not write the tracking codes when they stay the same', function () {
     expect(updateWithBarcode(['3SA']))->toBe([]);
 });
 
+it('does not write the tracking codes when the merchant does not show track and trace', function () {
+    // Both settings are off by default, so a merchant who never looked at them
+    // does not show the barcode to the customer.
+    expect(updateWithBarcode(['OWN-1'], false))->toBe([]);
+});
+
 it('does not write the tracking codes when the order has no shipping delivery', function () {
+    pdkFactory(OrderSettings::class)
+        ->withTrackTraceInAccount(true)
+        ->store();
+
     $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => null]));
     $repository = orderRepository($orders);
     $order      = $repository->find(Entities::ORDER_ID);
