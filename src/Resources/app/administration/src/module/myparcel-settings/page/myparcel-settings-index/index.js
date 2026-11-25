@@ -38,9 +38,9 @@ export default {
             // What the PDK said while it rendered, such as the notice for an account
             // with order management. Its own container is still empty at that point,
             // so this page shows them.
-            (loaded.data?.notifications ?? []).forEach((notification) => {
-                notifyShopware(this)(toForwardedNotification(notification));
-            });
+            const notify = notifyShopware(this);
+
+            (loaded.data?.notifications ?? []).forEach((notification) => notify(toForwardedNotification(notification)));
         } catch (error) {
             console.error(error);
             this.createNotificationError({
