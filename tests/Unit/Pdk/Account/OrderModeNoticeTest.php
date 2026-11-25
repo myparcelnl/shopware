@@ -5,29 +5,11 @@ declare(strict_types=1);
 use MyParcel\Shopware\Pdk\Account\OrderModeNotice;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\Account\Service\PdkAccountFeaturesService;
-use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
-use MyParcelNL\Pdk\Base\Support\Collection;
 use MyParcelNL\Pdk\Facade\Notifications;
-use MyParcelNL\Pdk\Facade\Pdk;
-
-/**
- * Gives the account the subscription features, which decide the order mode.
- *
- * @param string[] $features
- */
-function useSubscriptionFeatures(array $features): void
-{
-    /** @var PdkAccountRepositoryInterface $accounts */
-    $accounts = Pdk::get(PdkAccountRepositoryInterface::class);
-    $account  = $accounts->getAccount();
-
-    $account->subscriptionFeatures = new Collection($features);
-    $accounts->store($account);
-}
 
 it('warns the merchant when the effective order mode is v2', function () {
     TestPdk::boot();
-    useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_ORDER_MANAGEMENT]);
+    TestPdk::useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_ORDER_MANAGEMENT]);
 
     (new OrderModeNotice())->add();
 
@@ -43,7 +25,7 @@ it('warns the merchant when the effective order mode is v2', function () {
 
 it('says nothing in shipments mode', function () {
     TestPdk::boot();
-    useSubscriptionFeatures([]);
+    TestPdk::useSubscriptionFeatures([]);
 
     (new OrderModeNotice())->add();
 
@@ -52,7 +34,7 @@ it('says nothing in shipments mode', function () {
 
 it('says nothing in order mode v1', function () {
     TestPdk::boot();
-    useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_LEGACY_ORDER_MANAGEMENT]);
+    TestPdk::useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_LEGACY_ORDER_MANAGEMENT]);
 
     (new OrderModeNotice())->add();
 

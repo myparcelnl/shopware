@@ -106,3 +106,13 @@ it('returns 404 when the order does not exist', function () {
     expect($response->getStatusCode())->toBe(404)
         ->and(json_decode((string) $response->getContent(), true))->toHaveKey('message');
 });
+
+it('returns the notifications of the result', function () {
+    $notification = ['variant' => 'warning', 'title' => 'Order management', 'content' => ['Creating shipments still works.']];
+    $renderer     = new FixedAdminViewRenderer(new AdminViewResult('<b></b>', [], [], [$notification]));
+    $request      = Request::create('/api/_action/myparcel/view', 'GET', ['view' => 'pluginSettings']);
+
+    $response = viewController($renderer)->view($request);
+
+    expect(json_decode((string) $response->getContent(), true)['notifications'])->toBe([$notification]);
+});
