@@ -4,46 +4,29 @@ declare(strict_types=1);
 
 use MyParcel\Shopware\Pdk\Order\AutomaticOrderExport;
 use MyParcel\Shopware\Pdk\Order\Subscriber\AutomaticOrderExportSubscriber;
+use MyParcel\Shopware\Tests\Support\AutomaticExport;
 use MyParcel\Shopware\Tests\Support\Checkout;
 use MyParcel\Shopware\Tests\Support\Entities;
 use MyParcel\Shopware\Tests\Support\PdkServices;
-use MyParcel\Shopware\Tests\Support\RecordingActionsService;
 use MyParcel\Shopware\Tests\Support\RecordingLogger;
-use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Api\Backend\PdkBackendActions;
-use MyParcelNL\Pdk\App\Api\Contract\PdkActionsServiceInterface;
-use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 use Psr\Log\LogLevel;
 use Shopware\Core\Checkout\Cart\Event\CheckoutOrderPlacedEvent;
 use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 use Shopware\Core\System\StateMachine\Event\StateMachineTransitionEvent;
-use function MyParcelNL\Pdk\Tests\factory as pdkFactory;
 
 /*
  * The subscriber runs the export of AutomaticOrderExportTest through the real
  * PdkInitializer, which TestPdk::boot() points at the mock PDK. INT-2151 covers
- * the order path in a Shopware installation.
+ * what these tests cannot: that Shopware itself dispatches the two events.
  */
-
-/**
- * Boots the PDK with automatic export on "in_progress" and returns the actions it runs.
- */
-function bootSubscriberExport(): RecordingActionsService
-{
-    $actions = new RecordingActionsService();
-
-    TestPdk::boot([PdkActionsServiceInterface::class => $actions]);
-    pdkFactory(OrderSettings::class)->withProcessDirectly('in_progress')->store();
-
-    return $actions;
-}
 
 /**
  * A transition of $entityName into $state, as Shopware dispatches it.
  */
-function transitionTo(string $entityName, string $state): StateMachineTransitionEvent
+function orderTransitionEvent(string $entityName, string $state): StateMachineTransitionEvent
 {
     $from = new StateMachineStateEntity();
     $from->setTechnicalName('open');
@@ -69,7 +52,7 @@ function orderPlacedIn(?string $state): CheckoutOrderPlacedEvent
     return new CheckoutOrderPlacedEvent(Checkout::context(), Entities::order(['state' => $state]));
 }
 
-function subscriber(?RecordingLogger $logger = null): AutomaticOrderExportSubscriber
+function exportSubscriber(?RecordingLogger $logger = null): AutomaticOrderExportSubscriber
 {
     return new AutomaticOrderExportSubscriber(
         PdkServices::initializer(),
@@ -83,7 +66,7 @@ function subscriber(?RecordingLogger $logger = null): AutomaticOrderExportSubscr
  *
  * @return list<array{action: string, parameters: array<string, mixed>, automatic: bool}>
  */
-function exportCall(): array
+function automaticExportCall(): array
 {
     return [[
         'action'     => PdkBackendActions::EXPORT_ORDERS,
@@ -101,53 +84,53 @@ it('listens to the state machine transitions and to a placed order', function ()
 });
 
 it('exports the order that enters the state set for automatic export', function () {
-    $actions = bootSubscriberExport();
+    $actions = AutomaticExport::boot();
 
-    subscriber()->onTransition(transitionTo(OrderDefinition::ENTITY_NAME, 'in_progress'));
+    exportSubscriber()->onTransition(orderTransitionEvent(OrderDefinition::ENTITY_NAME, 'in_progress'));
 
-    expect($actions->calls)->toBe(exportCall());
+    expect($actions->calls)->toBe(automaticExportCall());
 });
 
 it('leaves the transitions of other entities alone', function () {
-    $actions = bootSubscriberExport();
+    $actions = AutomaticExport::boot();
 
     // Shopware dispatches the same event for order deliveries and transactions.
-    subscriber()->onTransition(transitionTo('order_delivery', 'in_progress'));
+    exportSubscriber()->onTransition(orderTransitionEvent('order_delivery', 'in_progress'));
 
     expect($actions->calls)->toBe([]);
 });
 
 it('exports a new order that the checkout places in the state set for automatic export', function () {
-    $actions = bootSubscriberExport();
+    $actions = AutomaticExport::boot();
 
     // The checkout creates the order without a transition, so onTransition() never sees it.
-    subscriber()->onOrderPlaced(orderPlacedIn('in_progress'));
+    exportSubscriber()->onOrderPlaced(orderPlacedIn('in_progress'));
 
-    expect($actions->calls)->toBe(exportCall());
+    expect($actions->calls)->toBe(automaticExportCall());
 });
 
 it('does not export a new order that the checkout places in another state', function () {
-    $actions = bootSubscriberExport();
+    $actions = AutomaticExport::boot();
 
-    subscriber()->onOrderPlaced(orderPlacedIn('open'));
+    exportSubscriber()->onOrderPlaced(orderPlacedIn('open'));
 
     expect($actions->calls)->toBe([]);
 });
 
 it('does not export a new order that has no state', function () {
-    $actions = bootSubscriberExport();
+    $actions = AutomaticExport::boot();
 
-    subscriber()->onOrderPlaced(orderPlacedIn(null));
+    exportSubscriber()->onOrderPlaced(orderPlacedIn(null));
 
     expect($actions->calls)->toBe([]);
 });
 
 it('logs a failed export and lets the state change through', function () {
-    $actions            = bootSubscriberExport();
+    $actions            = AutomaticExport::boot();
     $actions->onExecute = static fn () => throw new RuntimeException('The API is down');
     $logger             = new RecordingLogger();
 
-    subscriber($logger)->onTransition(transitionTo(OrderDefinition::ENTITY_NAME, 'in_progress'));
+    exportSubscriber($logger)->onTransition(orderTransitionEvent(OrderDefinition::ENTITY_NAME, 'in_progress'));
 
     expect($logger->records)->toHaveCount(1)
         ->and($logger->records[0]['level'])->toBe(LogLevel::ERROR)
