@@ -42,7 +42,9 @@
             overflow: visible;
         }
 
-        // A shipment that loads shows the small spinner, so the row keeps its height.
+        // A shipment that loads shows the small spinner, so the row keeps its height. The PDK gives this
+        // loader no size, so it does not get .mypa-loader--sm. Keep these rules the same as
+        // .mypa-loader--sm in src/Resources/app/pdk/src/styles/_feedback.scss.
         .mypa-loader {
             display: inline-flex;
             padding: 0;

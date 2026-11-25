@@ -15,6 +15,7 @@
       </slot>
     </label>
 
+    <!-- As in DefaultFormGroup: the description is a translation key, and a translation can have a link. -->
     <small
       v-if="element.props?.description"
       class="mypa-form-group__description"

@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {type App, createApp, h} from 'vue';
+import {type App, createApp, h, nextTick, ref} from 'vue';
 import ShopwareTable from './ShopwareTable.vue';
 
 // The real context reads the transition from the admin config. This one takes it from the props.
@@ -50,9 +50,23 @@ describe('ShopwareTable', () => {
     expect(container.querySelector('tfoot td')?.textContent).toBe('Foot');
   });
 
-  it('renders the rows in a transition group when there is a transition', () => {
-    mount({transition: 'mypa-fade'});
+  it('gives a new row the enter classes of the transition', async () => {
+    const keys = ref(['a']);
 
-    expect(container.querySelector('table.mypa-table tbody td')?.textContent).toBe('Cell');
+    app = createApp({
+      render: () =>
+        h(ShopwareTable, {transition: 'mypa-fade'}, {default: () => keys.value.map((key) => h('tr', {key}, [h('td', key)]))}),
+    });
+    app.directive('test', {});
+    app.mount(container);
+
+    keys.value = ['a', 'b'];
+    await nextTick();
+
+    const rows = container.querySelectorAll('table.mypa-table tbody tr');
+
+    expect(rows).toHaveLength(2);
+    expect(rows[1].classList.contains('mypa-fade-enter-active')).toBe(true);
+    expect(rows[0].classList.contains('mypa-fade-enter-active')).toBe(false);
   });
 });

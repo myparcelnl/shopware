@@ -44,8 +44,8 @@ export type RequestHeadersProvider = () => Record<string, string> | Promise<Reco
 const FADE = 'mypa-fade';
 
 /**
- * Create the PDK admin configuration with the components of preset-default and
- * the request headers of the Shopware admin.
+ * Create the PDK admin configuration with the Shopware* components, the components of preset-default
+ * that are left, and the request headers of the Shopware admin.
  *
  * The Shopware* components have the look of the Shopware admin. The components of preset-default
  * that are left only render other PDK components or plain layout, so they get the same look.
