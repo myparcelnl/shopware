@@ -132,18 +132,14 @@ export async function openSession(view, params, root, isActive, {onNotification}
 
 /**
  * Turns a PDK notification from the view route into the shape notifyShopware
- * takes. A session does this itself; the view route hands over the raw PDK
- * notification, whose content is a list of lines.
+ * takes. The mapping itself lives in the PDK bundle, which a session uses for
+ * its own notifications, so the two paths cannot drift apart.
  *
  * @param {{variant?: string, title?: string, content?: string[]|string}} notification
  * @returns {{variant: string, title?: string, message: string}}
  */
-export function toForwardedNotification({variant, title, content}) {
-    return {
-        variant: variant ?? 'info',
-        ...(title === undefined || title === null ? {} : {title}),
-        message: Array.isArray(content) ? content.join('<br>') : (content ?? ''),
-    };
+export function toForwardedNotification(notification) {
+    return window.MyParcelShopwarePdk.toForwardedNotification(notification);
 }
 
 /**

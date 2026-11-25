@@ -1,4 +1,5 @@
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+import {toForwardedNotification} from '../../../../../../pdk/src/session';
 
 const loader = {load: vi.fn(), close: vi.fn()};
 const createSessionLoader = vi.fn(() => loader);
@@ -10,6 +11,8 @@ describe('myparcel-settings-index', () => {
 
     beforeAll(async () => {
         globalThis.Shopware = {Mixin: {getByName: () => ({})}};
+        // The bundle of the PDK app puts its exports on this global in the browser.
+        window.MyParcelShopwarePdk = {toForwardedNotification};
         ({default: component} = await import('./index'));
     });
 

@@ -99,6 +99,25 @@ const BULK_ACTIONS: Record<BulkAction, AdminAction> = {
 const FORWARDED_CATEGORIES: string[] = [NotificationCategory.Action, NotificationCategory.Api];
 
 /**
+ * Turns a PDK notification into the shape the Shopware admin shows. Both paths
+ * use it: a session forwards its own notifications, and the admin module maps
+ * the ones that the view route hands over next to the html.
+ */
+export const toForwardedNotification = ({
+  variant,
+  title,
+  content,
+}: {
+  variant?: string;
+  title?: null | string;
+  content?: string | string[];
+}): ForwardedNotification => ({
+  variant: (variant ?? 'info') as ForwardedNotification['variant'],
+  ...(title === undefined || title === null ? {} : {title}),
+  message: Array.isArray(content) ? content.join('<br>') : (content ?? ''),
+});
+
+/**
  * Renders the given elements and returns the apps that did render. When one
  * render fails, it unmounts the apps that did render and rethrows.
  */
@@ -172,12 +191,8 @@ export const createSession = async (root: HTMLElement, options: SessionOptions):
       (notifications) => {
         [...notifications]
           .filter(({category}) => category && FORWARDED_CATEGORIES.includes(category))
-          .forEach(({id, variant, title, content}) => {
-            onNotification({
-              variant: variant as ForwardedNotification['variant'],
-              title,
-              message: Array.isArray(content) ? content.join('<br>') : (content ?? ''),
-            });
+          .forEach(({id, ...notification}) => {
+            onNotification(toForwardedNotification(notification));
             store.remove(id);
           });
       },

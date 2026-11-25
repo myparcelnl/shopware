@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {nextTick, reactive, ref} from 'vue';
 import {createPdkAdmin, useActionStore, useFormBuilder, useNotificationStore} from '@myparcel-dev/pdk-admin';
-import {createSession} from './session';
+import {createSession, toForwardedNotification} from './session';
 
 vi.mock('@myparcel-dev/pdk-admin', () => ({
   createPdkAdmin: vi.fn(),
@@ -324,5 +324,16 @@ describe('createSession', () => {
 
     expect(store.add).toHaveBeenCalledOnce();
     expect(onNotification).toHaveBeenCalledWith({variant: 'error', title: 'Not saved', message: ''});
+  });
+
+  it('maps a pdk notification to the shape the admin shows', () => {
+    expect(toForwardedNotification({variant: 'warning', title: 'T', content: ['a', 'b']})).toEqual({
+      variant: 'warning',
+      title: 'T',
+      message: 'a<br>b',
+    });
+    expect(toForwardedNotification({variant: 'error', content: 'one'})).toEqual({variant: 'error', message: 'one'});
+    expect(toForwardedNotification({content: ['a']})).toEqual({variant: 'info', message: 'a'});
+    expect(toForwardedNotification({variant: 'info', title: null})).toEqual({variant: 'info', message: ''});
   });
 });
