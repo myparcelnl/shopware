@@ -342,8 +342,11 @@ final class PdkOrderRepository extends AbstractPdkOrderRepository
 
     /**
      * Whether $stored is newer than $incoming. `modified` is the time of the last
-     * change in the API, `updated` the time the plugin saved the shipment. A copy
-     * fresh from the API has no `updated` yet, so it is never older by that field.
+     * change in the API, and it is the field that usually decides. `updated` is the
+     * time the plugin stored the shipment for the first time: the PDK fills it in
+     * toStorableArray() only when it is empty, so two copies of one row carry the
+     * same value and that field separates only rows with a different first save. A
+     * copy fresh from the API has no `updated` yet, so it is never older by it.
      */
     private static function isNewer(Shipment $stored, Shipment $incoming): bool
     {
