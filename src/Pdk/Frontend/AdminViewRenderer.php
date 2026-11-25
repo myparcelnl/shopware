@@ -55,6 +55,8 @@ final class AdminViewRenderer implements AdminViewRendererInterface
         // The rendered html holds an empty notification container: the PDK fills it
         // from its own responses, and this route is not one. So the notifications of
         // this request travel next to the html, and the admin module shows them.
+        // Every screen reports what it collected; the settings page is the only one
+        // that shows them today.
         return $result->withNotifications(Notifications::all()->toArrayWithoutNull());
     }
 
