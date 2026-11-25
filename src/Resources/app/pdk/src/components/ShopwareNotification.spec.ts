@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {type App, createApp, defineComponent, h} from 'vue';
+import {type App, createApp, defineComponent, h, nextTick, reactive} from 'vue';
 import ShopwareNotification from './ShopwareNotification.vue';
 
 vi.mock('@myparcel-dev/pdk-admin', () => ({
@@ -73,6 +73,20 @@ describe('ShopwareNotification', () => {
     mount({content: ['a', 'b']});
 
     expect([...container.querySelectorAll('li')].map((item) => item.textContent)).toEqual(['a', 'b']);
+  });
+
+  it('renders content items that are the same without a duplicate key', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    // The render reads this object, so a change of the content updates the list.
+    const notification = reactive({content: ['a', 'b']});
+
+    mount(notification);
+    notification.content = ['b', 'a', 'a'];
+    await nextTick();
+
+    expect([...container.querySelectorAll('li')].map((item) => item.textContent)).toEqual(['b', 'a', 'a']);
+    expect(warn.mock.calls.flat().join(' ')).not.toContain('Duplicate keys');
+    warn.mockRestore();
   });
 
   it('shows the loading text and aria-busy while loading', () => {

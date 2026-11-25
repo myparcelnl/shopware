@@ -10,8 +10,8 @@
 
     <ul v-if="contentArray.length > 1">
       <li
-        v-for="item in contentArray"
-        :key="item"
+        v-for="(item, index) in contentArray"
+        :key="index"
         v-text="item" />
     </ul>
 
