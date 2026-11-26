@@ -16,7 +16,6 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      # Test of myparcelnl/actions#179. Change the ref to v6 after its release.
-      - uses: myparcelnl/actions/pr-dismiss-review@feat/INT-2371-pr-dismiss-review
+      - uses: myparcelnl/actions/pr-dismiss-review@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
