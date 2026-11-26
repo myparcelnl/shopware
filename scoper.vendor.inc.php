@@ -6,8 +6,8 @@ use Isolated\Symfony\Component\Finder\Finder;
 
 /**
  * Scopes vendor dependencies. Unlike scoper.inc.php this DOES prefix
- * Symfony/Psr/etc: the PDK's bundled symfony/http-foundation (^6) must live
- * under _MyParcel\ so it can coexist with Shopware's Symfony 7.x runtime.
+ * Symfony/Psr/etc: the PDK's bundled symfony/http-foundation must live under
+ * _MyParcel\ so it can coexist with Shopware's own Symfony runtime.
  */
 return [
     'prefix' => '_MyParcel',

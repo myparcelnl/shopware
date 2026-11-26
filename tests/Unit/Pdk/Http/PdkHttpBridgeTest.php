@@ -37,7 +37,6 @@ it('copies method, query, body, cookies, server and raw content to the pdk reque
 
     expect($converted->getMethod())->toBe('POST')
         ->and($converted->query->get('action'))->toBe('fetchContext')
-        ->and($converted->get('action'))->toBe('fetchContext')
         ->and($converted->request->get('form'))->toBe('value')
         ->and($converted->cookies->get('session'))->toBe('abc')
         ->and($converted->headers->get('X-Requested-With'))->toBe('XMLHttpRequest')

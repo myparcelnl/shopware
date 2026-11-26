@@ -13,15 +13,15 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * The API-backed collaborators are never called: an account in storage is
- * returned without asking the API. getMockBuilder() because it is public,
- * unlike createStub(), so this helper can call it from outside the test.
+ * returned without asking the API. testMock() because PHPUnit's own mock
+ * methods are protected, so this helper cannot call them from outside the test.
  */
 function accountRepository(TestCase $test, InMemoryConfigStorage $config): PdkAccountRepository
 {
     return new PdkAccountRepository(
         new MemoryCacheStorage(),
-        $test->getMockBuilder(AccountRepository::class)->disableOriginalConstructor()->getMock(),
-        $test->getMockBuilder(PdkSettingsRepositoryInterface::class)->getMock(),
+        testMock($test, AccountRepository::class),
+        testMock($test, PdkSettingsRepositoryInterface::class),
         $config
     );
 }

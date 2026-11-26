@@ -13,7 +13,7 @@
   },
   "require-dev": {
     "humbug/php-scoper": "^0.18.0",
-    "pestphp/pest": "^1.0.0",
+    "pestphp/pest": "^3.0.0",
     "phpstan/phpstan": "^1.10",
     "shopware/core": ">=6.7.12.1 <6.8",
     "shopware/storefront": ">=6.7.12.1 <6.8",
@@ -64,7 +64,8 @@
   "config": {
     "prepend-autoloader": false,
     "allow-plugins": {
-      "pestphp/pest-plugin": true
+      "pestphp/pest-plugin": true,
+      "symfony/runtime": false
     }
   }
 }
