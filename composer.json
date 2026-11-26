@@ -65,6 +65,7 @@
     "prepend-autoloader": false,
     "allow-plugins": {
       "pestphp/pest-plugin": true,
+      "php-http/discovery": false,
       "symfony/runtime": false
     }
   }
