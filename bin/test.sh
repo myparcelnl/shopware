@@ -17,6 +17,11 @@
 
 set -Eeuo pipefail
 
+# Composer puts vendor/bin on PATH while it runs a script, and a scoped vendor
+# carries a prefixed composer there that fails on its own command line.
+# COMPOSER_BINARY names the composer that started this script.
+COMPOSER_CMD="${COMPOSER_BINARY:-composer}"
+
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="${PLUGIN_DIR}/.tmp"
 DEV_VENDOR_DIR="${TMP_DIR}/dev-vendor"
@@ -81,7 +86,7 @@ restore_vendor() {
   mv "${BACKUP_DIR}" "${VENDOR_DIR}"
 
   if [[ -d "${DEV_VENDOR_DIR}" ]]; then
-    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer dump-autoload --no-interaction \
+    COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" "${COMPOSER_CMD}" dump-autoload --no-interaction \
       || echo "warning: could not refresh the autoloader in ${DEV_VENDOR_DIR}. It stays stale until the next test run." >&2
   fi
 }
@@ -99,7 +104,7 @@ mv "${DEV_VENDOR_DIR}" "${VENDOR_DIR}"
 # that it sits at "vendor" (one level), the same files resolve our own src/ and
 # tests/ PSR-4 mappings one directory too high. Dumping again, from here, fixes
 # it for the current depth without touching what is installed.
-composer dump-autoload --no-interaction
+"${COMPOSER_CMD}" dump-autoload --no-interaction
 
 # PHP_ARGS is unquoted on purpose: it can hold more than one argument.
 # shellcheck disable=SC2086

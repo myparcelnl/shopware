@@ -11,6 +11,11 @@
 
 set -Eeuo pipefail
 
+# Composer puts vendor/bin on PATH while it runs a script, and a scoped vendor
+# carries a prefixed composer there that fails on its own command line.
+# COMPOSER_BINARY names the composer that started this script.
+COMPOSER_CMD="${COMPOSER_BINARY:-composer}"
+
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEV_VENDOR_DIR="${PLUGIN_DIR}/.tmp/dev-vendor"
 STAMP="${DEV_VENDOR_DIR}/.installed-for"
@@ -34,7 +39,7 @@ if [[ -f "${STAMP}" ]] && [[ "$(cat "${STAMP}")" == "${TARGET}" ]]; then
 fi
 
 echo "==> Installing development dependencies in .tmp/dev-vendor"
-COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" composer install \
+COMPOSER_VENDOR_DIR="${DEV_VENDOR_DIR}" "${COMPOSER_CMD}" install \
   --no-interaction \
   --no-progress
 

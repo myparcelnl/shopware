@@ -8,6 +8,11 @@
 
 set -Eeuo pipefail
 
+# Composer puts vendor/bin on PATH while it runs a script, and a scoped vendor
+# carries a prefixed composer there that fails on its own command line.
+# COMPOSER_BINARY names the composer that started this script.
+COMPOSER_CMD="${COMPOSER_BINARY:-composer}"
+
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="${PLUGIN_DIR}/.tmp"
 SCOPER_DIR="${TMP_DIR}/php-scoper"
@@ -156,7 +161,7 @@ rm -rf "${TARGET_DIR}/.cache" \
 # The classmap still points at the old file list. It is optimized but not
 # authoritative, so PSR-4 resolves a class it is missing and a failure here
 # costs speed, not correctness.
-composer dump-autoload --no-dev --optimize --no-interaction \
+"${COMPOSER_CMD}" dump-autoload --no-dev --optimize --no-interaction \
   || echo "warning: could not dump the autoloader. It stays stale until the next scope." >&2
 
 echo "Done. The linked PDK is scoped into vendor/myparcelnl/pdk."
