@@ -6,8 +6,11 @@ use Isolated\Symfony\Component\Finder\Finder;
 
 /**
  * Scopes vendor dependencies. Unlike scoper.inc.php this DOES prefix
- * Symfony/Psr/etc: the PDK's bundled symfony/http-foundation must live under
- * _MyParcel\ so it can coexist with Shopware's own Symfony runtime.
+ * Symfony/Psr/etc: the plugin loads its own vendor inside a running shop, and
+ * PHP declares a class once per process. Without the prefix, whichever
+ * autoloader comes first decides which copy of Symfony, Guzzle or PHP-DI both
+ * sides get. The shop's versions are not ours to pick, so the PDK keeps its
+ * own under _MyParcel\.
  */
 return [
     'prefix' => '_MyParcel',
