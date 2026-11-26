@@ -6,15 +6,17 @@
   "version": "0.1.0",
   "require": {
     "php": ">=8.2",
-    "myparcelnl/pdk": "^5.1",
+    "myparcelnl/pdk": "^5.3.3",
     "myparcelnl/sdk": "^11.0.0-beta.37@beta",
     "guzzlehttp/guzzle": "^7.5",
     "psr/log": "^1.0.0 || ^2.0.0 || ^3.0.0"
   },
   "require-dev": {
     "humbug/php-scoper": "^0.18.0",
-    "pestphp/pest": "^1.0.0",
+    "pestphp/pest": "^3.0.0",
     "phpstan/phpstan": "^1.10",
+    "shopware/core": ">=6.7.12.1 <6.8",
+    "shopware/storefront": ">=6.7.12.1 <6.8",
     "symfony/asset": "^7.0"
   },
   "extra": {
@@ -62,7 +64,9 @@
   "config": {
     "prepend-autoloader": false,
     "allow-plugins": {
-      "pestphp/pest-plugin": true
+      "pestphp/pest-plugin": true,
+      "php-http/discovery": false,
+      "symfony/runtime": false
     }
   }
 }

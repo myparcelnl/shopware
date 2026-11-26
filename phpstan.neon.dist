@@ -8,10 +8,9 @@ parameters:
     maximumNumberOfProcesses: 4
   paths:
     - src
-  # src/ is not scoped and references three worlds at once: the plug-in's own
-  # classes, Shopware's Symfony 7 runtime, and the _MyParcel-prefixed copies
-  # inside the scoped vendor. Each lives in its own directory, and none of them
-  # declares a class another one declares.
+  # src/ is not scoped and references two worlds at once: the _MyParcel-prefixed
+  # copies inside the scoped vendor, and Shopware with its own Symfony runtime in
+  # the development install. Each lives in its own directory.
   scanDirectories:
     - vendor
-    - .tmp/shopware/vendor
+    - .tmp/dev-vendor

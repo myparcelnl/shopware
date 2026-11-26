@@ -17,7 +17,7 @@ function webhooksRepository(TestCase $test, InMemoryConfigStorage $config): PdkW
 {
     return new PdkWebhooksRepository(
         new MemoryCacheStorage(),
-        $test->getMockBuilder(WebhookSubscriptionRepository::class)->disableOriginalConstructor()->getMock(),
+        testMock($test, WebhookSubscriptionRepository::class),
         $config
     );
 }

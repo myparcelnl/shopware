@@ -3,9 +3,9 @@
 # Runs PHPStan over src/.
 #
 # src/ names Shopware classes, the plug-in's own classes and _MyParcel-prefixed
-# classes from the scoped vendor. Shopware and the PDK cannot live in one
-# composer install, so bin/shopware-vendor.sh installs Shopware on its own in
-# .tmp/shopware and PHPStan is pointed at both directories.
+# classes from the scoped vendor. Shopware and the PDK live in one composer
+# install, which bin/dev-vendor.sh builds in .tmp/dev-vendor, and PHPStan is
+# pointed at both directories.
 #
 # PHPStan itself gets its own bare install in .tmp/tools rather than running
 # from .tmp/dev-vendor/bin/phpstan: Composer derives an install's autoloader
@@ -20,6 +20,11 @@
 
 set -Eeuo pipefail
 
+# Composer puts vendor/bin on PATH while it runs a script, and a scoped vendor
+# carries a prefixed composer there that fails on its own command line.
+# COMPOSER_BINARY names the composer that started this script.
+COMPOSER_CMD="${COMPOSER_BINARY:-composer}"
+
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TOOLS_DIR="${PLUGIN_DIR}/.tmp/tools"
 TOOLS_STAMP="${TOOLS_DIR}/.installed-for"
@@ -31,9 +36,9 @@ if [[ ! -f vendor/autoload.php ]]; then
   exit 1
 fi
 
-bin/shopware-vendor.sh
+bin/dev-vendor.sh
 
-# The same stamp as bin/shopware-vendor.sh uses, for the same reason.
+# The same stamp as bin/dev-vendor.sh uses, for the same reason.
 PHP_VERSION="$(php -r 'echo PHP_VERSION;')"
 # Read the version from require-dev so there is one place to bump it.
 PHPSTAN_VERSION="$(php -r 'echo json_decode(file_get_contents("composer.json"), true)["require-dev"]["phpstan/phpstan"];')"
@@ -45,7 +50,7 @@ if [[ ! -f "${TOOLS_STAMP}" ]] \
   echo "==> Installing ${TOOLS_TARGET} for analysis only"
   rm -rf "${TOOLS_DIR}"
   mkdir -p "${TOOLS_DIR}"
-  composer require "phpstan/phpstan:${PHPSTAN_VERSION}" \
+  "${COMPOSER_CMD}" require "phpstan/phpstan:${PHPSTAN_VERSION}" \
     --working-dir="${TOOLS_DIR}" \
     --ignore-platform-req=ext-* \
     --no-interaction \

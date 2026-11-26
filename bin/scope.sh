@@ -12,6 +12,11 @@
 
 set -Eeuo pipefail
 
+# Composer puts vendor/bin on PATH while it runs a script, and a scoped vendor
+# carries a prefixed composer there that fails on its own command line.
+# COMPOSER_BINARY names the composer that started this script.
+COMPOSER_CMD="${COMPOSER_BINARY:-composer}"
+
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="${PLUGIN_DIR}/.tmp"
 SCOPER_DIR="${TMP_DIR}/php-scoper"
@@ -49,7 +54,7 @@ rm -rf "${BACKUP_DIR}"
 if [[ -d "${VENDOR_DIR}" ]]; then
   mv "${VENDOR_DIR}" "${BACKUP_DIR}"
 fi
-composer install --no-dev --no-interaction --no-progress
+"${COMPOSER_CMD}" install --no-dev --no-interaction --no-progress
 
 # Installed outside vendor/ because everything in there gets scoped, and a scoped
 # scoper cannot scope. That is also why --no-dev above does not lose it.
@@ -57,7 +62,7 @@ if [[ ! -f "${SCOPER_STAMP}" ]] || [[ "$(cat "${SCOPER_STAMP}")" != "${SCOPER_TA
   echo "==> Installing php-scoper ${SCOPER_TARGET}"
   rm -rf "${SCOPER_DIR}"
   mkdir -p "${SCOPER_DIR}"
-  composer require "humbug/php-scoper:${SCOPER_VERSION}" \
+  "${COMPOSER_CMD}" require "humbug/php-scoper:${SCOPER_VERSION}" \
     --working-dir="${SCOPER_DIR}" \
     --ignore-platform-req=ext-* \
     --no-interaction \
@@ -86,7 +91,7 @@ mv "${SCOPED_DIR}" "${VENDOR_DIR}"
 # unscoped install no longer match. Optimized but not authoritative, so a new
 # class in src/ still resolves via PSR-4 without re-scoping.
 echo "==> Dumping autoloader"
-composer dump-autoload --no-dev --optimize --no-interaction
+"${COMPOSER_CMD}" dump-autoload --no-dev --optimize --no-interaction
 
 # The one thing worth asserting: a silently unprefixed http-foundation would mean
 # two Symfony versions in one process, which fails far away from here.

@@ -16,7 +16,7 @@ function languageService(TestCase $test, ?string $locale): LanguageService
     return new LanguageService(
         new LanguageRepository(
             new MemoryCacheStorage(),
-            $test->getMockBuilder(ApiServiceInterface::class)->getMock()
+            testMock($test, ApiServiceInterface::class)
         ),
         new FileSystem(),
         new FixedLocaleResolver($locale)

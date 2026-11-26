@@ -74,55 +74,24 @@ spl_autoload_register(static function (string $class) use ($pdkTestsDir): void {
 });
 
 /*
- * The mappers and repositories take Shopware entities, so the tests build real
- * ones. Shopware cannot live in the development install (the PDK caps
- * symfony/http-foundation at 6, Shopware 6.7 needs 7.4), but bin/shopware-vendor.sh
- * installs it in .tmp/shopware, and bin/test.sh runs that script first.
+ * PHPUnit 11 made createMock() and getMockBuilder() protected, so a global test
+ * helper can no longer call them on the TestCase it receives. Binding to the
+ * TestCase scope reaches the method without exposing it anywhere else.
  *
- * Only the namespaces that the tests need and the development install does not
- * have are mapped, so its Symfony 6 classes stay the ones in use:
- * - Shopware\Core: the entities, the DAL classes and the state machine.
- * - Shopware\Storefront: the confirm page and its event.
- * - Symfony\Component\EventDispatcher: the subscriber interface of the plugin's
- *   event subscribers.
- * - Doctrine\DBAL: the Connection that OrderDataWriter and ProductCustomFieldSet take.
- * - Symfony\Component\VarExporter: EntityRepository uses its LazyGhostTrait.
- * - Ramsey\Uuid and Brick\Math: Uuid::randomHex(), which a cart LineItem calls
- *   in its constructor.
- * symfony/polyfill-php85 is loaded by hand: Shopware's code calls PHP 8.5
- * functions, and the development install does not have that polyfill.
+ * createMock() already disables the original constructor, so it replaces
+ * getMockBuilder(...)->disableOriginalConstructor()->getMock() one for one.
+ *
+ * @template T of object
+ * @param  class-string<T> $class
+ * @return T&\PHPUnit\Framework\MockObject\MockObject
  */
-$shopwareVendorDir = dirname(__DIR__) . '/.tmp/shopware/vendor';
+function testMock(\PHPUnit\Framework\TestCase $test, string $class): object
+{
+    $create = Closure::bind(
+        static fn (\PHPUnit\Framework\TestCase $case, string $name): object => $case->createMock($name),
+        null,
+        \PHPUnit\Framework\TestCase::class
+    );
 
-if (!is_dir($shopwareVendorDir . '/shopware/core')) {
-    throw new RuntimeException('.tmp/shopware is missing. Run the tests with composer test, which installs it.');
+    return $create($test, $class);
 }
-
-require_once $shopwareVendorDir . '/symfony/polyfill-php85/Php85.php';
-require_once $shopwareVendorDir . '/symfony/polyfill-php85/bootstrap.php';
-
-spl_autoload_register(static function (string $class) use ($shopwareVendorDir): void {
-    $directories = [
-        'Shopware\\Core\\'                  => $shopwareVendorDir . '/shopware/core/',
-        'Shopware\\Storefront\\'            => $shopwareVendorDir . '/shopware/storefront/',
-        'Doctrine\\DBAL\\'                  => $shopwareVendorDir . '/doctrine/dbal/src/',
-        'Symfony\\Component\\VarExporter\\' => $shopwareVendorDir . '/symfony/var-exporter/',
-        'Symfony\\Component\\EventDispatcher\\' => $shopwareVendorDir . '/symfony/event-dispatcher/',
-        'Ramsey\\Uuid\\'                    => $shopwareVendorDir . '/ramsey/uuid/src/',
-        'Brick\\Math\\'                     => $shopwareVendorDir . '/brick/math/src/',
-    ];
-
-    foreach ($directories as $prefix => $directory) {
-        if (!str_starts_with($class, $prefix)) {
-            continue;
-        }
-
-        $file = $directory . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
-
-        if (is_file($file)) {
-            require_once $file;
-        }
-
-        return;
-    }
-});
