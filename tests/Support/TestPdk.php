@@ -6,7 +6,9 @@ namespace MyParcel\Shopware\Tests\Support;
 
 use Closure;
 use MyParcelNL\Pdk\Base\Concern\PdkInterface;
+use MyParcelNL\Pdk\App\Account\Contract\PdkAccountRepositoryInterface;
 use MyParcelNL\Pdk\Base\Factory\PdkFactory;
+use MyParcelNL\Pdk\Base\Support\Collection;
 use MyParcelNL\Pdk\Base\PdkBootstrapper;
 use MyParcelNL\Pdk\Base\Pdk;
 use MyParcelNL\Pdk\Facade\Pdk as PdkFacade;
@@ -44,6 +46,22 @@ final class TestPdk
             static::$initialized = true;
             static::$pdk         = $pdk;
         }, null, PdkBootstrapper::class)();
+    }
+
+    /**
+     * Gives the account these subscription features, which decide the order mode.
+     * Call it after boot().
+     *
+     * @param  string[] $features
+     */
+    public static function useSubscriptionFeatures(array $features): void
+    {
+        /** @var PdkAccountRepositoryInterface $accounts */
+        $accounts = PdkFacade::get(PdkAccountRepositoryInterface::class);
+        $account  = $accounts->getAccount();
+
+        $account->subscriptionFeatures = new Collection($features);
+        $accounts->store($account);
     }
 
     /**

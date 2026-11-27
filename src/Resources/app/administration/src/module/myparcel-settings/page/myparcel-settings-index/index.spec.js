@@ -1,4 +1,5 @@
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+import {toForwardedNotification} from '../../../../../../pdk/src/session';
 
 const loader = {load: vi.fn(), close: vi.fn()};
 const createSessionLoader = vi.fn(() => loader);
@@ -10,6 +11,8 @@ describe('myparcel-settings-index', () => {
 
     beforeAll(async () => {
         globalThis.Shopware = {Mixin: {getByName: () => ({})}};
+        // The bundle of the PDK app puts its exports on this global in the browser.
+        window.MyParcelShopwarePdk = {toForwardedNotification};
         ({default: component} = await import('./index'));
     });
 
@@ -18,6 +21,8 @@ describe('myparcel-settings-index', () => {
         $refs: {pdkRoot: document.createElement('div')},
         $tc: (key) => key,
         createNotificationError: vi.fn(),
+        createNotificationWarning: vi.fn(),
+        createNotificationInfo: vi.fn(),
     });
 
     beforeEach(() => {
@@ -39,6 +44,27 @@ describe('myparcel-settings-index', () => {
         expect(options).not.toHaveProperty('onNotification');
         expect(loader.load).toHaveBeenCalledWith('pluginSettings', {});
         expect(page.isLoading).toBe(false);
+    });
+
+    it('shows what the pdk reported while rendering the view', async () => {
+        const page = createPage();
+
+        loader.load.mockResolvedValue({
+            data: {
+                notifications: [
+                    {variant: 'warning', title: 'Order management', content: ['Line one.', 'Line two.'], category: 'general'},
+                    {variant: 'info', content: 'One line.'},
+                ],
+            },
+        });
+
+        await component.mounted.call(page);
+
+        expect(page.createNotificationWarning).toHaveBeenCalledWith({
+            title: 'Order management',
+            message: 'Line one.<br>Line two.',
+        });
+        expect(page.createNotificationInfo).toHaveBeenCalledWith({message: 'One line.'});
     });
 
     it('shows a notification when the settings cannot load', async () => {

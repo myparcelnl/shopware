@@ -22,11 +22,13 @@ use MyParcelNL\Pdk\Base\Exception\ModelNotFoundException;
 use MyParcelNL\Pdk\Base\Service\CurrencyService;
 use MyParcelNL\Pdk\Base\Service\WeightService;
 use MyParcelNL\Pdk\Fulfilment\Collection\OrderNoteCollection;
+use MyParcelNL\Pdk\Settings\Model\OrderSettings;
 use MyParcelNL\Pdk\Shipment\Collection\ShipmentCollection;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use function MyParcelNL\Pdk\Tests\factory as pdkFactory;
 
 beforeEach(fn () => TestPdk::boot());
 
@@ -163,6 +165,123 @@ it('merges stored shipments with the incoming ones by id and keeps new ones with
         ->and($stored[2])->not->toHaveKey('id')
         ->and($stored[1]['barcode'])->toBe('3STEST0000002')
         ->and($updated->shipments)->toHaveCount(3);
+});
+
+/**
+ * Stores an order whose stored copy of shipment 101 is $stored, and updates it with
+ * $incoming as the copy that the request carries. Returns the stored barcode.
+ */
+function mergeOneShipment(array $stored, array $incoming): ?string
+{
+    $shipments  = FakeEntityRepository::with();
+    $orders     = FakeEntityRepository::with(Entities::order([
+        'shipments' => [['id' => 101, 'carrier' => 'POSTNL'] + $stored],
+    ]));
+    $repository = orderRepository($orders, null, $shipments);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL'] + $incoming]);
+    $repository->update($order);
+
+    return array_column($shipments->upserts, 'data')[0]['barcode'] ?? null;
+}
+
+it('keeps the stored copy of a shipment that another request saved later', function () {
+    expect(mergeOneShipment(
+        ['barcode' => 'STORED', 'updated' => '2026-11-09 10:05:00'],
+        ['barcode' => 'INCOMING', 'updated' => '2026-11-09 10:00:00']
+    ))->toBe('STORED');
+});
+
+it('keeps the stored copy of a shipment that the api changed later', function () {
+    expect(mergeOneShipment(
+        ['barcode' => 'STORED', 'modified' => '2026-11-09 10:05:00'],
+        ['barcode' => 'INCOMING', 'modified' => '2026-11-09 10:00:00']
+    ))->toBe('STORED');
+});
+
+it('takes the incoming copy of a shipment that is as new or newer', function (array $stored, array $incoming) {
+    expect(mergeOneShipment(['barcode' => 'STORED'] + $stored, ['barcode' => 'INCOMING'] + $incoming))->toBe('INCOMING');
+})->with([
+    'fresh from the api, not saved yet' => [['updated' => '2026-11-09 10:05:00'], []],
+    'saved later'                       => [['updated' => '2026-11-09 10:00:00'], ['updated' => '2026-11-09 10:05:00']],
+    'saved at the same time'            => [['updated' => '2026-11-09 10:00:00'], ['updated' => '2026-11-09 10:00:00']],
+    'changed later in the api'          => [['modified' => '2026-11-09 10:00:00'], ['modified' => '2026-11-09 10:05:00']],
+    'no timestamps'                     => [[], []],
+]);
+
+/**
+ * Updates an order whose shipping delivery has $trackingCodes with shipment 101,
+ * barcode 3SA. Returns the writes to the order repository.
+ *
+ * @param  list<string> $trackingCodes
+ * @param  bool         $trackTrace    whether the merchant shows track and trace
+ *
+ * @return list<array<string, mixed>>
+ */
+function updateWithBarcode(array $trackingCodes, bool $trackTrace = true): array
+{
+    pdkFactory(OrderSettings::class)
+        ->withTrackTraceInAccount($trackTrace)
+        ->store();
+
+    $delivery   = Entities::delivery(Entities::address(), Entities::price(4.95, 1, 0.86), Entities::DELIVERY_ID, $trackingCodes);
+    $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => $delivery]));
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL', 'barcode' => '3SA']]);
+    $repository->update($order);
+
+    return $orders->updates;
+}
+
+it('adds the barcodes to the tracking codes of the shipping delivery', function () {
+    expect(updateWithBarcode(['OWN-1']))->toBe([[
+        'id'         => Entities::ORDER_ID,
+        'deliveries' => [['id' => Entities::DELIVERY_ID, 'trackingCodes' => ['OWN-1', '3SA']]],
+    ]]);
+});
+
+it('does not write the tracking codes when they stay the same', function () {
+    expect(updateWithBarcode(['3SA']))->toBe([]);
+});
+
+it('does not write the tracking codes when the merchant does not show track and trace', function () {
+    // Both settings are off by default, so a merchant who never looked at them
+    // does not show the barcode to the customer.
+    expect(updateWithBarcode(['OWN-1'], false))->toBe([]);
+});
+
+it('does not write the tracking codes when the order has no shipping delivery', function () {
+    pdkFactory(OrderSettings::class)
+        ->withTrackTraceInAccount(true)
+        ->store();
+
+    $orders     = FakeEntityRepository::with(Entities::order(['primaryDelivery' => null]));
+    $repository = orderRepository($orders);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    $order->shipments = new ShipmentCollection([['id' => 101, 'carrier' => 'POSTNL', 'barcode' => '3SA']]);
+    $repository->update($order);
+
+    expect($orders->updates)->toBe([]);
+});
+
+it('does not read the stored order when the external identifier is not a uuid', function () {
+    $orders     = FakeEntityRepository::with(Entities::order());
+    $orderData  = FakeEntityRepository::with();
+    $repository = orderRepository($orders, $orderData);
+    $order      = $repository->find(Entities::ORDER_ID);
+
+    // A search on such an id throws in Shopware, so update() stores the order
+    // without the stored shipments and without the tracking codes.
+    $order->externalIdentifier = 'not-a-uuid';
+    $repository->update($order);
+
+    expect($orders->criteria)->toHaveCount(1)
+        ->and($orders->updates)->toBe([])
+        ->and($orderData->upserts)->toHaveCount(1);
 });
 
 it('returns the updated order from the cache afterwards', function () {

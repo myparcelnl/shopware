@@ -146,6 +146,17 @@ describe('pdk-loader', () => {
         expect(component.createNotificationInfo).toHaveBeenCalledWith({message: 'm4'});
     });
 
+    it('maps a pdk notification with the mapper of the pdk bundle', async () => {
+        // The mapping itself is covered in session.spec.ts, where it lives.
+        const mapper = vi.fn().mockReturnValue({variant: 'warning', message: 'a<br>b'});
+        window.MyParcelShopwarePdk = {toForwardedNotification: mapper};
+        const {toForwardedNotification} = await loadModule();
+        const notification = {variant: 'warning', content: ['a', 'b']};
+
+        expect(toForwardedNotification(notification)).toEqual({variant: 'warning', message: 'a<br>b'});
+        expect(mapper).toHaveBeenCalledWith(notification);
+    });
+
     it('unmounts the session when the page closed while it started', async () => {
         const session = {render: vi.fn(), dispatchBulkAction: vi.fn(), unmount: vi.fn()};
         let active = true;

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MyParcel\Shopware\Checkout\SalesChannelContextHolder;
+use MyParcel\Shopware\Pdk\Account\OrderModeNotice;
 use MyParcel\Shopware\Pdk\Currency\EuroCurrency;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewNotFoundException;
 use MyParcel\Shopware\Pdk\Frontend\AdminViewRenderer;
@@ -32,13 +33,16 @@ use MyParcel\Shopware\Tests\Support\RecordingLogger;
 use MyParcel\Shopware\Tests\Support\TestPdk;
 use MyParcelNL\Pdk\App\Order\Contract\PdkOrderRepositoryInterface;
 use MyParcelNL\Pdk\App\Order\Contract\PdkProductRepositoryInterface;
+use MyParcelNL\Pdk\Account\Service\PdkAccountFeaturesService;
 use MyParcelNL\Pdk\Base\PdkBootstrapper as PdkBaseBootstrapper;
 use MyParcelNL\Pdk\Base\Service\CurrencyService;
 use MyParcelNL\Pdk\Base\Service\WeightService;
 use MyParcelNL\Pdk\Facade\Language;
+use MyParcelNL\Pdk\Facade\Notifications;
 use MyParcelNL\Pdk\Facade\Pdk;
 use MyParcelNL\Pdk\Frontend\Contract\FrontendRenderServiceInterface;
 use MyParcelNL\Pdk\Frontend\Contract\ViewServiceInterface;
+use MyParcelNL\Pdk\Notification\Model\Notification;
 use MyParcelNL\Pdk\Storage\MemoryCacheStorage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -193,4 +197,37 @@ it('renders the plugin settings', function () {
 
     expect($renderer->render(new AdminViewRequest(AdminScreen::PluginSettings, []))->html)
         ->toContain('data-pdk-component="PluginSettings"');
+});
+
+it('adds the order management notice to the plugin settings', function () {
+    [$renderer] = adminViewRenderer();
+    TestPdk::useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_ORDER_MANAGEMENT]);
+
+    $result = $renderer->render(new AdminViewRequest(AdminScreen::PluginSettings, []));
+
+    // The mock PDK has no translations, so the key is the text.
+    expect($result->notifications)->toHaveCount(1)
+        ->and($result->notifications[0]['variant'])->toBe('warning')
+        ->and($result->notifications[0]['title'])->toBe(OrderModeNotice::TITLE_KEY);
+});
+
+it('leaves the order management notice off the other screens', function () {
+    [$renderer] = adminViewRenderer();
+    TestPdk::useSubscriptionFeatures([PdkAccountFeaturesService::FEATURE_ORDER_MANAGEMENT]);
+
+    $result = $renderer->render(new AdminViewRequest(AdminScreen::Order, [Entities::ORDER_ID]));
+
+    expect($result->notifications)->toBe([]);
+});
+
+it('returns the notifications of the request with the view', function () {
+    [$renderer] = adminViewRenderer();
+
+    // Stands for whatever the PDK reports while it renders, on any screen.
+    Notifications::warning('A title', 'A message', Notification::CATEGORY_GENERAL);
+
+    $result = $renderer->render(new AdminViewRequest(AdminScreen::Order, [Entities::ORDER_ID]));
+
+    expect($result->notifications)->toHaveCount(1)
+        ->and($result->notifications[0]['title'])->toBe('A title');
 });

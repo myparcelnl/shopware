@@ -1,5 +1,6 @@
 import template from './myparcel-settings-index.html.twig';
 import {createSessionLoader} from '../../../../service/session-loader';
+import {notifyShopware, toForwardedNotification} from '../../../../service/pdk-loader';
 
 export default {
     template,
@@ -23,14 +24,23 @@ export default {
     },
 
     async mounted() {
-        // No onNotification: this page shows the PDK notifications in the PDK itself.
+        // No onNotification: the PDK shows the notifications of its own requests.
         this.loader = createSessionLoader({root: this.$refs.pdkRoot, isActive: () => this.isActive});
 
         try {
+            const loaded = await this.loader.load('pluginSettings', {});
+
             // null: the page closed while the view loaded.
-            if (!(await this.loader.load('pluginSettings', {}))) {
+            if (!loaded) {
                 return;
             }
+
+            // What the PDK said while it rendered, such as the notice for an account
+            // with order management. Its own container is still empty at that point,
+            // so this page shows them.
+            const notify = notifyShopware(this);
+
+            (loaded.data?.notifications ?? []).forEach((notification) => notify(toForwardedNotification(notification)));
         } catch (error) {
             console.error(error);
             this.createNotificationError({

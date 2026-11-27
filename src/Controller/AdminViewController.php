@@ -61,6 +61,9 @@ final class AdminViewController
                 // An object, so the admin app reads a map even when it holds one order.
                 'items'       => (object) $result->items,
                 'bulkActions' => $result->bulkActions,
+                // What the PDK reported while rendering. The admin module shows them,
+                // because the notification container in the html starts out empty.
+                'notifications' => $result->notifications,
                 'scripts'     => $this->assets->getScripts(),
                 'styles'      => $this->assets->getStyles(),
             ]);
