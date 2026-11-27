@@ -71,7 +71,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
   components: {
     [AdminComponent.Badge]: ShopwareBadge,
     [AdminComponent.Box]: ShopwareBox,
-    [AdminComponent.ButtonGroup]: DefaultButtonGroup,
+    [AdminComponent.ButtonGroup]: withClass(DefaultButtonGroup, 'mypa-button-group'),
     [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
     [AdminComponent.CheckboxInput]: ShopwareCheckboxInput,
@@ -99,6 +99,8 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.ShipmentLabelWrapper]: ShopwareShipmentLabelWrapper,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
     [AdminComponent.TabNavButton]: ShopwareTabNavButton,
+    // Without a wrapper the PDK renders only the content of a tab, right against its buttons.
+    [AdminComponent.TabNavContentWrapper]: withClass('div', 'mypa-tab-content'),
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
     [AdminComponent.Table]: withClass(DefaultTable, 'mypa-table'),

@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {DefaultButtonGroup} from '@myparcel-dev/pdk-admin-preset-default';
 import {createConfig} from './config';
 
 describe('createConfig', () => {
@@ -18,5 +19,13 @@ describe('createConfig', () => {
 
     expect(cssUtilities?.textColorSuccess).toBe('mypa-text-positive');
     expect(cssUtilities?.textColorError).toBe('mypa-text-critical');
+  });
+
+  // Without them, the buttons of a group touch, and the content of a tab sits against its buttons.
+  it('gives the button group and the content of a tab their own wrapper', () => {
+    const {components} = createConfig(() => ({}));
+
+    expect(components?.ButtonGroup).not.toBe(DefaultButtonGroup);
+    expect(components?.TabNavContentWrapper).toBeDefined();
   });
 });

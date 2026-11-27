@@ -68,4 +68,13 @@ describe('withClass', () => {
 
     expect(root().classList.contains('mypa-heading--2')).toBe(true);
   });
+
+  // A plain wrapper of the PDK has no preset component, so a tag stands in for it.
+  it('wraps a tag', () => {
+    mount(withClass('div', 'mypa-tab-content'));
+
+    expect(root().tagName).toBe('DIV');
+    expect(root().classList.contains('mypa-tab-content')).toBe(true);
+    expect(root().querySelector('.slot')).not.toBeNull();
+  });
 });

@@ -148,4 +148,37 @@
     border-radius: var(--border-radius-xs);
     background-color: var(--color-elevation-surface-raised);
   }
+
+  // A row of buttons, as the buttons of the account and of the webhooks. Without a gap they touch.
+  .mypa-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--scale-size-8);
+  }
+
+  .mypa-tab-content {
+    margin-top: var(--scale-size-24);
+  }
+
+  // The account box, the webhooks and the debug options of the PDK are plain p, ul and div. The admin
+  // resets their margins, so they get the spacing of Meteor here. Vertical margins collapse, so a form
+  // group (24 below) keeps its own spacing.
+  .mypa-card__content {
+    p {
+      margin: 0 0 var(--scale-size-8);
+    }
+
+    .mypa-button-group:not(:last-child) {
+      margin-bottom: var(--scale-size-16);
+    }
+  }
+
+  .mypa-tab-content > * > div + div {
+    margin-top: var(--scale-size-16);
+  }
+
+  // StatusIndicator puts the icon right before the name of a webhook.
+  .mypa-tab-content li > span > .mypa-icon:first-child {
+    margin-inline-end: var(--scale-size-4);
+  }
 }
