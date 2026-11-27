@@ -153,7 +153,9 @@
     }
   }
 
-  .mypa-radio:has(:disabled) {
+  .mypa-checkbox:has(:disabled),
+  .mypa-radio:has(:disabled),
+  .mypa-switch-field:has(:disabled) {
     color: var(--color-text-primary-disabled);
   }
 
