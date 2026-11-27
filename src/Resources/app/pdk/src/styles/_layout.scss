@@ -109,7 +109,8 @@
     }
   }
 
-  .mypa-tab--active {
+  // The state draws the look, so the two cannot disagree.
+  .mypa-tab[aria-current='true'] {
     box-shadow: inset 0 calc(-1 * var(--scale-size-2)) 0 var(--color-border-brand-default);
     font-weight: var(--font-weight-medium);
   }

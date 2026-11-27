@@ -37,10 +37,17 @@ describe('ShopwareTabNavButton', () => {
     expect(button().textContent).toBe('Orders');
   });
 
-  it('has the active class when active', () => {
+  // The PDK renders no tablist, so the state is aria-current, which fits a plain button.
+  it('has aria-current when active', () => {
     mount(true);
 
-    expect(button().classList.contains('mypa-tab--active')).toBe(true);
+    expect(button().getAttribute('aria-current')).toBe('true');
+  });
+
+  it('has no aria-current when not active', () => {
+    mount(false);
+
+    expect(button().hasAttribute('aria-current')).toBe(false);
   });
 
   it('emits click', () => {
