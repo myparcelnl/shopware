@@ -21,10 +21,17 @@
     </div>
 
     <div
-      v-if="$slots.footer"
+      v-if="$slots.footer || actions?.length"
       class="mypa-card__footer">
       <!-- Box footer. -->
-      <slot name="footer" />
+      <slot name="footer">
+        <PdkButtonGroup>
+          <ActionButton
+            v-for="action in actions"
+            :key="action.id"
+            :action="action" />
+        </PdkButtonGroup>
+      </slot>
     </div>
   </div>
 </template>
@@ -33,11 +40,25 @@
 /**
  * The PDK box as a card of the Shopware admin, with the header, the content and the footer of
  * preset-default. While it loads, it shows only the loader.
+ *
+ * The PDK also renders ConceptBoxWrapper as this box, with the actions of the order (export, print).
+ * Without a footer slot, the box shows them as buttons in the footer, as WooCommerce does.
  */
-import {AdminComponent, type BoxEmits, type BoxProps, type BoxSlots, Size, useLanguage} from '@myparcel-dev/pdk-admin';
+import {
+  type ActionDefinition,
+  ActionButton,
+  AdminComponent,
+  type BoxEmits,
+  type BoxProps,
+  type BoxSlots,
+  Size,
+  useLanguage,
+} from '@myparcel-dev/pdk-admin';
 
 // eslint-disable-next-line vue/no-unused-properties
-withDefaults(defineProps<BoxProps>(), {
+// ConceptBoxWrapper gives the actions, which BoxProps does not have.
+withDefaults(defineProps<BoxProps & {actions?: ActionDefinition[]}>(), {
+  actions: () => [],
   loading: false,
   size: Size.Medium,
 });
