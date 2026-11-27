@@ -35,7 +35,7 @@
       :id="menuId"
       ref="menu"
       :style="menuStyle"
-      class="mypa-dropdown-menu mypa-flex-col mypa-items-stretch mypa-rounded mypa-border mypa-border-solid mypa-border-gray-300 mypa-bg-white mypa-py-1 mypa-shadow"
+      class="mypa-dropdown-menu"
       popover="auto"
       @beforetoggle="onBeforeToggle"
       @toggle="onToggle">

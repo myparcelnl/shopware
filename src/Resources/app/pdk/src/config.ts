@@ -1,53 +1,63 @@
 import {AdminComponent, type InputAdminConfiguration, LogLevel, useAppInfo} from '@myparcel-dev/pdk-admin';
 import {
-  DefaultBadge,
-  DefaultBox,
-  DefaultButton,
   DefaultButtonGroup,
   DefaultCheckboxGroup,
-  DefaultCheckboxInput,
   DefaultCodeEditor,
   DefaultCol,
   DefaultCurrencyInput,
   DefaultDropOffInput,
-  DefaultFormGroup,
   DefaultHeading,
   DefaultImage,
   DefaultLink,
-  DefaultLoader,
   DefaultMultiDateInput,
   DefaultMultiSelectInput,
-  DefaultNotification,
   DefaultNumberInput,
-  DefaultRadioGroup,
-  DefaultRadioInput,
   DefaultRow,
-  DefaultSelectInput,
   DefaultSettingsDivider,
   DefaultShippingMethodsInput,
-  DefaultTabNavButton,
   DefaultTable,
   DefaultTableCol,
   DefaultTableRow,
-  DefaultTextArea,
-  DefaultTextInput,
   DefaultTimeInput,
-  DefaultToggleInput,
-  DefaultTriStateInput,
 } from '@myparcel-dev/pdk-admin-preset-default';
+import ShopwareBadge from './components/ShopwareBadge.vue';
+import ShopwareBox from './components/ShopwareBox.vue';
+import ShopwareButton from './components/ShopwareButton.vue';
+import ShopwareCheckboxInput from './components/ShopwareCheckboxInput.vue';
 import ShopwareDropdownButton from './components/ShopwareDropdownButton.vue';
+import ShopwareFormGroup from './components/ShopwareFormGroup.vue';
 import ShopwareIcon from './components/ShopwareIcon.vue';
+import ShopwareLoader from './components/ShopwareLoader.vue';
 import ShopwareModal from './components/ShopwareModal.vue';
+import ShopwareNotification from './components/ShopwareNotification.vue';
+import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
+import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
+import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
+import ShopwareShipmentLabelWrapper from './components/ShopwareShipmentLabelWrapper.vue';
+import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
+import ShopwareTextArea from './components/ShopwareTextArea.vue';
+import ShopwareTextInput from './components/ShopwareTextInput.vue';
+import ShopwareToggleInput from './components/ShopwareToggleInput.vue';
+import ShopwareTriStateInput from './components/ShopwareTriStateInput.vue';
+import {withClass} from './withClass';
 
 export type RequestHeadersProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
 const FADE = 'mypa-fade';
 
 /**
- * Create the PDK admin configuration with the components of preset-default and
- * the request headers of the Shopware admin.
+ * Create the PDK admin configuration with the Shopware* components, the components of preset-default
+ * that are left, and the request headers of the Shopware admin.
  *
- * The components render plain HTML, except the icons: the preset icon only prints the name, so ShopwareIcon draws them.
+ * How a component gets the look of the Shopware admin:
+ * - A Shopware* component only where the markup or the behaviour differs from preset-default. Its
+ *   look is BEM classes (mypa-block__element) in the SCSS partials, on the Meteor tokens.
+ * - withClass(Default*, 'mypa-…') where only the class differs, so changes in preset-default come along.
+ * - The other components of preset-default only render other PDK components or plain layout, so
+ *   they get the same look.
+ * The prefixed Tailwind utilities are only for layout (the cssUtilities of the PDK and the joined
+ * buttons of a dropdown), not for colours or surfaces.
+ * The preset icon only prints the name, so ShopwareIcon draws them.
  * Its dropdown opens on hover and has no menu styling, so ShopwareDropdownButton opens on click as a floating menu.
  * Its modal has no position or backdrop, so ShopwareModal shows it as a native modal dialog.
  * The utilities are the WooCommerce set, prefixed and scoped to .myparcel-pdk by Tailwind.
@@ -59,43 +69,46 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
   useLocationHash: false,
 
   components: {
-    [AdminComponent.Badge]: DefaultBadge,
-    [AdminComponent.Box]: DefaultBox,
-    [AdminComponent.ButtonGroup]: DefaultButtonGroup,
-    [AdminComponent.Button]: DefaultButton,
+    [AdminComponent.Badge]: ShopwareBadge,
+    [AdminComponent.Box]: ShopwareBox,
+    [AdminComponent.ButtonGroup]: withClass(DefaultButtonGroup, 'mypa-button-group'),
+    [AdminComponent.Button]: ShopwareButton,
     [AdminComponent.CheckboxGroup]: DefaultCheckboxGroup,
-    [AdminComponent.CheckboxInput]: DefaultCheckboxInput,
+    [AdminComponent.CheckboxInput]: ShopwareCheckboxInput,
     [AdminComponent.CodeEditor]: DefaultCodeEditor,
     [AdminComponent.Col]: DefaultCol,
     [AdminComponent.CurrencyInput]: DefaultCurrencyInput,
-    [AdminComponent.DropOffInput]: DefaultDropOffInput,
+    [AdminComponent.DropOffInput]: withClass(DefaultDropOffInput, 'mypa-drop-off'),
     [AdminComponent.DropdownButton]: ShopwareDropdownButton,
-    [AdminComponent.FormGroup]: DefaultFormGroup,
-    [AdminComponent.Heading]: DefaultHeading,
+    [AdminComponent.FormGroup]: ShopwareFormGroup,
+    [AdminComponent.Heading]: withClass(DefaultHeading, (attrs) => ['mypa-heading', `mypa-heading--${attrs.level ?? 1}`]),
     [AdminComponent.Icon]: ShopwareIcon,
     [AdminComponent.Image]: DefaultImage,
-    [AdminComponent.Link]: DefaultLink,
-    [AdminComponent.Loader]: DefaultLoader,
+    [AdminComponent.Link]: withClass(DefaultLink, 'mypa-link'),
+    [AdminComponent.Loader]: ShopwareLoader,
     [AdminComponent.Modal]: ShopwareModal,
     [AdminComponent.MultiDateInput]: DefaultMultiDateInput,
     [AdminComponent.MultiSelectInput]: DefaultMultiSelectInput,
-    [AdminComponent.Notification]: DefaultNotification,
+    [AdminComponent.Notification]: ShopwareNotification,
     [AdminComponent.NumberInput]: DefaultNumberInput,
-    [AdminComponent.RadioGroup]: DefaultRadioGroup,
-    [AdminComponent.RadioInput]: DefaultRadioInput,
+    [AdminComponent.RadioGroup]: ShopwareRadioGroup,
+    [AdminComponent.RadioInput]: ShopwareRadioInput,
     [AdminComponent.Row]: DefaultRow,
-    [AdminComponent.SelectInput]: DefaultSelectInput,
-    [AdminComponent.SettingsDivider]: DefaultSettingsDivider,
+    [AdminComponent.SelectInput]: ShopwareSelectInput,
+    [AdminComponent.SettingsDivider]: withClass(DefaultSettingsDivider, 'mypa-settings-divider'),
+    [AdminComponent.ShipmentLabelWrapper]: ShopwareShipmentLabelWrapper,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
-    [AdminComponent.TabNavButton]: DefaultTabNavButton,
+    [AdminComponent.TabNavButton]: ShopwareTabNavButton,
+    // Without a wrapper the PDK renders only the content of a tab, right against its buttons.
+    [AdminComponent.TabNavContentWrapper]: withClass('div', 'mypa-tab-content'),
     [AdminComponent.TableCol]: DefaultTableCol,
     [AdminComponent.TableRow]: DefaultTableRow,
-    [AdminComponent.Table]: DefaultTable,
-    [AdminComponent.TextArea]: DefaultTextArea,
-    [AdminComponent.TextInput]: DefaultTextInput,
+    [AdminComponent.Table]: withClass(DefaultTable, 'mypa-table'),
+    [AdminComponent.TextArea]: ShopwareTextArea,
+    [AdminComponent.TextInput]: ShopwareTextInput,
     [AdminComponent.TimeInput]: DefaultTimeInput,
-    [AdminComponent.ToggleInput]: DefaultToggleInput,
-    [AdminComponent.TriStateInput]: DefaultTriStateInput,
+    [AdminComponent.ToggleInput]: ShopwareToggleInput,
+    [AdminComponent.TriStateInput]: ShopwareTriStateInput,
   },
 
   cssUtilities: {
@@ -107,8 +120,9 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     marginLAuto: 'mypa-ml-auto',
     marginYAuto: 'mypa-my-auto',
     textCenter: 'mypa-text-center',
-    textColorError: 'mypa-text-red-500',
-    textColorSuccess: 'mypa-text-green-500',
+    // The Meteor status colours in _feedback.scss, not Tailwind colours.
+    textColorError: 'mypa-text-critical',
+    textColorSuccess: 'mypa-text-positive',
     whitespaceNoWrap: 'mypa-whitespace-nowrap',
   },
 

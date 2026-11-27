@@ -147,4 +147,22 @@ describe('ShopwareModal', () => {
 
     expect(add).not.toHaveBeenCalled();
   });
+
+  // The look comes from the Meteor tokens in _overlay.scss, not from Tailwind utilities.
+  it('has the header, the content and the footer of a Meteor modal', () => {
+    expect(dialog().querySelector('.mypa-modal__header .mypa-modal__title')).not.toBeNull();
+    expect(dialog().querySelector('.mypa-modal__content .content')).not.toBeNull();
+    expect(dialog().querySelectorAll('.mypa-modal__footer [data-action]')).toHaveLength(2);
+  });
+
+  it('has the Meteor close button with a label', () => {
+    expect(closeButton().classList.contains('mypa-modal__close')).toBe(true);
+    expect(closeButton().getAttribute('aria-label')).toBeTruthy();
+  });
+
+  it('has no Tailwind surface classes', () => {
+    const classes = [...dialog().classList];
+
+    expect(classes.some((name) => /^mypa-(bg|rounded|shadow|border|p|max-w|w|max-h)-/.test(name))).toBe(false);
+  });
 });

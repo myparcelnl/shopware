@@ -55,6 +55,17 @@ describe('sw-order-list override', () => {
                 .toEqual(['orderNumber', DELIVERY_STATUS, 'myparcelShipments', 'amountTotal']);
         });
 
+        // Without a width the column is narrow, and the toggle of a shipment wraps under its barcode.
+        it('gives the MyParcel column a width that the user can still resize', () => {
+            const list = createList();
+
+            list.$super = vi.fn(() => [{property: 'orderNumber'}]);
+
+            const column = component.methods.getOrderColumns.call(list).find(({property}) => property === 'myparcelShipments');
+
+            expect(column).toMatchObject({width: '300px', allowResize: true});
+        });
+
         it('adds the MyParcel column at the end without a delivery status column', () => {
             expect(getOrderColumns(createList(), [{property: 'orderNumber'}]))
                 .toEqual(['orderNumber', 'myparcelShipments']);

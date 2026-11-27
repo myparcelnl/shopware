@@ -1,0 +1,217 @@
+// The checkbox, the radio and the switch of Meteor (mt-checkbox.css, mt-radio-group-item.css,
+// mt-radio-group-indicator.css and mt-switch.css of
+// @shopware-ag/meteor-component-library 5.2.0, MIT,
+// Copyright 2019 shopware AG; the licence notice is in index.scss), built with the Meteor tokens that the Shopware
+// admin sets on :root. Meteor draws over a hidden input; here the native input itself has the look,
+// so it keeps the focus and the keyboard of the browser.
+@mixin choice {
+  .mypa-checkbox,
+  .mypa-radio,
+  .mypa-switch-field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--scale-size-4);
+    color: var(--color-text-primary-default);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+
+    &:has(:disabled) {
+      cursor: not-allowed;
+    }
+
+    label {
+      cursor: inherit;
+    }
+  }
+
+  .mypa-checkbox__input,
+  .mypa-radio__input,
+  .mypa-switch {
+    position: relative;
+    flex: none;
+    margin: 0;
+    cursor: inherit;
+    appearance: none;
+
+    &:focus-visible {
+      outline: var(--scale-size-2) solid var(--color-border-brand-default);
+      outline-offset: var(--scale-size-2);
+    }
+  }
+
+  .mypa-checkbox__input {
+    width: var(--scale-size-16);
+    height: var(--scale-size-16);
+    border: 1px solid var(--color-border-primary-default);
+    border-radius: var(--border-radius-checkbox);
+    background: var(--color-background-primary-default);
+
+    // The checkmark of the icon kit as a mask, so it takes the colour of the token.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--color-static-white);
+      mask: url('@shopware-ag/meteor-icon-kit/icons/regular/checkmark-xxs.svg') center / 8px no-repeat;
+      opacity: 0;
+    }
+
+    &:checked {
+      border-color: var(--color-interaction-primary-default);
+      background: var(--color-interaction-primary-default);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &:disabled {
+      border-color: var(--color-border-primary-default);
+      background: var(--color-background-tertiary-default);
+
+      &::after {
+        background: var(--color-border-primary-default);
+      }
+    }
+  }
+
+  .mypa-switch {
+    width: var(--scale-size-24);
+    height: var(--scale-size-16);
+    border: 0;
+    border-radius: var(--border-radius-round);
+    background: var(--color-interaction-secondary-disabled);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 3px;
+      width: var(--scale-size-10);
+      height: var(--scale-size-10);
+      border-radius: var(--border-radius-round);
+      background: var(--color-static-white);
+      transform: translateY(-50%);
+      transition: 200ms left cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    &:checked {
+      background: var(--color-interaction-primary-default);
+
+      &::after {
+        left: calc(100% - var(--scale-size-10) - 3px);
+      }
+
+      &:disabled {
+        background: var(--color-interaction-primary-disabled);
+      }
+    }
+
+    &:disabled:not(:checked)::after {
+      background: var(--color-icon-primary-disabled);
+    }
+  }
+
+  .mypa-radio__input {
+    width: var(--scale-size-16);
+    height: var(--scale-size-16);
+    border: 1px solid var(--color-border-primary-default);
+    border-radius: var(--border-radius-round);
+    background: var(--color-background-primary-default);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    // The dot in the middle.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: var(--scale-size-8);
+      height: var(--scale-size-8);
+      margin: auto;
+      border-radius: var(--border-radius-round);
+      background: var(--color-static-white);
+      transform: scale(0);
+      transition: transform 0.15s ease-out;
+    }
+
+    &:checked {
+      border-color: var(--color-interaction-primary-default);
+      background: var(--color-interaction-primary-default);
+
+      &::after {
+        transform: scale(1);
+      }
+    }
+
+    &:disabled {
+      border-color: var(--color-border-primary-default);
+      background: var(--color-background-tertiary-default);
+
+      &::after {
+        background: var(--color-border-primary-default);
+      }
+    }
+  }
+
+  .mypa-checkbox:has(:disabled),
+  .mypa-radio:has(:disabled),
+  .mypa-switch-field:has(:disabled) {
+    color: var(--color-text-primary-disabled);
+  }
+
+  .mypa-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--scale-size-8) var(--scale-size-16);
+  }
+
+  // The switch for the value and the checkbox to use the default, side by side.
+  .mypa-tri-state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--scale-size-8) var(--scale-size-16);
+  }
+
+  // DefaultShippingMethodsInput hides every label in its filter, and the checkbox of "Show assigned" is a
+  // label. Show the checkbox, without the label of the field that the filter gives it. The selector is
+  // more specific than the one of preset-default.
+  .shipping-methods .shipping-method-details-header .filter-checkbox > label.mypa-checkbox {
+    display: inline-flex;
+
+    > span {
+      display: none;
+    }
+  }
+
+  // Forced Colors Mode replaces the background colours that show the state. Draw it with system colours:
+  // a border for the shape, Highlight for checked, and the mark (checkmark, dot, knob) in CanvasText,
+  // or HighlightText when checked.
+  @media (forced-colors: active) {
+    .mypa-checkbox__input,
+    .mypa-radio__input,
+    .mypa-switch {
+      border: 1px solid CanvasText;
+
+      &:checked {
+        background: Highlight;
+      }
+
+      &::after {
+        background: CanvasText;
+      }
+
+      &:checked::after {
+        background: HighlightText;
+      }
+    }
+  }
+
+  // The knob and the dot move once, so they change state at once instead of more slowly.
+  @media (prefers-reduced-motion: reduce) {
+    .mypa-switch::after,
+    .mypa-radio__input::after {
+      transition: none;
+    }
+  }
+}

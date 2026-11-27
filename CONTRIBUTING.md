@@ -140,6 +140,14 @@ Put a component in the place for its kind:
   them.
 - A PDK replacement goes into `components` in `pdk/src/config.ts`, on its
   `AdminComponent` key.
+- Write a `Shopware<Name>.vue` only when the markup or the behaviour differs from
+  the `Default<Name>` of preset-default. When only the class differs, use
+  `withClass(Default<Name>, 'mypa-<name>')` in `config.ts`, so changes in
+  preset-default come along.
+- Style PDK components with BEM classes (`mypa-<block>__<element>`) in the SCSS
+  partials in `pdk/src/styles/`, on the Meteor tokens that the Shopware admin sets
+  on `:root`. Use the prefixed Tailwind utilities (`mypa-*`) only for layout, not
+  for colours or surfaces.
 - Components in the Shopware admin module use the Options API, as Shopware does.
 - Components in the PDK admin app follow the
   [Vue style guide](https://vuejs.org/style-guide/) and use the Composition API

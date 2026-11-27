@@ -1,0 +1,184 @@
+// The card, the text sizes, the tabs and the table of Meteor (mt-card.css, mt-text.css, mt-tabs.css
+// and mt-data-table.css of
+// @shopware-ag/meteor-component-library 5.2.0, MIT,
+// Copyright 2019 shopware AG; the licence notice is in index.scss), built with the Meteor tokens that the Shopware
+// admin sets on :root.
+@mixin layout {
+  .mypa-card {
+    position: relative;
+    margin-bottom: var(--scale-size-24);
+    overflow: hidden;
+    border: 1px solid var(--color-border-secondary-default);
+    border-radius: var(--border-radius-card);
+    background: var(--color-elevation-surface-raised);
+  }
+
+  .mypa-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--scale-size-12);
+    padding: var(--scale-size-24);
+    border-bottom: 1px solid var(--color-border-secondary-default);
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-s);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--font-line-height-s);
+  }
+
+  .mypa-card__content {
+    display: flow-root;
+    padding: var(--scale-size-24);
+    color: var(--color-text-primary-default);
+  }
+
+  .mypa-card__footer {
+    display: flex;
+    padding: var(--scale-size-24);
+    border-top: 1px solid var(--color-border-secondary-default);
+    color: var(--color-text-secondary-default);
+  }
+
+  .mypa-heading {
+    margin: 0 0 var(--scale-size-8);
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .mypa-heading--1 {
+    font-size: var(--font-size-m);
+    line-height: var(--font-line-height-m);
+  }
+
+  .mypa-heading--2 {
+    font-size: var(--font-size-s);
+    line-height: var(--font-line-height-s);
+  }
+
+  .mypa-heading--3,
+  .mypa-heading--4,
+  .mypa-heading--5,
+  .mypa-heading--6 {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-line-height-xs);
+  }
+
+  .mypa-settings-divider {
+    margin: var(--scale-size-24) 0 var(--scale-size-16);
+    padding-top: var(--scale-size-24);
+    border-top: 1px solid var(--color-border-secondary-default);
+  }
+
+  // The content of DefaultSettingsDivider is a plain paragraph.
+  .mypa-settings-divider > p {
+    margin: 0;
+    color: var(--color-text-secondary-default);
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-line-height-2xs);
+  }
+
+  // The tabs have no common wrapper, so each tab draws its part of the line below the row.
+  .mypa-tab {
+    margin: 0;
+    padding: var(--scale-size-10) var(--scale-size-16);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: inset 0 -1px 0 var(--color-border-secondary-default);
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-line-height-xs);
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text-brand-default);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-border-brand-default);
+      outline-offset: -2px;
+      border-radius: var(--border-radius-xs);
+    }
+
+    &:disabled {
+      color: var(--color-text-primary-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  // The state draws the look, so the two cannot disagree.
+  .mypa-tab[aria-current='true'] {
+    box-shadow: inset 0 calc(-1 * var(--scale-size-2)) 0 var(--color-border-brand-default);
+    font-weight: var(--font-weight-medium);
+  }
+
+  // The rows and the cells are plain tr, th and td of preset-default.
+  .mypa-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--color-text-primary-default);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-line-height-xs);
+
+    th,
+    td {
+      padding: var(--scale-size-12) var(--scale-size-16);
+      border-bottom: 1px solid var(--color-border-secondary-default);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    thead th {
+      background-color: var(--color-elevation-surface-sunken);
+      color: var(--color-text-secondary-default);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  // A shipment in the order list: a small box, as WcShipmentLabelWrapper in WooCommerce.
+  .mypa-shipment-label {
+    margin-bottom: var(--scale-size-4);
+    padding: var(--scale-size-8);
+    border: 1px solid var(--color-border-secondary-default);
+    border-radius: var(--border-radius-xs);
+    background-color: var(--color-elevation-surface-raised);
+  }
+
+  // A row of buttons, as the buttons of the account and of the webhooks. Without a gap they touch.
+  .mypa-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--scale-size-8);
+  }
+
+  .mypa-tab-content {
+    margin-top: var(--scale-size-24);
+  }
+
+  // The account box, the webhooks and the debug options of the PDK are plain p, ul and div. The admin
+  // resets their margins, so they get the spacing of Meteor here. Vertical margins collapse, so a form
+  // group (24 below) keeps its own spacing.
+  .mypa-card__content {
+    p {
+      margin: 0 0 var(--scale-size-8);
+    }
+
+    .mypa-button-group:not(:last-child) {
+      margin-bottom: var(--scale-size-16);
+    }
+  }
+
+  .mypa-tab-content > * > div + div {
+    margin-top: var(--scale-size-16);
+  }
+
+  // StatusIndicator puts the icon right before the name of a webhook.
+  .mypa-tab-content li > span > .mypa-icon:first-child {
+    margin-inline-end: var(--scale-size-4);
+  }
+}
