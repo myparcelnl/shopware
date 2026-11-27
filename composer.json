@@ -3,7 +3,7 @@
   "description": "MyParcel plugin for Shopware 6.7+ (PDK-based)",
   "type": "shopware-platform-plugin",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "require": {
     "php": ">=8.2",
     "myparcelnl/pdk": "^5.3.3",
