@@ -6,8 +6,10 @@
       v-model="model"
       type="hidden" />
 
+    <!-- The toggle element of the PDK has no label, so the switch gets the label of the setting. -->
     <PdkToggleInput
       v-model="toggleModel"
+      :accessible-label="element.label"
       :element="toggleElement" />
 
     <PdkCheckboxInput

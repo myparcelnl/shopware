@@ -29,13 +29,14 @@ let app: App | undefined;
 let container: HTMLElement;
 const value = ref<unknown>(false);
 
-const mount = (element: Record<string, unknown> = {}) => {
+const mount = (element: Record<string, unknown> = {}, props: Record<string, unknown> = {}) => {
   app = createApp({
     render: () =>
       h(ShopwareToggleInput, {
         element: {name: 'enabled', ...element},
         modelValue: value.value,
         'onUpdate:modelValue': (newValue: unknown) => (value.value = newValue),
+        ...props,
       }),
   });
   app.directive('test', {});
@@ -98,5 +99,24 @@ describe('ShopwareToggleInput', () => {
     mount(element);
 
     expect(toggle().disabled).toBe(true);
+  });
+
+  // The label of the form group points to the hidden input, so the switch needs a name of its own.
+  it('names the switch with the label of the element', () => {
+    mount({label: 'Concept shipments'});
+
+    expect(toggle().getAttribute('aria-label')).toBe('Concept shipments');
+  });
+
+  it('names the switch with the accessible label before the label of the element', () => {
+    mount({label: 'Toggle'}, {accessibleLabel: 'Signature'});
+
+    expect(toggle().getAttribute('aria-label')).toBe('Signature');
+  });
+
+  it('has no aria-label without a label', () => {
+    mount();
+
+    expect(toggle().hasAttribute('aria-label')).toBe(false);
   });
 });

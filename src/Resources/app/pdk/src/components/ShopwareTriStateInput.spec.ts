@@ -25,10 +25,19 @@ let app: App | undefined;
 let container: HTMLElement;
 
 const stub = (name: string) =>
-  defineComponent({props: ['element', 'modelValue'], setup: (p) => () => h('i', {'data-stub': name, 'data-element': p.element.name, 'data-value': String(p.modelValue)})});
+  defineComponent({
+    props: ['element', 'modelValue', 'accessibleLabel'],
+    setup: (p) => () =>
+      h('i', {
+        'data-stub': name,
+        'data-element': p.element.name,
+        'data-value': String(p.modelValue),
+        'data-accessible-label': p.accessibleLabel,
+      }),
+  });
 
 const mount = () => {
-  app = createApp({render: () => h(ShopwareTriStateInput, {element: {name: 'option'}, modelValue: 1})});
+  app = createApp({render: () => h(ShopwareTriStateInput, {element: {name: 'option', label: 'Signature'}, modelValue: 1})});
   app.directive('test', {});
   app.component('PdkToggleInput', stub('toggle'));
   app.component('PdkCheckboxInput', stub('checkbox'));
@@ -65,5 +74,12 @@ describe('ShopwareTriStateInput', () => {
     expect(toggle?.getAttribute('data-value')).toBe('true');
     expect(checkbox?.getAttribute('data-element')).toBe('inherit');
     expect(checkbox?.getAttribute('data-value')).toBe('false');
+  });
+
+  // The toggle element of the context has no label, so the tri-state gives the switch its own.
+  it('gives the label of the setting to the switch', () => {
+    mount();
+
+    expect(container.querySelector('[data-stub="toggle"]')?.getAttribute('data-accessible-label')).toBe('Signature');
   });
 });
