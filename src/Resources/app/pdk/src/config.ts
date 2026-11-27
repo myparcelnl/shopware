@@ -32,6 +32,7 @@ import ShopwareRadioGroup from './components/ShopwareRadioGroup.vue';
 import ShopwareRadioInput from './components/ShopwareRadioInput.vue';
 import ShopwareSelectInput from './components/ShopwareSelectInput.vue';
 import ShopwareSettingsDivider from './components/ShopwareSettingsDivider.vue';
+import ShopwareShipmentLabelWrapper from './components/ShopwareShipmentLabelWrapper.vue';
 import ShopwareTabNavButton from './components/ShopwareTabNavButton.vue';
 import ShopwareTable from './components/ShopwareTable.vue';
 import ShopwareTextArea from './components/ShopwareTextArea.vue';
@@ -88,6 +89,7 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     [AdminComponent.Row]: DefaultRow,
     [AdminComponent.SelectInput]: ShopwareSelectInput,
     [AdminComponent.SettingsDivider]: ShopwareSettingsDivider,
+    [AdminComponent.ShipmentLabelWrapper]: ShopwareShipmentLabelWrapper,
     [AdminComponent.ShippingMethodsInput]: DefaultShippingMethodsInput,
     [AdminComponent.TabNavButton]: ShopwareTabNavButton,
     [AdminComponent.TableCol]: DefaultTableCol,
