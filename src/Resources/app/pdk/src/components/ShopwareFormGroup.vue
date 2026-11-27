@@ -1,23 +1,24 @@
 <template>
+  <!-- As in WooCommerce: a field that depends on another one hides until that one allows it. -->
   <div
+    v-show="element.isVisible"
     v-test="AdminComponent.FormGroup"
     class="mypa-form-group">
+    <!-- As in WooCommerce there is no optional tip: almost every setting is optional, so it says nothing. -->
     <label
+      v-if="element.label || $slots.label"
       :for="id"
       class="mypa-form-group__label">
       <!-- Can be used instead of the label prop. -->
       <slot name="label">
         {{ element.label }}
-        <span
-          v-if="element.isOptional"
-          class="mypa-form-group__optional"
-          v-text="translate('form_optional_tip')" />
       </slot>
     </label>
 
-    <!-- As in DefaultFormGroup: the description is a translation key, and a translation can have a link. -->
+    <!-- As in DefaultFormGroup: the description is a translation key, and a translation can have a link.
+         As in WooCommerce: a key without a translation is not shown. -->
     <small
-      v-if="element.props?.description"
+      v-if="has(element.props?.description)"
       class="mypa-form-group__description"
       v-html="translate(element.props.description)" />
 
@@ -56,5 +57,5 @@ const propRefs = toRefs(props);
 
 const id = generateFieldId(propRefs.element);
 
-const {translate} = useLanguage();
+const {has, translate} = useLanguage();
 </script>

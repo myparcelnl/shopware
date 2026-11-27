@@ -2,14 +2,18 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {type App, createApp, h} from 'vue';
 import ShopwareFormGroup from './ShopwareFormGroup.vue';
 
-// The id comes from the name of the element. A translation is the key in brackets.
+// The id comes from the name of the element. A translation is the key in brackets, and every key
+// but 'missing' has a translation.
 vi.mock('@myparcel-dev/pdk-admin', async () => {
   const {unref} = await import('vue');
 
   return {
     AdminComponent: {FormGroup: 'FormGroup'},
     generateFieldId: (element: {name: string}) => `field-${unref(element).name}`,
-    useLanguage: () => ({translate: (key: string) => `[${key}]`}),
+    useLanguage: () => ({
+      has: (key?: string) => Boolean(key) && key !== 'missing',
+      translate: (key: string) => `[${key}]`,
+    }),
   };
 });
 
@@ -21,7 +25,7 @@ const mount = (element: Record<string, unknown> = {}, slots: Record<string, () =
     render: () =>
       h(
         ShopwareFormGroup,
-        {element: {name: 'title', label: 'Title', isValid: true, errors: [], props: {}, ...element}},
+        {element: {name: 'title', label: 'Title', isValid: true, isVisible: true, errors: [], props: {}, ...element}},
         {default: () => h('input', {class: 'field'}), ...slots},
       ),
   });
@@ -53,16 +57,38 @@ describe('ShopwareFormGroup', () => {
     expect(label?.textContent).toContain('Title');
   });
 
-  it('shows the optional tip when the field is optional', () => {
+  // As in WooCommerce: almost every setting is optional, so the tip says nothing.
+  it('shows no optional tip, also when the field is optional', () => {
     mount({isOptional: true});
 
-    expect(find('.mypa-form-group__optional')?.textContent).toBe('[form_optional_tip]');
+    expect(container.textContent).not.toContain('form_optional_tip');
   });
 
-  it('shows no optional tip when the field is required', () => {
+  // As in WooCommerce: a field that depends on another one hides until that one allows it.
+  it('hides the group when the element is not visible', () => {
+    mount({isVisible: false});
+
+    expect(find('.mypa-form-group')?.style.display).toBe('none');
+  });
+
+  it('shows the group when the element is visible', () => {
     mount();
 
-    expect(find('.mypa-form-group__optional')).toBeNull();
+    expect(find('.mypa-form-group')?.style.display).toBe('');
+  });
+
+  // As in WooCommerce: a key without a translation is not shown.
+  it('shows no description that has no translation', () => {
+    mount({props: {description: 'missing'}});
+
+    expect(find('.mypa-form-group__description')).toBeNull();
+  });
+
+  it('renders no empty label when the element has no label', () => {
+    mount({label: undefined});
+
+    expect(find('label')).toBeNull();
+    expect(find('.field')).not.toBeNull();
   });
 
   it('renders the translated description as html', () => {
