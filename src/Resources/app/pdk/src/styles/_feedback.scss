@@ -131,4 +131,11 @@
       transform: rotate(360deg);
     }
   }
+
+  // Slower, not stopped, so the user still sees that something loads.
+  @media (prefers-reduced-motion: reduce) {
+    .mypa-loader__spinner {
+      animation-duration: 6s;
+    }
+  }
 }

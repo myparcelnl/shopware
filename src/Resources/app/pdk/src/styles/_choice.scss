@@ -204,4 +204,12 @@
       }
     }
   }
+
+  // The knob and the dot move once, so they change state at once instead of more slowly.
+  @media (prefers-reduced-motion: reduce) {
+    .mypa-switch::after,
+    .mypa-radio__input::after {
+      transition: none;
+    }
+  }
 }
