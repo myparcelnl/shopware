@@ -99,4 +99,12 @@
     --dp-disabled-color: var(--color-background-tertiary-default);
     --dp-disabled-color-text: var(--color-text-primary-disabled);
   }
+
+  // Forced Colors Mode does not always show a background image, so the select gets its own chevron.
+  @media (forced-colors: active) {
+    .mypa-field--select:not([multiple]) {
+      background-image: none;
+      appearance: auto;
+    }
+  }
 }

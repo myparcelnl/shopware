@@ -180,4 +180,27 @@
       display: none;
     }
   }
+
+  // Forced Colors Mode replaces the background colours that show the state. Draw it with system colours:
+  // a border for the shape, Highlight for checked, and the mark (checkmark, dot, knob) in CanvasText,
+  // or HighlightText when checked.
+  @media (forced-colors: active) {
+    .mypa-checkbox__input,
+    .mypa-radio__input,
+    .mypa-switch {
+      border: 1px solid CanvasText;
+
+      &:checked {
+        background: Highlight;
+      }
+
+      &::after {
+        background: CanvasText;
+      }
+
+      &:checked::after {
+        background: HighlightText;
+      }
+    }
+  }
 }
