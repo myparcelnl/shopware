@@ -5,7 +5,8 @@
     v-test="AdminComponent.SelectInput"
     :disabled="options.length === 1 || element.isDisabled || element.isSuspended || element.isReadOnly"
     :name="id"
-    class="mypa-field mypa-field--select">
+    :aria-invalid="element.isValid === false || undefined"
+    :class="['mypa-field', 'mypa-field--select', {'mypa-field--error': element.isValid === false}]">
     <option
       v-for="(item, index) in options"
       :key="index"

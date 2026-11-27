@@ -6,7 +6,8 @@
     :disabled="element.isDisabled || element.isSuspended"
     :name="id"
     :readonly="element.isReadOnly"
-    class="mypa-field mypa-field--textarea" />
+    :aria-invalid="element.isValid === false || undefined"
+    :class="['mypa-field', 'mypa-field--textarea', {'mypa-field--error': element.isValid === false}]" />
 </template>
 
 <script lang="ts" setup>

@@ -79,4 +79,18 @@ describe('ShopwareTextInput', () => {
     expect(input().readOnly).toBe(true);
     expect(input().disabled).toBe(false);
   });
+
+  it('marks an invalid field with the error class and aria-invalid', () => {
+    mount({isValid: false});
+
+    expect(input().classList.contains('mypa-field--error')).toBe(true);
+    expect(input().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('does not mark a valid field', () => {
+    mount({isValid: true});
+
+    expect(input().classList.contains('mypa-field--error')).toBe(false);
+    expect(input().hasAttribute('aria-invalid')).toBe(false);
+  });
 });

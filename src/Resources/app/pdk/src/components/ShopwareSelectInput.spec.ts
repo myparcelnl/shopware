@@ -100,4 +100,18 @@ describe('ShopwareSelectInput', () => {
 
     expect(select().disabled).toBe(true);
   });
+
+  it('marks an invalid field with the error class and aria-invalid', () => {
+    mount({isValid: false});
+
+    expect(select().classList.contains('mypa-field--error')).toBe(true);
+    expect(select().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('does not mark a valid field', () => {
+    mount({isValid: true});
+
+    expect(select().classList.contains('mypa-field--error')).toBe(false);
+    expect(select().hasAttribute('aria-invalid')).toBe(false);
+  });
 });

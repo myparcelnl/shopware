@@ -41,6 +41,12 @@
     }
   }
 
+  // A field that is not valid has the critical border of a Meteor field with an error (has--error).
+  // The focus ring is an outline, so the border stays critical while the user corrects the value.
+  .mypa-field--error {
+    border-color: var(--color-border-critical-default);
+  }
+
   // A select of one line has the chevron of the icon kit at the right, as mt-select. Its fill is
   // the value of --color-icon-primary-default; a CSS variable cannot reach into a background image.
   .mypa-field--select:not([multiple]) {
