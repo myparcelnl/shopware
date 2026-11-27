@@ -1,6 +1,7 @@
 // The checkbox, the radio and the switch of Meteor (mt-checkbox.css, mt-radio-group-item.css,
 // mt-radio-group-indicator.css and mt-switch.css of
-// @shopware-ag/meteor-component-library 5.2.0, MIT), built with the Meteor tokens that the Shopware
+// @shopware-ag/meteor-component-library 5.2.0, MIT,
+// Copyright 2019 shopware AG; the licence notice is in index.scss), built with the Meteor tokens that the Shopware
 // admin sets on :root. Meteor draws over a hidden input; here the native input itself has the look,
 // so it keeps the focus and the keyboard of the browser.
 @mixin choice {
