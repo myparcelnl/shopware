@@ -34,6 +34,30 @@
             margin-top: var(--scale-size-4);
         }
 
+        // The buttons of the order come after the boxes of the shipments, with more room above them.
+        > .mypa-shipment-label + .mypa-inline-flex {
+            margin-top: var(--scale-size-8);
+        }
+
+        // The first row of a shipment is the barcode with its toggle. It does not wrap: a long barcode
+        // ends in an ellipsis, and the toggle stays at the right.
+        .mypa-shipment-label > .mypa-flex:first-child {
+            flex-wrap: nowrap;
+
+            > :first-child {
+                flex: 1 1 auto;
+                overflow: hidden;
+            }
+
+            .mypa-link {
+                display: block;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
         // The PDK puts the barcode with the dropdown, and the package type with the status, in flex rows. They need a gap and may wrap.
         .mypa-flex:not([popover]) {
             flex-wrap: wrap;

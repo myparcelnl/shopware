@@ -61,6 +61,8 @@ Shopware.Component.override('sw-order-list', {
             columns.splice(index === -1 ? columns.length : index + 1, 0, {
                 property: 'myparcelShipments',
                 label: 'myparcel.plugin_title_short',
+                // Without a width the column is narrow, and the toggle of a shipment wraps under its barcode.
+                width: '300px',
                 allowResize: true,
                 sortable: false,
             });

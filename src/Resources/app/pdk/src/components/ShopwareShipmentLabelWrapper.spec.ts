@@ -64,4 +64,19 @@ describe('ShopwareShipmentLabelWrapper', () => {
     expect(root.classList.contains('cursor')).toBe(true);
     expect(onClick).toHaveBeenCalledOnce();
   });
+
+  // As in WooCommerce: each shipment is a small box, so the shipments of an order are apart.
+  it('shows the shipment in a small box, also while it loads', () => {
+    mount();
+
+    expect((container.firstElementChild as HTMLElement).classList.contains('mypa-shipment-label')).toBe(true);
+
+    app?.unmount();
+    mount({loading: true});
+
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(root.classList.contains('mypa-shipment-label')).toBe(true);
+    expect(root.querySelector('.loader')).not.toBeNull();
+  });
 });
