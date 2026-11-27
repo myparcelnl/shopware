@@ -16,8 +16,7 @@
 
 <script lang="ts" setup>
 /**
- * The PDK button with the secondary look of the Shopware admin. It stays neutral, as in
- * WooCommerce and PrestaShop: only an error action has its own (critical) look.
+ * The PDK button with the secondary look of the Shopware admin. Only an error action has its own (critical) look.
  */
 import {computed} from 'vue';
 import {
