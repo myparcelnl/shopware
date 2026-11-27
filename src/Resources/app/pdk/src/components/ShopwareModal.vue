@@ -5,43 +5,44 @@
     ref="dialog"
     v-test="AdminComponent.Modal"
     :aria-labelledby="headingId"
-    class="mypa-modal mypa-max-h-[calc(100vh-6rem)] mypa-w-[calc(100%-1rem)] mypa-max-w-2xl mypa-overflow-y-auto mypa-rounded mypa-border-0 mypa-bg-white mypa-p-0 mypa-shadow-lg"
+    class="mypa-modal"
     @click="onClick"
     @close="onClose">
-    <div
-      v-if="isOpen"
-      class="mypa-flex mypa-flex-col mypa-p-6">
-      <header class="mypa-mb-4 mypa-flex mypa-items-start mypa-justify-between mypa-gap-4">
+    <template v-if="isOpen">
+      <header class="mypa-modal__header">
         <PdkHeading
           :id="headingId"
+          class="mypa-modal__title"
           level="2">
           {{ translate(title) }}
         </PdkHeading>
 
         <button
           :aria-label="translate('action_close')"
-          class="mypa-cursor-pointer mypa-border-0 mypa-bg-transparent mypa-p-1"
+          class="mypa-modal__close"
           type="button"
           @click="close">
           <PdkIcon icon="close" />
         </button>
       </header>
 
-      <NotificationContainer :category="NotificationCategory.Modal" />
+      <div class="mypa-modal__content">
+        <NotificationContainer :category="NotificationCategory.Modal" />
 
-      <KeepAlive>
-        <slot :context="context" />
-      </KeepAlive>
+        <KeepAlive>
+          <slot :context="context" />
+        </KeepAlive>
+      </div>
 
       <footer
         v-if="actions.length > 0"
-        class="mypa-mt-4 mypa-flex mypa-justify-end mypa-gap-2">
+        class="mypa-modal__footer">
         <ActionButton
           v-for="(action, index) in actions"
           :key="`action_${action.id}_${index}`"
           :action="action" />
       </footer>
-    </div>
+    </template>
   </dialog>
 </template>
 

@@ -1,0 +1,148 @@
+// The modal and the dropdown menu of Meteor (mt-modal.css, mt-modal-root.css, mt-popover.css and
+// mt-popover-item.css of @shopware-ag/meteor-component-library 5.8.0, MIT,
+// Copyright 2019 shopware AG; the licence notice is in index.scss), built with the Meteor tokens that
+// the Shopware admin sets on :root. Here the modal is a native dialog and the menu a native popover.
+@mixin overlay {
+  // The admin resets the margin of every element, and a modal dialog is centered by margin: auto.
+  // No display here: it would also show the dialog while it is closed.
+  .mypa-modal {
+    flex-direction: column;
+    box-sizing: border-box;
+    width: min(45rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border-secondary-default);
+    border-radius: var(--border-radius-card);
+    background-color: var(--color-elevation-surface-raised);
+    color: var(--color-text-primary-default);
+
+    &[open] {
+      display: flex;
+    }
+
+    &::backdrop {
+      background-color: var(--color-elevation-backdrop-default);
+    }
+  }
+
+  .mypa-modal__header {
+    display: flex;
+    align-items: center;
+    gap: var(--scale-size-12);
+    padding: var(--scale-size-24);
+    border-bottom: 1px solid var(--color-border-secondary-default);
+  }
+
+  .mypa-modal__title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .mypa-modal__close {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--scale-size-32);
+    height: var(--scale-size-32);
+    padding: 0;
+    border: 0;
+    border-radius: var(--border-radius-xs);
+    background: transparent;
+    color: var(--color-icon-primary-default);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-interaction-secondary-hover);
+    }
+
+    &:focus-visible {
+      outline: var(--scale-size-2) solid var(--color-border-brand-default);
+      outline-offset: var(--scale-size-2);
+    }
+  }
+
+  // In the flex column the content shrinks only with min-height: 0, so a long form scrolls here
+  // between the header and the footer.
+  .mypa-modal__content {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--scale-size-24);
+  }
+
+  .mypa-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--scale-size-8);
+    padding: var(--scale-size-24);
+    border-top: 1px solid var(--color-border-secondary-default);
+  }
+
+  .mypa-dropdown-menu {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 8rem;
+    // Undo the default place, border and padding of a popover: the script gives top and left.
+    inset: auto;
+    margin: 0;
+    padding: var(--scale-size-4) 0;
+    border: 0;
+    border-radius: var(--border-radius-xs);
+    background-color: var(--color-background-primary-default);
+    box-shadow:
+      0 1px 1px var(--color-elevation-shadow-default),
+      0 2px 1px var(--color-elevation-shadow-default),
+      0 1px 3px var(--color-elevation-shadow-default);
+
+    // Not on the element itself: that would also show the menu while it is closed.
+    &:popover-open {
+      display: flex;
+    }
+  }
+
+  // The menu is a list of rows, like the Shopware context menu: no box per item. An item is a
+  // PdkButton, so it also has .mypa-button. The menu in the selector makes these rules win.
+  .mypa-dropdown-menu .mypa-dropdown-menu__item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--scale-size-8);
+    width: 100%;
+    min-height: 0;
+    padding: var(--scale-size-8) var(--scale-size-16);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text-primary-default);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--font-line-height-xs);
+    text-align: left;
+    white-space: nowrap;
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background-color: var(--color-interaction-secondary-hover);
+    }
+
+    &:disabled {
+      color: var(--color-text-primary-disabled);
+      cursor: default;
+    }
+  }
+
+  .mypa-dropdown-menu .mypa-dropdown-menu__item--danger {
+    color: var(--color-text-critical-default);
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background-color: var(--color-background-critical-default);
+    }
+  }
+}

@@ -25,6 +25,7 @@
 @use 'field';
 @use 'form-group';
 @use 'layout';
+@use 'overlay';
 
 @tailwind base;
 @tailwind components;
@@ -37,6 +38,7 @@
   @include form-group.form-group;
   @include layout.layout;
   @include feedback.feedback;
+  @include overlay.overlay;
 
   // The icons size with the text around them and take its color.
   .mypa-icon {
@@ -47,46 +49,6 @@
       @apply mypa-block mypa-h-full mypa-w-full;
       fill: currentColor;
     }
-  }
-
-  .mypa-modal::backdrop {
-    background: rgb(0 0 0 / 40%);
-  }
-
-  .mypa-dropdown-menu {
-    min-width: 8rem;
-    // Undo the default place and padding of a popover: the script gives top and left.
-    inset: auto;
-    margin: 0;
-    padding-inline: 0;
-
-    // Not on the element itself: that would also show the menu while it is closed.
-    &:popover-open {
-      display: flex;
-    }
-  }
-
-  // The dropdown menu is a list of rows, like the Shopware context menu: no box per item.
-  // An item is a PdkButton, so it also has .mypa-button. The menu in the selector makes these rules win.
-  .mypa-dropdown-menu .mypa-dropdown-menu__item {
-    @apply mypa-flex mypa-w-full mypa-items-center mypa-justify-start mypa-gap-2 mypa-whitespace-nowrap mypa-rounded-none mypa-border-0 mypa-bg-transparent mypa-px-3 mypa-py-1.5 mypa-text-left;
-    min-height: 0;
-    font-size: var(--font-size-xs, 0.75rem);
-    font-weight: inherit;
-    color: var(--color-text-primary-default, inherit);
-
-    &:hover:not(:disabled),
-    &:focus-visible {
-      background: var(--color-background-tertiary-default, theme('colors.gray.100'));
-    }
-
-    &:disabled {
-      @apply mypa-cursor-default mypa-opacity-50;
-    }
-  }
-
-  .mypa-dropdown-menu .mypa-dropdown-menu__item--danger {
-    color: var(--color-text-critical-default, theme('colors.red.500'));
   }
 
   .mypa-icon--spin {

@@ -279,4 +279,9 @@ describe('ShopwareDropdownButton', () => {
 
     expect(remove.mock.calls.map(([type]) => type)).toEqual(expect.arrayContaining(['scroll', 'resize']));
   });
+
+  // The look comes from the Meteor tokens in _overlay.scss, not from Tailwind utilities.
+  it('gives the menu no Tailwind surface classes', () => {
+    expect([...menu().classList].some((name) => /^mypa-(bg|rounded|shadow|border|py)-?/.test(name))).toBe(false);
+  });
 });
