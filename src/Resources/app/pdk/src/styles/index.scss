@@ -44,9 +44,14 @@
   .mypa-icon {
     @apply mypa-inline-block mypa-h-[1em] mypa-w-[1em] mypa-align-[-0.125em];
 
-    // The svg of the icon kit has fill="none". The CSS fill overrides that attribute.
+    // The svg of the icon kit has fill="none" on its root and a fixed fill on its shapes. A fill
+    // attribute on a shape wins over the fill it inherits, so the shapes get currentColor here, as
+    // in mt-icon. The icon then takes the colour of the text around it.
     svg {
       @apply mypa-block mypa-h-full mypa-w-full;
+    }
+
+    svg [fill]:not([fill='none']) {
       fill: currentColor;
     }
   }

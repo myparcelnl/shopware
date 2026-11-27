@@ -88,6 +88,15 @@
     }
   }
 
+  // The status colours of the PDK (cssUtilities textColorSuccess and textColorError in config.ts).
+  .mypa-text-positive {
+    color: var(--color-icon-positive-default);
+  }
+
+  .mypa-text-critical {
+    color: var(--color-icon-critical-default);
+  }
+
   .mypa-loader {
     display: flex;
     justify-content: center;

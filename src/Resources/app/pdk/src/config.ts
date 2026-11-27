@@ -118,8 +118,9 @@ export const createConfig = (getRequestHeaders: RequestHeadersProvider): InputAd
     marginLAuto: 'mypa-ml-auto',
     marginYAuto: 'mypa-my-auto',
     textCenter: 'mypa-text-center',
-    textColorError: 'mypa-text-red-500',
-    textColorSuccess: 'mypa-text-green-500',
+    // The Meteor status colours in _feedback.scss, not Tailwind colours.
+    textColorError: 'mypa-text-critical',
+    textColorSuccess: 'mypa-text-positive',
     whitespaceNoWrap: 'mypa-whitespace-nowrap',
   },
 

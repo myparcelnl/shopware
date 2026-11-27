@@ -11,4 +11,12 @@ describe('createConfig', () => {
 
     expect(createConfig(getRequestHeaders).getRequestHeaders).toBe(getRequestHeaders);
   });
+
+  // The status icons of the PDK take these classes. They are the Meteor tokens, not Tailwind colours.
+  it('colours a success and an error with the Meteor status classes', () => {
+    const {cssUtilities} = createConfig(() => ({}));
+
+    expect(cssUtilities?.textColorSuccess).toBe('mypa-text-positive');
+    expect(cssUtilities?.textColorError).toBe('mypa-text-critical');
+  });
 });
