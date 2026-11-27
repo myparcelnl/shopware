@@ -169,4 +169,15 @@
     align-items: center;
     gap: var(--scale-size-8) var(--scale-size-16);
   }
+
+  // DefaultShippingMethodsInput hides every label in its filter, and the checkbox of "Show assigned" is a
+  // label. Show the checkbox, without the label of the field that the filter gives it. The selector is
+  // more specific than the one of preset-default.
+  .shipping-methods .shipping-method-details-header .filter-checkbox > label.mypa-checkbox {
+    display: inline-flex;
+
+    > span {
+      display: none;
+    }
+  }
 }
