@@ -75,7 +75,8 @@
     resize: vertical;
   }
 
-  .mypa-drop-off {
+  // DefaultDropOffInput: a list of days. Each day is the name, the switch and the time in a div.
+  .mypa-drop-off > ul {
     display: flex;
     flex-direction: column;
     gap: var(--scale-size-8);
@@ -84,7 +85,7 @@
     list-style: none;
   }
 
-  .mypa-drop-off__day {
+  .mypa-drop-off > ul > li {
     display: grid;
     grid-template-columns: 8rem auto minmax(0, 12rem);
     gap: var(--scale-size-16);

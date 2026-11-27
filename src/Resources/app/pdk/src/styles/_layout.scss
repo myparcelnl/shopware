@@ -71,7 +71,8 @@
     border-top: 1px solid var(--color-border-secondary-default);
   }
 
-  .mypa-settings-divider__content {
+  // The content of DefaultSettingsDivider is a plain paragraph.
+  .mypa-settings-divider > p {
     margin: 0;
     color: var(--color-text-secondary-default);
     font-size: var(--font-size-2xs);
